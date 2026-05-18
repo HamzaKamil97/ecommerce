@@ -25,8 +25,9 @@ API="https://developers.hostinger.com/api/vps/v1/virtual-machines/${HOSTINGER_VP
 
 # Substitute env into compose content
 COMPOSE_CONTENT=$(envsubst < deploy/docker-compose.prod.yml)
-# Caddyfile is uploaded separately via volume mount in compose — Hostinger Docker API supports inline files via "files" array.
-CADDYFILE_CONTENT=$(cat deploy/Caddyfile)
+# Caddyfile is base64-encoded and passed as CADDYFILE_B64 env var. Caddy container
+# decodes it on start (see compose). Avoids host file-mount race issues on Hostinger.
+CADDYFILE_B64=$(base64 -w0 deploy/Caddyfile)
 
 # Build env block — these become the `environment` section runtime values
 ENV_BLOCK=$(cat <<EOF
@@ -40,25 +41,19 @@ ADMIN_CORS=${ADMIN_CORS:-https://srv1162617.hstgr.cloud}
 AUTH_CORS=${AUTH_CORS:-https://srv1162617.hstgr.cloud}
 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
 FX_USD_TO_IQD=1310
+CADDYFILE_B64=${CADDYFILE_B64}
 EOF
 )
 
-# Hostinger Docker API accepts JSON body with: project_name, content, environment, files[]
+# Hostinger Docker API accepts JSON body with: project_name, content, environment
 PAYLOAD=$(jq -n \
   --arg name "hanoot" \
   --arg content "$COMPOSE_CONTENT" \
   --arg env "$ENV_BLOCK" \
-  --arg caddyfile "$CADDYFILE_CONTENT" \
   '{
     project_name: $name,
     content: $content,
-    environment: $env,
-    files: [
-      {
-        path: "Caddyfile",
-        content: $caddyfile
-      }
-    ]
+    environment: $env
   }')
 
 echo "==> Deploying to VPS $HOSTINGER_VPS_ID..."

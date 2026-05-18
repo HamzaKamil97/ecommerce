@@ -83,8 +83,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      CADDYFILE_B64: ${CADDYFILE_B64}
+    command: ["sh", "-c", "echo \"$$CADDYFILE_B64\" | base64 -d > /etc/caddy/Caddyfile && exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on: [medusa, storefront, vendor]
