@@ -4,6 +4,7 @@ import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
+import { getLeafSchema } from "@lib/data/taxonomy"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -120,12 +121,18 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
+  const taxonomyCat = pricedProduct?.categories?.find(
+    (c: any) => c?.metadata?.is_taxonomy === true
+  )
+  const leafSchema = taxonomyCat ? await getLeafSchema(taxonomyCat.handle) : null
+
   return (
     <ProductTemplate
       product={pricedProduct}
       region={region}
       countryCode={params.countryCode}
       images={images}
+      leafSchema={leafSchema}
     />
   )
 }
