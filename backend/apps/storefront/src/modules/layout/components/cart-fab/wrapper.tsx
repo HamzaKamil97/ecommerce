@@ -5,9 +5,10 @@ import { HttpTypes } from "@medusajs/types"
 
 interface Props {
   cart: HttpTypes.StoreCart | null | undefined
+  countryCode: string
 }
 
-export default function CartFabWrapper({ cart }: Props) {
+export default function CartFabWrapper({ cart, countryCode }: Props) {
   const itemCount = cart?.items?.length ?? 0
-  return <CartFab itemCount={itemCount} />
+  return <CartFab itemCount={itemCount} countryCode={countryCode} />
 }
