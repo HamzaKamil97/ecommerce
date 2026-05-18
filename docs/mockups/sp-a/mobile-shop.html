@@ -206,28 +206,63 @@
     cursor: pointer;
   }
 
-  /* sticky cart cta */
-  .cart-cta {
+  /* sticky cart pill (Talabat / Toters pattern — pops up when cart has items) */
+  .cart-pill {
     position: sticky;
     bottom: 16px;
-    margin: 16px;
-    background: var(--text);
+    margin: 20px 12px 12px;
+    background: var(--primary);
     color: white;
-    padding: 14px 18px;
-    border-radius: 14px;
+    padding: 12px 8px 12px 18px;
+    border-radius: 999px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    box-shadow: 0 12px 28px rgba(15,118,110,.45), 0 4px 8px rgba(0,0,0,.08);
     z-index: 10;
+    animation: pop-up 220ms cubic-bezier(.34,1.56,.64,1);
   }
-  .cart-cta .left { font-size: 13px; }
-  .cart-cta .left .count { font-weight: 700; }
-  .cart-cta .right {
+  @keyframes pop-up {
+    0%   { transform: translateY(24px); opacity: 0; }
+    100% { transform: translateY(0);     opacity: 1; }
+  }
+  .cart-pill .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .cart-pill .basket {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    position: relative;
+  }
+  .cart-pill .badge {
+    position: absolute;
+    top: -4px; right: -4px;
     background: var(--accent);
     color: var(--text);
-    padding: 6px 12px;
-    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--primary);
+  }
+  .cart-pill .total {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .cart-pill .right {
+    background: white;
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 999px;
     font-weight: 700;
     font-size: 13px;
   }
@@ -288,8 +323,8 @@
 </div>
 
 <div class="annot a3">
-  <strong>Cart-per-store CTA</strong><br/>
-  Stays visible while browsing. Shows count + subtotal scoped to THIS shop. Tap → cart screen (SP-B).
+  <strong>Sticky cart pill — pops up when items added</strong><br/>
+  Talabat / Toters / Uber Eats pattern. Brand-teal pill, drop shadow, slides up from bottom with a small bounce when first item added. Shows badge count + subtotal + "View cart". Sticky across screens within the shop. SP-B builds the full cart screen + fly-to-cart animation; this is the entry point.
 </div>
 
 <div class="phone">
@@ -364,9 +399,12 @@
     </div>
   </div>
 
-  <div class="cart-cta">
-    <div class="left"><span class="count">2</span> items · 27,000 IQD</div>
-    <div class="right">View cart ›</div>
+  <div class="cart-pill">
+    <div class="left">
+      <span class="basket">🛒<span class="badge">2</span></span>
+      <span class="total">27,000 IQD</span>
+    </div>
+    <span class="right">View cart ›</span>
   </div>
 </div>
 

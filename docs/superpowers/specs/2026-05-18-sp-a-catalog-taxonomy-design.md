@@ -29,7 +29,7 @@ Separately, each shop curates **merch categories** (flat per-shop browse buckets
 
 Customer-facing flow stays shops-first: home shows shops, tap shop → see products grouped by merch categories, tap product → detail page renders the schema's core fields as a specs panel followed by any custom fields. **Customer never sees the taxonomy path** — no `food · pizza · margherita-style` breadcrumb anywhere. Taxonomy only surfaces as filter chips ("Category: Pizza", "Fast delivery", "Under 20,000 IQD") on the search/browse page.
 
-**Multi-industry UI coherence rule:** The same `ProductCard`, `SpecsPanel`, `ShopCard`, `CartItemRow`, and search-row components render for all sections. Only the schema-driven content (fields, labels, values) adapts. No `if (section === "food") { ... }` branches in components. See `memory/feedback_multi_industry_coherence.md`.
+**Multi-industry UI coherence rule:** The same `ProductCard`, `DetailsPanel`, `ShopCard`, `CartItemRow`, and search-row components render for all sections. Only the schema-driven content (fields, labels, values) adapts. No `if (section === "food") { ... }` branches in components. See `memory/feedback_multi_industry_coherence.md`.
 
 ## Data model
 
@@ -196,7 +196,7 @@ Editing an existing product: same wizard, pre-filled. Changing the taxonomy node
   - Title + shop badge
   - PriceText dual-currency (from Phase 3.3)
   - Description
-  - **Specs panel** (NEW): renders `core_fields` as label:value rows using the schema's `label` + value formatted by type. Header says just "Specs" — no taxonomy path shown. Below that, `custom_fields` rendered as plain key/value rows.
+  - **Details panel** (NEW): renders `core_fields` as label:value rows using the schema's `label` + value formatted by type. Header says just "Specs" — no taxonomy path shown. Below that, `custom_fields` rendered as plain key/value rows.
   - Add-to-cart (animation in SP-B)
 - **Search** (v0): query input + filter chips. Filters available:
   - Section (dropdown: Food / Fashion / Electronics / Home / Grocery)
@@ -233,7 +233,7 @@ User reviewed the visual mockups and gave 6 directional changes. Each is now bak
 1. **No per-item time on customer UI.** `prep_min` stays as backend-only data for ETA computation. Product cards show no time.
 2. **No taxonomy path visible to customer.** Removed the leaf breadcrumb from specs panel and search results.
 3. **Sub-category is optional/advanced.** Default vendor flow uses 2 levels (Section → Category). Sub-category column unlocked by a toggle. Data model keeps 3 levels.
-4. **Schema flexibility bounded by structure.** Same `SpecsPanel` renders all sections; field TYPES drive variance, not custom components per industry.
+4. **Schema flexibility bounded by structure.** Same `DetailsPanel` renders all sections; field TYPES drive variance, not custom components per industry.
 5. **Customer filters added.** Section, Category, Fast delivery, Price range, Sort. Listed under "Mobile (customer) — Search".
 6. **Multi-industry coherence rule** added to Architecture overview. See `memory/feedback_multi_industry_coherence.md`.
 

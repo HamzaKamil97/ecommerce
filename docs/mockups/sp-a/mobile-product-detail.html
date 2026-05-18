@@ -69,8 +69,32 @@
     font-size: 18px;
   }
   .gallery .back { left: 16px; }
-  .gallery .heart { right: 60px; font-size: 16px; }
-  .gallery .share { right: 16px; font-size: 16px; }
+  .gallery .heart { right: 110px; font-size: 16px; }
+  .gallery .share { right: 64px; font-size: 16px; }
+  .gallery .cart {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px; height: 36px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+  }
+  .gallery .cart .cart-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    background: var(--accent);
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 800;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    border: 2px solid white;
+  }
   .gallery .dots {
     position: absolute;
     bottom: 14px;
@@ -271,13 +295,18 @@
 <div class="topbar"><a href="index.html">← All SP-A mockups</a> · Product detail · Margherita Pizza</div>
 
 <div class="annot a1">
-  <strong>Specs panel (NEW in SP-A)</strong><br/>
-  Renders <code>core_fields</code> from the schema. Header says just "Specs" — customer never sees the taxonomy path. Labels come from schema. Field TYPE drives rendering (chips for arrays, dropdowns for enums). Per-item prep time is NOT shown — kept server-side for cart ETA.
+  <strong>Details panel (NEW in SP-A)</strong><br/>
+  Renders <code>core_fields</code> from the schema. Header says "Details" — same label for every section (food / fashion / electronics / etc.). Customer never sees the taxonomy path. Field TYPE drives rendering (chips for arrays, dropdowns for enums). Per-item prep time NOT shown.
 </div>
 
 <div class="annot a2">
   <strong>Same component, any industry</strong><br/>
-  This identical SpecsPanel renders for t-shirts (size/material/fit), smartwatches (brand/storage/band), etc. Only the schema's fields differ. No industry-specific UI code.
+  This identical DetailsPanel renders for t-shirts (size/material/fit), smartwatches (brand/storage/band), etc. Only the schema's fields differ. No industry-specific UI code.
+</div>
+
+<div class="annot a4" style="position:fixed; top:80px; left: calc(50% + 220px); background:#1F2937; color:white; padding:10px 12px; border-radius:8px; font-size:12px; line-height:1.45; max-width:240px; box-shadow:0 8px 20px rgba(0,0,0,.3);">
+  <strong style="color:var(--accent)">Cart access (Amazon pattern)</strong><br/>
+  Round teal cart icon top-right with saffron badge showing count. Always visible on product pages. Tap → cart screen. Sticky bottom add-to-cart bar stays focused on the primary action.
 </div>
 
 <div class="annot a3">
@@ -292,6 +321,7 @@
     <div class="nav back">‹</div>
     <div class="nav heart">♡</div>
     <div class="nav share">↗</div>
+    <div class="cart">🛒<span class="cart-badge">2</span></div>
     <div class="dots">
       <span class="active"></span><span></span><span></span><span></span>
     </div>
@@ -318,7 +348,7 @@
 
     <div class="specs">
       <div class="specs-header">
-        <span>Specs</span>
+        <span>Details</span>
       </div>
       <div class="specs-row">
         <span class="key">Size</span>
