@@ -11,7 +11,20 @@ permissions:
   packages: write
 
 jobs:
+  # Lowercase the owner once and expose it to all downstream jobs.
+  # Docker image refs (ghcr.io/<owner>/<image>) require lowercase.
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      owner_lc: ${{ steps.lc.outputs.owner_lc }}
+    steps:
+      - id: lc
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: echo "owner_lc=${OWNER,,}" >> "$GITHUB_OUTPUT"
+
   build-backend:
+    needs: [prepare]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +39,12 @@ jobs:
           context: .
           file: deploy/Dockerfile.medusa
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/hanoot-backend:latest
+          tags: ghcr.io/${{ needs.prepare.outputs.owner_lc }}/hanoot-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   build-storefront:
+    needs: [prepare]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,11 +59,12 @@ jobs:
           context: .
           file: deploy/Dockerfile.storefront
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/hanoot-storefront:latest
+          tags: ghcr.io/${{ needs.prepare.outputs.owner_lc }}/hanoot-storefront:latest
           build-args: |
             MEDUSA_BACKEND_URL=https://srv1162617.hstgr.cloud
 
   build-vendor:
+    needs: [prepare]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,25 +79,20 @@ jobs:
           context: .
           file: deploy/Dockerfile.vendor
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/hanoot-vendor:latest
+          tags: ghcr.io/${{ needs.prepare.outputs.owner_lc }}/hanoot-vendor:latest
 
   deploy:
-    needs: [build-backend, build-storefront, build-vendor]
+    needs: [prepare, build-backend, build-storefront, build-vendor]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install jq + envsubst
         run: sudo apt-get update && sudo apt-get install -y jq gettext-base
-      - name: Make ghcr.io images public
-        run: |
-          # First push runs may default to private; ensure they're readable by VPS
-          # (Or, configure ghcr.io package settings manually one-time in GitHub UI)
-          echo "Skipping — done one-time in GitHub package settings"
       - name: Deploy to Hostinger
         env:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
           HOSTINGER_VPS_ID: ${{ secrets.HOSTINGER_VPS_ID }}
-          GITHUB_USERNAME: ${{ github.repository_owner }}
+          GITHUB_USERNAME: ${{ needs.prepare.outputs.owner_lc }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
