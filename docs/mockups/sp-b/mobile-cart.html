@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Cart (mockup)</title>
+<style>
+  :root { --primary: #0F766E; --accent: #F59E0B; --text: #0B0B0F; --muted: #6B7280; --border: #E5E7EB; --bg: #FFFFFF; --surface: #F7F7F8; --danger: #DC2626; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #E5E7EB; color: var(--text); padding: 24px; min-height: 100vh; }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  .phone { width: 390px; margin: 0 auto; background: var(--bg); border-radius: 36px; box-shadow: 0 20px 60px rgba(0,0,0,.18); overflow: hidden; border: 10px solid #111; }
+  .status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; font-weight: 600; }
+
+  /* sticky header */
+  .header {
+    position: sticky; top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+  }
+  .header .back {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: grid; place-items: center;
+    font-size: 20px;
+  }
+  .header .title {
+    font-size: 16px; font-weight: 700;
+    margin: 0;
+  }
+  .header .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+  }
+  .header .add-more {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* items list */
+  .items {
+    padding: 8px 16px 200px;
+  }
+  .item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .item:last-child { border-bottom: none; }
+  .item .img {
+    width: 72px; height: 72px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+  }
+  .item .body {
+    flex: 1; min-width: 0;
+  }
+  .item .title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .item .unit-price {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .item .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .stepper button {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    display: grid; place-items: center;
+  }
+  .stepper button.minus { color: var(--muted); }
+  .stepper button.plus { background: var(--primary); color: white; border-color: var(--primary); }
+  .stepper .qty {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .item .line-total {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .item .trash {
+    color: var(--muted);
+    font-size: 16px;
+    padding: 4px;
+    background: none;
+    border: none;
+  }
+
+  /* sticky bottom summary */
+  .summary {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 410px;
+    margin: 0;
+    background: white;
+    padding: 16px 20px 24px;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 14px;
+  }
+  .summary-row.total {
+    font-size: 17px;
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 6px;
+  }
+  .summary-row.total .label { color: var(--text); }
+  .summary-row .muted { color: var(--muted); }
+  .checkout-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* annotations */
+  .annot { position: fixed; background: #1F2937; color: white; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45; max-width: 240px; box-shadow: 0 8px 20px rgba(0,0,0,.3); pointer-events: none; }
+  .annot::before { content: ""; position: absolute; width: 0; height: 0; border: 6px solid transparent; }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 80px; left: calc(50% + 220px); }
+  .annot.a1::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  .annot.a2 { top: 240px; left: calc(50% - 400px); width: 260px; }
+  .annot.a2::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  .annot.a3 { top: 460px; left: calc(50% + 220px); }
+  .annot.a3::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  @media (max-width: 1200px) { .annot { display: none; } }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="index.html">← All SP-B mockups</a> · Cart screen (Hamza's Kitchen)</div>
+
+<div class="annot a1">
+  <strong>"Add more" link</strong><br/>
+  Tap → navigates back to the shop page so customer can add more items from the same shop. Prevents the "I'm stuck" feeling that the current cart has.
+</div>
+
+<div class="annot a2">
+  <strong>Item interaction</strong><br/>
+  Tap image or title → product detail page. <br/>− at qty=1 + tap trash → item removed with undo toast. Live line-total updates as qty changes.
+</div>
+
+<div class="annot a3">
+  <strong>Sticky bottom summary</strong><br/>
+  Subtotal · delivery fee · total. Big teal CTA with price baked in (Talabat / Toters convention). Disabled if cart empty.
+</div>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+  <div class="header">
+    <a href="#" class="back">‹</a>
+    <div>
+      <p class="title">Your basket</p>
+      <p class="sub">Hamza's Kitchen</p>
+    </div>
+    <a href="mobile-shop.html" class="add-more">+ Add more</a>
+  </div>
+
+  <div class="items">
+    <div class="item">
+      <div class="img" style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300')"></div>
+      <div class="body">
+        <h3 class="title">Margherita Pizza</h3>
+        <p class="unit-price">15,000 IQD</p>
+        <div class="actions">
+          <div class="stepper">
+            <button class="minus">−</button>
+            <span class="qty">1</span>
+            <button class="plus">+</button>
+          </div>
+          <span class="line-total">15,000 IQD</span>
+          <button class="trash">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="img" style="background-image:url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300')"></div>
+      <div class="body">
+        <h3 class="title">Classic Beef Burger</h3>
+        <p class="unit-price">12,000 IQD</p>
+        <div class="actions">
+          <div class="stepper">
+            <button class="minus">−</button>
+            <span class="qty">2</span>
+            <button class="plus">+</button>
+          </div>
+          <span class="line-total">24,000 IQD</span>
+          <button class="trash">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="img" style="background-image:url('https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300')"></div>
+      <div class="body">
+        <h3 class="title">Fresh Mint Lemonade</h3>
+        <p class="unit-price">3,500 IQD</p>
+        <div class="actions">
+          <div class="stepper">
+            <button class="minus">−</button>
+            <span class="qty">1</span>
+            <button class="plus">+</button>
+          </div>
+          <span class="line-total">3,500 IQD</span>
+          <button class="trash">🗑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-row"><span class="muted">Subtotal</span><span>42,500 IQD</span></div>
+    <div class="summary-row"><span class="muted">Delivery fee</span><span>2,500 IQD</span></div>
+    <div class="summary-row total"><span class="label">Total</span><span>45,000 IQD</span></div>
+    <button class="checkout-btn">
+      <span>Checkout</span>
+      <span>45,000 IQD →</span>
+    </button>
+  </div>
+</div>
+</body>
+</html>

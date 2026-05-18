@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Checkout (mockup)</title>
+<style>
+  :root { --primary: #0F766E; --accent: #F59E0B; --text: #0B0B0F; --muted: #6B7280; --border: #E5E7EB; --bg: #FFFFFF; --surface: #F7F7F8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #E5E7EB; color: var(--text); padding: 24px; min-height: 100vh; }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  .phone { width: 390px; margin: 0 auto; background: var(--bg); border-radius: 36px; box-shadow: 0 20px 60px rgba(0,0,0,.18); overflow: hidden; border: 10px solid #111; }
+  .status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; font-weight: 600; }
+
+  .header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .header .back { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-size: 20px; }
+  .header h1 { font-size: 18px; font-weight: 700; margin: 0; }
+
+  .content { padding: 16px; padding-bottom: 200px; }
+  .section {
+    margin-bottom: 22px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Address card (selected) */
+  .address-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .address-card .icon {
+    width: 36px; height: 36px;
+    background: #ECFDF5;
+    color: var(--primary);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .address-card .body { flex: 1; min-width: 0; }
+  .address-card .label-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .address-card .label { font-size: 14px; font-weight: 700; }
+  .address-card .default-pill { font-size: 10px; background: var(--accent); color: var(--text); padding: 1px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+  .address-card .recipient { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+  .address-card .full { font-size: 13px; color: var(--text); margin: 0; }
+  .address-card .chevron { color: var(--muted); font-size: 20px; }
+
+  /* Notes */
+  .notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    min-height: 80px;
+    resize: vertical;
+  }
+  .notes-input:focus { outline: none; border-color: var(--primary); }
+
+  /* Payment card */
+  .payment-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+  }
+  .payment-card .icon {
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+  .payment-card .body { flex: 1; }
+  .payment-card .name { font-size: 14px; font-weight: 700; }
+  .payment-card .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .payment-card .check {
+    width: 22px; height: 22px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .summary-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .summary-row.total { font-size: 16px; font-weight: 700; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; }
+  .summary-row .muted { color: var(--muted); }
+
+  /* sticky bottom CTA */
+  .cta {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 410px;
+    background: white;
+    padding: 14px 20px 24px;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+  }
+  .cta button {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* annotations */
+  .annot { position: fixed; background: #1F2937; color: white; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45; max-width: 240px; box-shadow: 0 8px 20px rgba(0,0,0,.3); pointer-events: none; }
+  .annot::before { content: ""; position: absolute; width: 0; height: 0; border: 6px solid transparent; }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 130px; left: calc(50% - 400px); }
+  .annot.a1::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  .annot.a2 { top: 320px; left: calc(50% + 220px); }
+  .annot.a2::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  .annot.a3 { top: 500px; left: calc(50% - 400px); width: 260px; }
+  .annot.a3::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  @media (max-width: 1200px) { .annot { display: none; } }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="index.html">← All SP-B mockups</a> · Checkout</div>
+
+<div class="annot a1">
+  <strong>Address card (returning customer)</strong><br/>
+  Default address pre-selected, shown as a card. Tap → opens <a href="address-picker.html" style="color:inherit;text-decoration:underline">address picker bottom sheet</a> with all saved addresses + "Add new". First-time customers see an inline form here instead.
+</div>
+
+<div class="annot a2">
+  <strong>Order notes</strong><br/>
+  Optional. Customer adds delivery instructions, dietary requests, etc. Saved with the order and visible to the shop in the admin.
+</div>
+
+<div class="annot a3">
+  <strong>COD only for v0</strong><br/>
+  Single card, non-selectable since it's the only option. Bigger payment story (cards, ZainCash, Qi Card) is a future sub-project. Customer expects to pay rider in cash on delivery.
+</div>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+  <div class="header">
+    <a href="mobile-cart.html" class="back">‹</a>
+    <h1>Checkout</h1>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. Deliver to -->
+    <div class="section">
+      <div class="section-label">Deliver to</div>
+      <a href="address-picker.html" style="text-decoration:none;color:inherit;">
+        <div class="address-card">
+          <div class="icon">🏠</div>
+          <div class="body">
+            <div class="label-row">
+              <span class="label">Home</span>
+              <span class="default-pill">Default</span>
+            </div>
+            <p class="recipient">Hamza Kamel · +964 750 123 4567</p>
+            <p class="full">Karrada, Building 12, apartment 4 · "Blue gate"</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- 2. Order notes -->
+    <div class="section">
+      <div class="section-label">Order notes (optional)</div>
+      <textarea class="notes-input" placeholder="Leave at the door, call before arrival, etc."></textarea>
+    </div>
+
+    <!-- 3. Payment -->
+    <div class="section">
+      <div class="section-label">Payment</div>
+      <div class="payment-card">
+        <div class="icon">💵</div>
+        <div class="body">
+          <div class="name">Cash on Delivery</div>
+          <div class="sub">Pay the rider on delivery</div>
+        </div>
+        <div class="check">✓</div>
+      </div>
+    </div>
+
+    <!-- 4. Summary -->
+    <div class="section">
+      <div class="section-label">Summary</div>
+      <div class="summary-card">
+        <div class="summary-row"><span class="muted">3 items from Hamza's Kitchen</span><span></span></div>
+        <div class="summary-row"><span class="muted">Subtotal</span><span>42,500 IQD</span></div>
+        <div class="summary-row"><span class="muted">Delivery fee</span><span>2,500 IQD</span></div>
+        <div class="summary-row total"><span>Total</span><span>45,000 IQD</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cta">
+    <button>
+      <span>Place order</span>
+      <span>45,000 IQD →</span>
+    </button>
+  </div>
+</div>
+</body>
+</html>

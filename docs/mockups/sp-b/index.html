@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot — SP-B Cart Mockups</title>
+<style>
+  :root { --primary: #0F766E; --accent: #F59E0B; --text: #0B0B0F; --muted: #6B7280; --border: #E5E7EB; --surface: #F7F7F8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--surface); color: var(--text); line-height: 1.5; padding: 24px; max-width: 980px; margin-inline: auto; }
+  header { margin-bottom: 24px; }
+  h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.02em; }
+  h1 .logo-mark { display: inline-block; width: 36px; height: 36px; background: var(--accent); color: white; border-radius: 8px; text-align: center; line-height: 36px; font-weight: 800; margin-right: 8px; vertical-align: middle; }
+  .lede { color: var(--muted); max-width: 640px; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; }
+  .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: transform 120ms, box-shadow 120ms; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--primary); }
+  .tag { display: inline-block; background: var(--primary); color: white; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; align-self: flex-start; }
+  .card h2 { margin: 12px 0 4px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .card .arrow { margin-top: 12px; color: var(--primary); font-weight: 600; font-size: 13px; }
+  .feedback-note { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0; font-size: 14px; }
+  .feedback-note strong { color: #92400E; }
+  .anim-note { background: #ECFDF5; border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0; font-size: 14px; }
+  .anim-note ol { margin: 8px 0 0; padding-left: 18px; line-height: 1.7; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="logo-mark">H</span>SP-B Cart & Checkout</h1>
+  <p class="lede">Mockups for the cart UX rebuild. Open each in a browser to review. Brand-teal primary, saffron accents — same look as SP-A.</p>
+</header>
+
+<div class="feedback-note">
+  <strong>How to give feedback:</strong> Look at each mockup, screenshot anything to redirect.
+  Tell me things like "cart row needs bigger image" / "address picker should default to last-used" / "success screen needs phone number for SMS".
+  We iterate to "approved" before any code is written.
+</div>
+
+<div class="anim-note">
+  <strong>Fly-to-cart animation</strong> (can't easily mock as static HTML — here's the sequence):
+  <ol>
+    <li>Customer taps <strong>+</strong> on a product card</li>
+    <li>A ghost copy of the product image appears at the tapped card position</li>
+    <li>The ghost scales to 60%, then animates along a curve toward the cart FAB (bottom-right corner)</li>
+    <li>On landing: ghost scales to 0, FAB does a small bounce (110% → 100%), saffron badge increments</li>
+    <li>Total time ~400ms. Cubic-bezier(0.34, 1.56, 0.64, 1) curve — slight overshoot for satisfying feel</li>
+  </ol>
+  Reference: Talabat, Shein, Amazon mobile.
+</div>
+
+<div class="grid">
+
+  <a class="card" href="mobile-cart.html">
+    <span class="tag">Mobile</span>
+    <h2>🛒 Cart screen</h2>
+    <p>Items list with image, qty stepper (− N +), trash icon. Tap image to go to product. Sticky bottom summary + Checkout button.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="cross-shop-prompt.html">
+    <span class="tag">Mobile</span>
+    <h2>⚠️ Cross-shop prompt</h2>
+    <p>Modal that appears when customer tries to add an item from a different shop while basket has items.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="mobile-checkout.html">
+    <span class="tag">Mobile</span>
+    <h2>📝 Checkout</h2>
+    <p>Single-page checkout: deliver-to (saved address picker), order notes, payment (COD), summary, Place Order button.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="address-picker.html">
+    <span class="tag">Mobile</span>
+    <h2>📍 Address picker (bottom sheet)</h2>
+    <p>Talabat-style bottom sheet. Saved addresses as radio list + "Add new" link. First-time customer sees inline form.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="order-success.html">
+    <span class="tag">Mobile</span>
+    <h2>✅ Order success</h2>
+    <p>Big checkmark, order number, shop, ETA, summary. "Track order" stub (works in SP-F) + "Back to home".</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+</div>
+
+<footer>
+  <p>Spec: <code>docs/superpowers/specs/2026-05-19-sp-b-cart-checkout-design.md</code> (commit <code>97af358</code>)</p>
+</footer>
+</body>
+</html>

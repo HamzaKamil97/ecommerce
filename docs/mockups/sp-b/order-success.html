@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Order success (mockup)</title>
+<style>
+  :root { --primary: #0F766E; --accent: #F59E0B; --text: #0B0B0F; --muted: #6B7280; --border: #E5E7EB; --bg: #FFFFFF; --surface: #F7F7F8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #E5E7EB; color: var(--text); padding: 24px; min-height: 100vh; }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  .phone { width: 390px; margin: 0 auto; background: var(--bg); border-radius: 36px; box-shadow: 0 20px 60px rgba(0,0,0,.18); overflow: hidden; border: 10px solid #111; }
+  .status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; font-weight: 600; }
+
+  .content {
+    padding: 24px 24px 32px;
+    text-align: center;
+    min-height: 720px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .checkmark {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: #ECFDF5;
+    border: 4px solid var(--primary);
+    display: grid;
+    place-items: center;
+    margin: 40px auto 24px;
+    font-size: 60px;
+    color: var(--primary);
+    animation: pop 600ms cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop {
+    0% { transform: scale(.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -.02em;
+  }
+
+  .order-number {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 24px;
+  }
+  .order-number .code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--surface);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .info-row .icon {
+    width: 36px; height: 36px;
+    background: white;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .info-row .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+  }
+  .info-row .value {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .info-row .value strong { font-size: 16px; }
+
+  .actions {
+    margin-top: auto;
+    padding-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .actions .primary {
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .actions .secondary {
+    background: transparent;
+    color: var(--primary);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+  }
+
+  .sms-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 12px 0 0;
+    line-height: 1.5;
+  }
+
+  /* annotations */
+  .annot { position: fixed; background: #1F2937; color: white; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45; max-width: 240px; box-shadow: 0 8px 20px rgba(0,0,0,.3); pointer-events: none; }
+  .annot::before { content: ""; position: absolute; width: 0; height: 0; border: 6px solid transparent; }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 200px; left: calc(50% + 220px); }
+  .annot.a1::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  .annot.a2 { top: 400px; left: calc(50% - 400px); width: 260px; }
+  .annot.a2::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  .annot.a3 { top: 600px; left: calc(50% + 220px); }
+  .annot.a3::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  @media (max-width: 1200px) { .annot { display: none; } }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="index.html">← All SP-B mockups</a> · Order success</div>
+
+<div class="annot a1">
+  <strong>Pop-in animation</strong><br/>
+  Checkmark scales 30% → 100% over 600ms with bounce easing. Satisfying confirmation moment. Cart is cleared in background.
+</div>
+
+<div class="annot a2">
+  <strong>ETA range, not exact time</strong><br/>
+  "Arriving in 25–35 min" sets expectations honestly. Computed from shop's prep_min (hidden customer-side per SP-A) + delivery distance estimate. Updated by SP-F when order tracking ships.
+</div>
+
+<div class="annot a3">
+  <strong>Track order is stubbed for now</strong><br/>
+  Button exists but routes to a placeholder. SP-F builds the real timeline (placed → preparing → on the way → delivered) with live updates. SMS at each stage transition.
+</div>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+  <div class="content">
+    <div class="checkmark">✓</div>
+
+    <h1>Order placed</h1>
+    <p class="order-number">Order <span class="code">#A1B2C3</span></p>
+
+    <div class="info-card">
+      <div class="info-row">
+        <div class="icon">🏪</div>
+        <div>
+          <p class="label">Shop</p>
+          <p class="value">Hamza's Kitchen</p>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="icon">⏱️</div>
+        <div>
+          <p class="label">Arriving in</p>
+          <p class="value"><strong>25–35 min</strong></p>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="icon">💵</div>
+        <div>
+          <p class="label">Total · Cash on Delivery</p>
+          <p class="value">3 items · <strong>45,000 IQD</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <p class="sms-note">We'll text you at <strong>+964 750 123 4567</strong> when the order updates.</p>
+
+    <div class="actions">
+      <button class="primary">
+        📍 Track order
+      </button>
+      <button class="secondary">← Back to home</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

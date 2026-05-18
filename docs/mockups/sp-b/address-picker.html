@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Address picker (mockup)</title>
+<style>
+  :root { --primary: #0F766E; --accent: #F59E0B; --text: #0B0B0F; --muted: #6B7280; --border: #E5E7EB; --bg: #FFFFFF; --surface: #F7F7F8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #E5E7EB; padding: 24px; min-height: 100vh; }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  .pair {
+    display: grid;
+    grid-template-columns: 410px 410px;
+    gap: 28px;
+    justify-content: center;
+  }
+
+  .phone {
+    background: var(--bg);
+    border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    overflow: hidden;
+    border: 10px solid #111;
+    position: relative;
+    height: 720px;
+  }
+  .status-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; font-weight: 600; }
+
+  .label-bar {
+    text-align: center;
+    background: var(--accent);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 12px auto;
+    width: fit-content;
+  }
+
+  /* dim background */
+  .behind {
+    padding: 16px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .behind .small {
+    height: 40px; background: var(--surface); border-radius: 10px; margin-bottom: 12px;
+  }
+  .behind .big {
+    height: 90px; background: var(--surface); border-radius: 12px; margin-bottom: 12px;
+  }
+
+  /* bottom sheet */
+  .sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.15);
+    padding: 16px;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+  .sheet .handle-bar {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+  .sheet .sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .sheet .sheet-title { font-size: 16px; font-weight: 700; }
+  .sheet .close { color: var(--muted); font-size: 22px; line-height: 1; }
+
+  .address-option {
+    display: flex;
+    gap: 12px;
+    padding: 14px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+  .address-option.selected {
+    border-color: var(--primary);
+    background: #ECFDF5;
+  }
+  .radio {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .address-option.selected .radio {
+    border-color: var(--primary);
+  }
+  .address-option.selected .radio::after {
+    content: "";
+    width: 10px; height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .address-option .body { flex: 1; }
+  .address-option .label-row { display: flex; align-items: center; gap: 6px; }
+  .address-option .label { font-size: 14px; font-weight: 700; }
+  .address-option .default-pill { font-size: 10px; background: var(--accent); color: var(--text); padding: 1px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+  .address-option .recipient { font-size: 12px; color: var(--muted); margin: 2px 0; }
+  .address-option .full { font-size: 13px; margin: 0; }
+
+  .add-new {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .add-new .plus {
+    width: 24px; height: 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Inline form (right phone) */
+  .form-field {
+    margin-bottom: 12px;
+  }
+  .form-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .form-field input, .form-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .save-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .save-toggle input { accent-color: var(--primary); }
+  .save-btn {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+  }
+
+  /* annotations */
+  .annot { position: fixed; background: #1F2937; color: white; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45; max-width: 220px; box-shadow: 0 8px 20px rgba(0,0,0,.3); pointer-events: none; }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 90px; left: 30px; }
+  .annot.a2 { top: 90px; right: 30px; }
+  @media (max-width: 1100px) { .pair { grid-template-columns: 1fr; } .annot { display: none; } }
+</style>
+</head>
+<body>
+<div class="topbar"><a href="index.html">← All SP-B mockups</a> · Address picker (two states)</div>
+
+<div class="annot a1">
+  <strong>Returning customer</strong><br/>
+  Has saved addresses. Default is highlighted at top. Tap any to select + close sheet. "Add new" link bottom.
+</div>
+
+<div class="annot a2">
+  <strong>First-time customer</strong><br/>
+  No saved addresses. Sheet shows the inline form directly. "Save for next time" defaults to ON so future orders get a picker (not a form).
+</div>
+
+<div class="pair">
+
+  <!-- LEFT: Returning customer with saved addresses -->
+  <div>
+    <div class="label-bar">Returning customer</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="behind">
+        <div class="small"></div>
+        <div class="big"></div>
+        <div class="small"></div>
+        <div class="big"></div>
+      </div>
+
+      <div class="sheet">
+        <div class="handle-bar"></div>
+        <div class="sheet-header">
+          <span class="sheet-title">Choose delivery address</span>
+          <span class="close">×</span>
+        </div>
+
+        <div class="address-option selected">
+          <div class="radio"></div>
+          <div class="body">
+            <div class="label-row">
+              <span class="label">Home</span>
+              <span class="default-pill">Default</span>
+            </div>
+            <p class="recipient">Hamza Kamel · +964 750 123 4567</p>
+            <p class="full">Karrada, Building 12, apt 4 · "Blue gate"</p>
+          </div>
+        </div>
+
+        <div class="address-option">
+          <div class="radio"></div>
+          <div class="body">
+            <div class="label-row">
+              <span class="label">Office</span>
+            </div>
+            <p class="recipient">Hamza Kamel · +964 750 123 4567</p>
+            <p class="full">Mansour, Tower 3, floor 7</p>
+          </div>
+        </div>
+
+        <div class="add-new">
+          <span class="plus">+</span>
+          Add new address
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: First-time customer, inline form -->
+  <div>
+    <div class="label-bar">First-time customer</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="behind">
+        <div class="small"></div>
+        <div class="big"></div>
+        <div class="small"></div>
+      </div>
+
+      <div class="sheet">
+        <div class="handle-bar"></div>
+        <div class="sheet-header">
+          <span class="sheet-title">Delivery address</span>
+          <span class="close">×</span>
+        </div>
+
+        <div class="form-field">
+          <label>Recipient name *</label>
+          <input value="Hamza Kamel" />
+        </div>
+        <div class="form-field">
+          <label>Phone *</label>
+          <input value="+964 750 123 4567" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>City *</label>
+            <select><option>Baghdad</option><option>Erbil</option><option>Basra</option><option>Mosul</option></select>
+          </div>
+          <div class="form-field">
+            <label>Area</label>
+            <input placeholder="e.g. Karrada" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Street / Building *</label>
+          <input placeholder="Building 12, apartment 4" />
+        </div>
+        <div class="form-field">
+          <label>Delivery instructions</label>
+          <input placeholder="Blue gate near pharmacy" />
+        </div>
+
+        <div class="save-toggle">
+          <input type="checkbox" checked />
+          <span>Save for next time</span>
+        </div>
+
+        <button class="save-btn">Use this address</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
