@@ -29,6 +29,7 @@ services:
 
   medusa:
     image: ghcr.io/${GITHUB_USERNAME}/hanoot-backend:latest
+    pull_policy: always
     container_name: hanoot_medusa
     restart: unless-stopped
     depends_on:
@@ -52,6 +53,7 @@ services:
 
   storefront:
     image: ghcr.io/${GITHUB_USERNAME}/hanoot-storefront:latest
+    pull_policy: always
     container_name: hanoot_storefront
     restart: unless-stopped
     depends_on: [medusa]
@@ -65,6 +67,7 @@ services:
 
   vendor:
     image: ghcr.io/${GITHUB_USERNAME}/hanoot-vendor:latest
+    pull_policy: always
     container_name: hanoot_vendor
     restart: unless-stopped
     depends_on: [medusa]
