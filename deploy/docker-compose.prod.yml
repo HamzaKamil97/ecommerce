@@ -1,10 +1,12 @@
-# Production stack for Hostinger VPS.
-# Bring up with: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# deploy/docker-compose.prod.yml
+# Production stack. Deployed to Hostinger VPS via Docker API.
+# Images come from ghcr.io. Build context references for `docker compose up` are removed —
+# CI builds + pushes images, runtime only pulls.
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ecom_postgres
+    container_name: hanoot_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-medusa}
@@ -21,15 +23,13 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: ecom_redis
+    container_name: hanoot_redis
     restart: unless-stopped
     networks: [internal]
 
   medusa:
-    build:
-      context: ../backend/apps/backend
-      dockerfile: ../../../deploy/Dockerfile.medusa
-    container_name: ecom_medusa
+    image: ghcr.io/${GITHUB_USERNAME}/hanoot-backend:latest
+    container_name: hanoot_medusa
     restart: unless-stopped
     depends_on:
       postgres:
@@ -45,15 +45,37 @@ services:
       STORE_CORS: ${STORE_CORS}
       ADMIN_CORS: ${ADMIN_CORS}
       AUTH_CORS: ${AUTH_CORS}
-      MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL}
-      MEDUSA_ADMIN_BACKEND_URL: ${MEDUSA_BACKEND_URL}
-      DISABLE_MEDUSA_ADMIN: "false"
+      MEDUSA_BACKEND_URL: https://srv1162617.hstgr.cloud
+      FX_USD_TO_IQD: ${FX_USD_TO_IQD:-1310}
     expose: ["9000"]
     networks: [internal, web]
 
+  storefront:
+    image: ghcr.io/${GITHUB_USERNAME}/hanoot-storefront:latest
+    container_name: hanoot_storefront
+    restart: unless-stopped
+    depends_on: [medusa]
+    environment:
+      MEDUSA_BACKEND_URL: https://srv1162617.hstgr.cloud
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_BASE_URL: https://srv1162617.hstgr.cloud
+      NEXT_PUBLIC_DEFAULT_REGION: iq
+    expose: ["8000"]
+    networks: [web]
+
+  vendor:
+    image: ghcr.io/${GITHUB_USERNAME}/hanoot-vendor:latest
+    container_name: hanoot_vendor
+    restart: unless-stopped
+    depends_on: [medusa]
+    environment:
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: https://srv1162617.hstgr.cloud
+    expose: ["9100"]
+    networks: [web]
+
   caddy:
     image: caddy:2-alpine
-    container_name: ecom_caddy
+    container_name: hanoot_caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -62,8 +84,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on:
-      - medusa
+    depends_on: [medusa, storefront, vendor]
     networks: [web]
 
 volumes:
