@@ -18,6 +18,31 @@ class AddressesService extends MedusaService({
     }
     return (this as any).updateCustomerAddresses({ id: addressId, is_default: true })
   }
+
+  async createForCustomer(customerId: string, data: {
+    label?: string
+    recipient_name?: string
+    phone?: string
+    street: string
+    building?: string | null
+    apartment?: string | null
+    city: string
+    region?: string | null
+    postcode?: string | null
+    country_code: string
+    delivery_instructions?: string | null
+    is_default?: boolean
+    lat?: number | null
+    lng?: number | null
+  }) {
+    if (data.is_default) {
+      const existing = await this.listCustomerAddresses({ customer_id: customerId, is_default: true })
+      for (const e of existing) {
+        await (this as any).updateCustomerAddresses({ id: e.id, is_default: false })
+      }
+    }
+    return (this as any).createCustomerAddresses({ ...data, customer_id: customerId })
+  }
 }
 
 export default AddressesService

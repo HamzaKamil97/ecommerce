@@ -21,6 +21,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (!body.street || !body.city || !body.country_code) {
     return res.status(400).json({ error: "street, city, country_code required" })
   }
-  const created = await (svc as any).createCustomerAddresses({ ...body, customer_id: customerId })
+  const created = await svc.createForCustomer(customerId, body)
   res.status(201).json({ address: created })
 }
