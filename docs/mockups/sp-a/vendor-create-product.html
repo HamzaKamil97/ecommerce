@@ -138,16 +138,50 @@
   .panel h2 { margin: 0 0 4px; font-size: 16px; }
   .panel .helper { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
 
-  /* cascading picker (step 1 visualization) */
+  /* cascading picker (step 1 visualization) — default 2 columns, optional 3rd via toggle */
   .cascade {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
     overflow: hidden;
     background: var(--surface);
   }
+  .cascade.advanced { grid-template-columns: 1fr 1fr 1fr; }
+  .advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .advanced-toggle .toggle {
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--primary);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .advanced-toggle .toggle::after {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    right: 3px;
+  }
+  .advanced-toggle.off .toggle { background: var(--border); }
+  .advanced-toggle.off .toggle::after { right: auto; left: 3px; }
+  .advanced-toggle .hint { font-size: 11px; color: var(--muted); margin-left: auto; }
   .col { background: white; padding: 10px 0; max-height: 280px; overflow: auto; }
   .col-head {
     font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
@@ -302,13 +336,13 @@
 <div class="topbar"><a href="index.html">← All SP-A mockups</a> · Vendor portal · Create product wizard</div>
 
 <div class="annot a1">
-  <strong>Step 1 picker</strong><br/>
-  3 columns = 3 levels. Click cascades right. Selecting a leaf unlocks step 2's form below. Search bar at top lets vendor jump straight to a known leaf.
+  <strong>2-level default (revised)</strong><br/>
+  Section → Category. Restaurant vendors stop here. The "Use sub-category" toggle below opens a 3rd column for fashion/electronics/home shops that need finer tagging. Vendors can NEVER add nodes to the tree — only the platform team can.
 </div>
 
 <div class="annot a2">
-  <strong>Step 2 schema form</strong><br/>
-  Fields rendered from the leaf's TS schema. <span style="color:#DC2626">*</span> = required. Enums become dropdowns; <code>string[]</code> becomes chips. Custom fields panel below for shop-specific extras.
+  <strong>Schema form (schema-driven)</strong><br/>
+  Fields rendered from the chosen node's TS schema. The same form component handles food, fashion, electronics — only the field set differs. Prep time is collected as a hidden-from-customer field used for ETA computation.
 </div>
 
 <div class="browser">
@@ -360,25 +394,23 @@
           </div>
           <div class="col">
             <div class="col-head">Category</div>
-            <div class="col-item selected">Pizza <span class="chev">›</span></div>
-            <div class="col-item">Burger <span class="chev">›</span></div>
-            <div class="col-item">Salad <span class="chev">›</span></div>
-            <div class="col-item">Pasta <span class="chev">›</span></div>
-            <div class="col-item">Dessert <span class="chev">›</span></div>
-            <div class="col-item">Drinks <span class="chev">›</span></div>
-          </div>
-          <div class="col">
-            <div class="col-head">Sub-category</div>
-            <div class="col-item leaf selected">Margherita-style</div>
-            <div class="col-item leaf">Specialty</div>
-            <div class="col-item leaf">Pepperoni-style</div>
-            <div class="col-item leaf">White (no sauce)</div>
-            <div class="col-item leaf">Calzone</div>
+            <div class="col-item selected">Pizza ✓</div>
+            <div class="col-item">Burger</div>
+            <div class="col-item">Salad</div>
+            <div class="col-item">Pasta</div>
+            <div class="col-item">Dessert</div>
+            <div class="col-item">Drinks</div>
           </div>
         </div>
 
+        <div class="advanced-toggle off">
+          <div class="toggle"></div>
+          <span><strong style="color:var(--text)">Use sub-category for finer tagging</strong> &nbsp;— optional. Useful for fashion sizes, electronics models, home variants. Most restaurants leave this off.</span>
+          <span class="hint">Advanced</span>
+        </div>
+
         <div class="leaf-banner">
-          <span>Selected: <code>food.pizza.margherita-style</code> — 4 core fields, edit-friendly</span>
+          <span>Selected: <strong>Food → Pizza</strong> — 3 core fields, edit-friendly</span>
           <button class="btn primary" style="padding:6px 12px;font-size:13px;">Continue ›</button>
         </div>
       </div>
@@ -388,18 +420,18 @@
 
         <div class="panel">
           <h2>Step 2 — Fill specs</h2>
-          <p class="helper">From <code>food.pizza.margherita-style</code> schema. Required fields marked with <span style="color:var(--danger)">*</span>.</p>
+          <p class="helper">From <strong>Food → Pizza</strong> schema. Required fields marked with <span style="color:var(--danger)">*</span>. (Prep time is collected separately for shop-level ETA — not a customer-visible spec.)</p>
 
           <div class="form-grid">
-            <div class="field">
-              <label>Prep time (min) <span class="req">*</span></label>
-              <input value="18" type="number" />
-              <span class="hint">Number, min 1</span>
-            </div>
             <div class="field">
               <label>Size (inches) <span class="req">*</span></label>
               <select><option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option></select>
               <span class="hint">Enum: pick one</span>
+            </div>
+            <div class="field">
+              <label>Prep time (min) <span class="req">*</span></label>
+              <input value="18" type="number" />
+              <span class="hint">For shop ETA — not shown on product</span>
             </div>
             <div class="field" style="grid-column: span 2;">
               <label>Toppings</label>

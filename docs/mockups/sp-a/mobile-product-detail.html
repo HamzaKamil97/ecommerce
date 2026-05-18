@@ -259,7 +259,7 @@
   .annot strong { color: var(--accent); }
   .annot.a1 { top: 420px; left: calc(50% - 400px); }
   .annot.a1::before { right: -12px; top: 14px; border-left-color: #1F2937; }
-  .annot.a2 { top: 540px; left: calc(50% + 220px); width: 260px; }
+  .annot.a2 { top: 460px; left: calc(50% + 220px); width: 260px; }
   .annot.a2::before { left: -12px; top: 14px; border-right-color: #1F2937; }
   .annot.a3 { top: 720px; left: calc(50% - 400px); }
   .annot.a3::before { right: -12px; top: 14px; border-left-color: #1F2937; }
@@ -272,13 +272,12 @@
 
 <div class="annot a1">
   <strong>Specs panel (NEW in SP-A)</strong><br/>
-  Renders <code>core_fields</code> from the leaf schema (<code>food.pizza.margherita-style</code>).
-  Labels come from schema's <code>label</code>. Types determine rendering (chips for arrays, dropdowns for enums).
+  Renders <code>core_fields</code> from the schema. Header says just "Specs" — customer never sees the taxonomy path. Labels come from schema. Field TYPE drives rendering (chips for arrays, dropdowns for enums). Per-item prep time is NOT shown — kept server-side for cart ETA.
 </div>
 
 <div class="annot a2">
-  <strong>Taxonomy leaf badge</strong><br/>
-  Small, gray. Tells the customer "this is a pizza · margherita-style". Also makes it tappable later for "more like this".
+  <strong>Same component, any industry</strong><br/>
+  This identical SpecsPanel renders for t-shirts (size/material/fit), smartwatches (brand/storage/band), etc. Only the schema's fields differ. No industry-specific UI code.
 </div>
 
 <div class="annot a3">
@@ -320,11 +319,6 @@
     <div class="specs">
       <div class="specs-header">
         <span>Specs</span>
-        <span class="leaf">food · pizza · margherita-style</span>
-      </div>
-      <div class="specs-row">
-        <span class="key">Prep time</span>
-        <span class="val">18 min</span>
       </div>
       <div class="specs-row">
         <span class="key">Size</span>

@@ -187,18 +187,18 @@
 <div class="topbar"><a href="index.html">← All SP-A mockups</a> · Cross-shop search</div>
 
 <div class="annot a1">
-  <strong>Section filter chip</strong><br/>
-  Tap to drop down a Section list (Food / Fashion / Electronics / Home / Grocery). This is the ONLY place the taxonomy is visible on home flow.
+  <strong>Filter chips</strong><br/>
+  Section (Food/Fashion/Electronics/Home/Grocery), Category (Pizza/Burger/Salad/...), Fast delivery (⚡ ≤30 min), Price, Sort. Tap each for a dropdown / toggle.
 </div>
 
 <div class="annot a2">
   <strong>Cross-shop results</strong><br/>
-  All "pizza" products from any shop with a <code>food.pizza.*</code> leaf. Each result shows which shop. Tap result → product detail in that shop.
+  All "pizza" products from any shop. Each result shows shop name + delivery time range. Tap result → product detail in that shop. No taxonomy path shown.
 </div>
 
 <div class="annot a3">
-  <strong>Leaf tag</strong><br/>
-  Small breadcrumb showing the taxonomy leaf. Useful for the customer to verify it's the type of thing they meant.
+  <strong>Shop delivery time visible</strong><br/>
+  Each result shows the shop's delivery range. Fast-delivery shops get the ⚡ icon. Per-item prep time is NOT shown.
 </div>
 
 <div class="phone">
@@ -211,10 +211,10 @@
       <span class="icon">×</span>
     </div>
     <div class="filters">
-      <span class="chip active">All</span>
       <span class="chip">Section: Food <span class="caret">▾</span></span>
+      <span class="chip active">Category: Pizza <span class="caret">▾</span></span>
+      <span class="chip">⚡ Fast delivery</span>
       <span class="chip">Under 20,000 IQD</span>
-      <span class="chip">≤ 30 min</span>
       <span class="chip">Sort: Best <span class="caret">▾</span></span>
     </div>
   </div>
@@ -224,9 +224,8 @@
   <a class="result" href="mobile-product-detail.html">
     <div class="img" style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400')"></div>
     <div class="body">
-      <div class="leaf">food · pizza · margherita-style</div>
       <h3 class="title">Margherita Pizza</h3>
-      <p class="meta">Hamza's Kitchen · ⏱ 18 min · 12"</p>
+      <p class="meta">Hamza's Kitchen · Delivery 25–35 min</p>
       <div class="price-row">
         <span class="price">15,000 IQD</span>
         <button class="add-btn">+</button>
@@ -237,9 +236,8 @@
   <a class="result" href="#">
     <div class="img" style="background-image:url('https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400')"></div>
     <div class="body">
-      <div class="leaf">food · pizza · specialty</div>
       <h3 class="title">Quattro Stagioni</h3>
-      <p class="meta">Hamza's Kitchen · ⏱ 20 min · 14"</p>
+      <p class="meta">Hamza's Kitchen · Delivery 25–35 min</p>
       <div class="price-row">
         <span class="price">22,000 IQD</span>
         <button class="add-btn">+</button>
@@ -250,9 +248,8 @@
   <a class="result" href="#">
     <div class="img" style="background-image:url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400')"></div>
     <div class="body">
-      <div class="leaf">food · pizza · pepperoni-style</div>
       <h3 class="title">Pepperoni Supreme</h3>
-      <p class="meta">Pizza Roma · ⏱ 22 min · 12"</p>
+      <p class="meta">Pizza Roma · ⚡ Delivery 15–25 min</p>
       <div class="price-row">
         <span class="price">18,000 IQD</span>
         <button class="add-btn">+</button>
@@ -263,9 +260,8 @@
   <a class="result" href="#">
     <div class="img" style="background-image:url('https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400')"></div>
     <div class="body">
-      <div class="leaf">food · pizza · margherita-style</div>
       <h3 class="title">Margherita Classica</h3>
-      <p class="meta">La Vera · ⏱ 16 min · 10"</p>
+      <p class="meta">La Vera · Delivery 30–45 min</p>
       <div class="price-row">
         <span class="price">13,500 IQD</span>
         <button class="add-btn">+</button>

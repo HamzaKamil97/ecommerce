@@ -19,13 +19,17 @@ Current state: `vertical-fields` module has a flat ~6-vertical list (food/fashio
 
 ## Architecture overview
 
-Platform maintains a 3-level tree in Medusa's existing `product_category` table (handles dot-namespaced: `food`, `food.pizza`, `food.pizza.margherita-style`). Each leaf carries a stable `schema_handle` in `metadata` that maps to a TypeScript schema module under `src/taxonomy/schemas/`. The schema declares required and optional core fields with types (string / number / boolean / enum / string[]).
+Platform maintains a 3-level tree in Medusa's existing `product_category` table (handles dot-namespaced: `food`, `food.pizza`, `food.pizza.margherita-style`). Schemas can attach at **either Category or Sub-category** level — the product stores whichever taxonomy node the vendor stops at.
 
-When a shop admin creates a product, they pick a leaf. The schema renders as a form. Core fields are validated at the workflow layer and stored in `product.metadata.core_fields`. Shops may add arbitrary key-value pairs in `product.metadata.custom_fields` (no platform validation).
+**Sub-category is optional and advanced** (revised after user feedback 2026-05-18). Most vendors — especially restaurants and grocery — only need Section → Category (e.g., `food.pizza` is enough). Industries where finer tagging matters — fashion, electronics, home — can opt-in to Sub-category via a toggle in the create-product wizard. Vendors can NEVER add taxonomy nodes; only the platform team can. This keeps the tree clean.
+
+When a vendor creates a product, they pick the deepest node they want. The schema for that node renders as a form. Core fields are validated at the workflow layer and stored in `product.metadata.core_fields`. Shops may add arbitrary key-value pairs in `product.metadata.custom_fields` (no platform validation).
 
 Separately, each shop curates **merch categories** (flat per-shop browse buckets: "Pizzas", "Burgers"). These live in a new `merch` module with two tables: `merch_category` and `product_merch_category` join. A product can be in 0..N merch categories within its own tenant.
 
-Customer-facing flow stays shops-first (matching item 6): home shows shops, tap shop → see products grouped by merch categories, tap product → detail page renders the schema's core fields as a specs panel followed by any custom fields. Taxonomy surfaces in search filters (Section dropdown) and powers cross-shop discovery for the AI agent later.
+Customer-facing flow stays shops-first: home shows shops, tap shop → see products grouped by merch categories, tap product → detail page renders the schema's core fields as a specs panel followed by any custom fields. **Customer never sees the taxonomy path** — no `food · pizza · margherita-style` breadcrumb anywhere. Taxonomy only surfaces as filter chips ("Category: Pizza", "Fast delivery", "Under 20,000 IQD") on the search/browse page.
+
+**Multi-industry UI coherence rule:** The same `ProductCard`, `SpecsPanel`, `ShopCard`, `CartItemRow`, and search-row components render for all sections. Only the schema-driven content (fields, labels, values) adapts. No `if (section === "food") { ... }` branches in components. See `memory/feedback_multi_industry_coherence.md`.
 
 ## Data model
 
@@ -171,25 +175,37 @@ Validation rules enforced:
 
 New "Create product" wizard (4 steps):
 
-1. **Pick category**: 3-level cascading picker (Section → Category → Sub-category) with type-ahead search. Bonus: recently-used leaves pinned at top for the shop.
-2. **Fill schema**: form rendered from the leaf's `core_fields`. Required fields gated. "+ Add custom field" button below for free-form key/value extras.
+1. **Pick category** (revised — 2 levels by default):
+   - Default UI: 2-column cascade (Section → Category) with type-ahead search.
+   - Toggle: "Use sub-category for finer tagging (optional)". When on, a 3rd column appears. Vendor can leave it un-toggled and stop at Category — most restaurants and grocery shops will. Fashion / electronics / home shops will more often enable it.
+   - Recently-used categories pinned at top for the shop.
+2. **Fill schema**: form rendered from the chosen node's `core_fields` (Category if sub-category toggle off, Sub-category if on). Required fields gated. "+ Add custom field" button below for free-form key/value extras.
 3. **Tag merch categories**: multi-select of the shop's merch categories. "+ Create new merch category" inline (modal). 0 selections allowed — product lives under "Uncategorized" in the customer view if so.
 4. **Standard product fields**: title, description, images, variants, prices (existing Medusa UI patterns).
 
-Editing an existing product: same wizard, pre-filled. Changing the taxonomy leaf re-validates `core_fields` against the new schema and warns about fields that no longer apply.
+Editing an existing product: same wizard, pre-filled. Changing the taxonomy node re-validates `core_fields` against the new schema and warns about fields that no longer apply.
 
 ### Mobile (customer — `mobile/`)
 
-- **Home (unchanged structurally)**: shops list. Prep time / cart-per-store come in SP-B/F.
-- **Shop page**: products grouped by the shop's merch categories. Each merch category renders as a horizontal scroll row (Toters-style) or a section header + grid depending on product count.
+**Visibility rule:** customer never sees the taxonomy path. No `food · pizza · margherita-style` breadcrumb. No `prep_min` rendered on product cards or product detail (prep_min stays as backend-only data for cart ETA estimation).
+
+- **Home (unchanged structurally)**: shops list. Per-shop delivery estimate from SP-F. Cart-per-store comes in SP-B.
+- **Shop page**: products grouped by the shop's merch categories. Each merch category renders as a horizontal scroll row (Toters-style) or a section header + grid depending on product count. Product cards show only: image, title, price, add (+) button. No time, no leaf path.
 - **Product detail page**:
   - Image carousel
   - Title + shop badge
   - PriceText dual-currency (from Phase 3.3)
   - Description
-  - **Specs panel** (NEW): renders `core_fields` as label:value rows using the schema's `label` + the field value formatted by type. Below that, `custom_fields` rendered as plain key/value rows (no schema-defined labels).
+  - **Specs panel** (NEW): renders `core_fields` as label:value rows using the schema's `label` + value formatted by type. Header says just "Specs" — no taxonomy path shown. Below that, `custom_fields` rendered as plain key/value rows.
   - Add-to-cart (animation in SP-B)
-- **Search** (basic, v0): query input + optional Section filter dropdown that hits `/store/taxonomy/tree` and lets the customer scope by top-level section. Cross-shop results.
+- **Search** (v0): query input + filter chips. Filters available:
+  - Section (dropdown: Food / Fashion / Electronics / Home / Grocery)
+  - Category (dropdown, scoped to selected Section if any)
+  - Fast delivery (toggle — only shops with ≤30 min delivery)
+  - Price range
+  - Sort (Best / Cheapest / Fastest)
+
+  Cross-shop results. Each result shows image, title, shop name, shop delivery time, price, quick-add. No taxonomy path on results.
 
 ### Storefront (web — `backend/apps/storefront/`)
 
@@ -209,6 +225,17 @@ Mirror of mobile: shop page, product detail with specs panel, basic search. Reus
 10. Delete `vertical-fields` module entirely. No backward-compat shim.
 
 After step 10: `grep -r vertical_fields` in the repo returns nothing.
+
+## Revisions after mockup review (2026-05-18)
+
+User reviewed the visual mockups and gave 6 directional changes. Each is now baked into the spec above:
+
+1. **No per-item time on customer UI.** `prep_min` stays as backend-only data for ETA computation. Product cards show no time.
+2. **No taxonomy path visible to customer.** Removed the leaf breadcrumb from specs panel and search results.
+3. **Sub-category is optional/advanced.** Default vendor flow uses 2 levels (Section → Category). Sub-category column unlocked by a toggle. Data model keeps 3 levels.
+4. **Schema flexibility bounded by structure.** Same `SpecsPanel` renders all sections; field TYPES drive variance, not custom components per industry.
+5. **Customer filters added.** Section, Category, Fast delivery, Price range, Sort. Listed under "Mobile (customer) — Search".
+6. **Multi-industry coherence rule** added to Architecture overview. See `memory/feedback_multi_industry_coherence.md`.
 
 ## Out of scope (explicit)
 
