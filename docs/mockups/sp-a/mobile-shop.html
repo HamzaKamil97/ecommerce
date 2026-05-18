@@ -206,65 +206,38 @@
     cursor: pointer;
   }
 
-  /* sticky cart pill (Talabat / Toters pattern — pops up when cart has items) */
-  .cart-pill {
-    position: sticky;
-    bottom: 16px;
-    margin: 20px 12px 12px;
+  /* floating cart FAB (InstaShop / Talabat pattern — small circle, count badge only) */
+  .cart-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px; height: 56px;
     background: var(--primary);
     color: white;
-    padding: 12px 8px 12px 18px;
-    border-radius: 999px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 12px 28px rgba(15,118,110,.45), 0 4px 8px rgba(0,0,0,.08);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    box-shadow: 0 8px 20px rgba(15,118,110,.45), 0 2px 6px rgba(0,0,0,.12);
     z-index: 10;
     animation: pop-up 220ms cubic-bezier(.34,1.56,.64,1);
   }
   @keyframes pop-up {
-    0%   { transform: translateY(24px); opacity: 0; }
-    100% { transform: translateY(0);     opacity: 1; }
+    0%   { transform: scale(.4); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
   }
-  .cart-pill .left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-  }
-  .cart-pill .basket {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.18);
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    position: relative;
-  }
-  .cart-pill .badge {
+  .cart-fab .badge {
     position: absolute;
-    top: -4px; right: -4px;
+    top: -2px; right: -2px;
     background: var(--accent);
     color: var(--text);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
-    width: 17px; height: 17px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    border: 2px solid var(--primary);
-  }
-  .cart-pill .total {
-    font-weight: 700;
-    font-size: 15px;
-  }
-  .cart-pill .right {
-    background: white;
-    color: var(--primary);
-    padding: 8px 16px;
+    min-width: 22px; height: 22px;
+    padding: 0 6px;
     border-radius: 999px;
-    font-weight: 700;
-    font-size: 13px;
+    display: grid; place-items: center;
+    border: 2px solid white;
   }
 
   /* annotation */
@@ -399,13 +372,7 @@
     </div>
   </div>
 
-  <div class="cart-pill">
-    <div class="left">
-      <span class="basket">🛒<span class="badge">2</span></span>
-      <span class="total">27,000 IQD</span>
-    </div>
-    <span class="right">View cart ›</span>
-  </div>
+  <a class="cart-fab" href="#">🛒<span class="badge">2</span></a>
 </div>
 
 </body>

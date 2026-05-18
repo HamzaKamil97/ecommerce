@@ -228,14 +228,22 @@ After step 10: `grep -r vertical_fields` in the repo returns nothing.
 
 ## Revisions after mockup review (2026-05-18)
 
-User reviewed the visual mockups and gave 6 directional changes. Each is now baked into the spec above:
+User reviewed the visual mockups across two review rounds. All changes baked into the spec above:
 
+**Round 1:**
 1. **No per-item time on customer UI.** `prep_min` stays as backend-only data for ETA computation. Product cards show no time.
-2. **No taxonomy path visible to customer.** Removed the leaf breadcrumb from specs panel and search results.
+2. **No taxonomy path visible to customer.** Removed the leaf breadcrumb from details panel and search results.
 3. **Sub-category is optional/advanced.** Default vendor flow uses 2 levels (Section → Category). Sub-category column unlocked by a toggle. Data model keeps 3 levels.
 4. **Schema flexibility bounded by structure.** Same `DetailsPanel` renders all sections; field TYPES drive variance, not custom components per industry.
-5. **Customer filters added.** Section, Category, Fast delivery, Price range, Sort. Listed under "Mobile (customer) — Search".
+5. **Customer filters added.** Section, Category, Fast delivery, Price range, Sort.
 6. **Multi-industry coherence rule** added to Architecture overview. See `memory/feedback_multi_industry_coherence.md`.
+
+**Round 2:**
+
+7. **"Specs" → "Details" globally** (label for the schema-driven panel on product detail).
+8. **Cart access = small circle FAB** (InstaShop / Talabat pattern, NOT a wide pill). Fixed bottom-right corner, 56×56 brand-teal circle with saffron count badge. Tap → full cart screen (built in SP-B). Same component on shop page, search, and any browse screen. Pops up with a scale animation when cart goes from 0 → 1 item. Product detail header keeps the same circle pattern in the top-right (Amazon style for that screen because the bottom bar is the add-to-cart CTA).
+
+Reference patterns documented in `memory/feedback_copy_proven_ecom_patterns.md`.
 
 ## Out of scope (explicit)
 
