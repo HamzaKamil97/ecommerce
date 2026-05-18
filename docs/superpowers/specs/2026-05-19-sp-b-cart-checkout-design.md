@@ -57,10 +57,16 @@ interface CartState {
   shop_name: string | null
   shop_display_currency: "IQD" | "USD"
   items: CartItem[]
-  notes: string
+  /** "Notes for the shop" — meal prep prefs, allergy reminders, etc. Captured on the cart screen, visible to the shop. */
+  shop_notes: string
+  /** "Delivery instructions" — captured on checkout (rider-facing). */
+  delivery_notes: string
+  /** Optional coupon code entered at checkout. Applied/validated server-side at order placement. */
+  coupon_code: string | null
   // Derived (not stored, computed in selectors)
   // itemCount: number
   // subtotal_minor: number
+  // discount_minor: number (after coupon validation)
 }
 ```
 
@@ -125,9 +131,13 @@ Body for `/store/orders/place-cod`:
   "items": [
     { "variant_id": "vrnt_01...", "qty": 2 }
   ],
-  "notes": "Please ring the bell twice"
+  "shop_notes": "No onions on the burger",
+  "delivery_notes": "Blue gate near pharmacy, ring bell twice",
+  "coupon_code": "HANOOT10"
 }
 ```
+
+The two notes fields are stored on the order: `shop_notes` is surfaced to the shop in the vendor portal (kitchen-facing), `delivery_notes` is surfaced to the rider in the delivery flow. If the coupon code is invalid or expired, the request returns 400 with a clear error.
 
 If `inline_address` is provided (one-shot, save=true), the address is also created server-side before being used.
 
@@ -227,6 +237,11 @@ Total              17,500 IQD
 
 **Top-right "+":** "Add more from this shop" — navigates back to the shop page.
 
+**Notes for the shop (above summary, optional):**
+- Textarea labeled "Notes for the shop"
+- Placeholder: "No onions, cut in 8 slices, allergies, etc."
+- Stored in cart state; sent to the order as `shop_notes`. Visible in vendor portal kitchen-facing order view.
+
 ### Checkout screen `/checkout`
 
 Single page with clear sections:
@@ -235,15 +250,21 @@ Single page with clear sections:
 - If saved addresses exist: card with selected address + chevron. Tap → bottom sheet listing saved addresses (radio) + "Add new address" link. Default address selected by default.
 - If zero saved addresses: inline form (name, phone, city, area, street, building, floor, notes). "Save for next time" checkbox checked by default.
 
-**2. Order notes (optional)**
-- Free-text textarea, placeholder: "Leave at the door, call before arrival, etc."
+**2. Delivery instructions (optional)**
+- Free-text textarea, placeholder: "Blue gate near pharmacy, call when arrived, etc."
+- Rider-facing — distinct from "Notes for the shop" set on the cart screen.
 
-**3. Payment method**
+**3. Coupon code (optional, collapsible)**
+- Default state: collapsed link "Have a coupon code?" with a chevron.
+- Expanded: small input + "Apply" button on the right.
+- On Apply: POST `/store/promotions/validate` (existing endpoint) with the code + subtotal + currency. On success, the discount row appears in the summary with a remove (×) affordance. On failure, inline error: "Code invalid" / "Code expired" / etc.
+
+**4. Payment method**
 - Single non-selectable card: "💵 Cash on Delivery" with a check icon. Subtext: "Pay the rider on delivery."
 
-**4. Summary**
+**5. Summary**
 - Item count: `2 items from Hamza's Kitchen`
-- Subtotal · delivery fee · **Total**
+- Subtotal · (Discount, if coupon applied — green text, negative number) · Delivery fee · **Total**
 
 **Sticky bottom:**
 - `[ Place order · 17,500 IQD ]` — disabled until valid address present
@@ -351,7 +372,8 @@ Every "done" gate runs at least one of these verifications.
 7. Submit checkout with valid address + COD → success screen with order number. Order appears in admin.
 8. Second order from same customer → address picker shows saved address as default-selected. Tap → bottom sheet with "Add new" option.
 9. Empty cart → empty state with "Browse shops" CTA.
-10. Order notes captured and visible in admin / order detail.
+10. `shop_notes` from cart screen and `delivery_notes` from checkout captured separately and visible in admin / order detail.
+11. Coupon flow: apply valid code → discount appears in summary. Apply invalid code → inline error, no state change.
 
 ## Open questions / deferred
 
