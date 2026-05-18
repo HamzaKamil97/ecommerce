@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot — SP-A Mockups</title>
+<style>
+  :root {
+    --primary: #0F766E;
+    --primary-dark: #115E59;
+    --accent: #F59E0B;
+    --text: #0B0B0F;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --surface: #F7F7F8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px;
+    max-width: 980px;
+    margin-inline: auto;
+  }
+  header { margin-bottom: 32px; }
+  h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+  h1 .logo-mark {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 36px;
+    font-weight: 800;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .lede { color: var(--muted); max-width: 640px; margin: 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: transform 120ms, box-shadow 120ms;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: var(--primary);
+  }
+  .tag {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    align-self: flex-start;
+  }
+  .tag.vendor { background: #6B7280; }
+  .card h2 {
+    margin: 12px 0 4px;
+    font-size: 17px;
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .card .arrow {
+    margin-top: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .feedback-note {
+    background: #FEF3C7;
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 32px 0;
+    font-size: 14px;
+  }
+  .feedback-note strong { color: #92400E; }
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="logo-mark">H</span>Hanoot — SP-A Mockups</h1>
+  <p class="lede">
+    Visual mockups for the Catalog + Product-Category sub-project.
+    Tap a card to open the mockup. These are <strong>static HTML — no real backend</strong>.
+    Use them to give precise feedback before any code is written.
+  </p>
+</header>
+
+<div class="feedback-note">
+  <strong>How to give feedback:</strong> Look at each mockup, take screenshots if helpful, and tell me
+  things like "the specs panel needs to be above the description" / "merch row should scroll horizontally"
+  / "wizard step 2 is too busy". I'll redo the mockup until you're happy, THEN we plan + implement.
+</div>
+
+<div class="grid">
+
+  <a class="card" href="mobile-shop.html">
+    <span class="tag">Customer</span>
+    <h2>📱 Shop page</h2>
+    <p>Hamza's Kitchen with merch-category rows. How a customer browses a single store's catalog.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="mobile-product-detail.html">
+    <span class="tag">Customer</span>
+    <h2>📱 Product detail + specs panel</h2>
+    <p>Margherita Pizza page. The NEW specs panel renders core fields from the taxonomy schema.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="mobile-search.html">
+    <span class="tag">Customer</span>
+    <h2>📱 Cross-shop search</h2>
+    <p>Search "pizza" across all shops, with Section filter dropdown. Taxonomy made visible to user here only.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+  <a class="card" href="vendor-create-product.html">
+    <span class="tag vendor">Vendor portal</span>
+    <h2>💻 Create product wizard</h2>
+    <p>4-step flow: pick taxonomy leaf → fill schema → tag merch → standard fields.</p>
+    <span class="arrow">Open mockup →</span>
+  </a>
+
+</div>
+
+<footer>
+  <p>Spec: <code>docs/superpowers/specs/2026-05-18-sp-a-catalog-taxonomy-design.md</code> ·
+  Commit: <code>7d0a76b</code></p>
+</footer>
+</body>
+</html>

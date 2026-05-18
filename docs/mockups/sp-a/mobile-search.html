@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Search (mockup)</title>
+<style>
+  :root {
+    --primary: #0F766E;
+    --accent: #F59E0B;
+    --text: #0B0B0F;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #FFFFFF;
+    --surface: #F7F7F8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #E5E7EB;
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  .phone {
+    width: 390px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    overflow: hidden;
+    border: 10px solid #111;
+  }
+  .status-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* search header */
+  .search-header {
+    padding: 12px 16px 0;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .search-box input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    outline: none;
+  }
+  .search-box .icon { color: var(--muted); font-size: 17px; }
+
+  /* filter chips */
+  .filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 12px;
+    background: var(--surface);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    border: 1px solid transparent;
+  }
+  .chip.active {
+    background: var(--primary);
+    color: white;
+  }
+  .chip .caret { font-size: 11px; opacity: .8; }
+
+  /* section divider with count */
+  .results-meta {
+    padding: 8px 16px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .results-meta strong { color: var(--text); }
+
+  /* result rows */
+  .result {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+  }
+  .result .img {
+    width: 80px; height: 80px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+  }
+  .result .body { flex: 1; min-width: 0; }
+  .result .title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .result .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .result .leaf {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .result .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .result .price { font-size: 14px; font-weight: 700; }
+  .result .add-btn {
+    width: 30px; height: 30px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  /* annotations */
+  .annot {
+    position: fixed;
+    background: #1F2937;
+    color: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+    max-width: 240px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    pointer-events: none;
+  }
+  .annot::before {
+    content: "";
+    position: absolute;
+    width: 0; height: 0;
+    border: 6px solid transparent;
+  }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 140px; left: calc(50% - 400px); }
+  .annot.a1::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  .annot.a2 { top: 240px; left: calc(50% + 220px); width: 260px; }
+  .annot.a2::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  .annot.a3 { top: 460px; left: calc(50% - 420px); }
+  .annot.a3::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  @media (max-width: 1100px) { .annot { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="topbar"><a href="index.html">← All SP-A mockups</a> · Cross-shop search</div>
+
+<div class="annot a1">
+  <strong>Section filter chip</strong><br/>
+  Tap to drop down a Section list (Food / Fashion / Electronics / Home / Grocery). This is the ONLY place the taxonomy is visible on home flow.
+</div>
+
+<div class="annot a2">
+  <strong>Cross-shop results</strong><br/>
+  All "pizza" products from any shop with a <code>food.pizza.*</code> leaf. Each result shows which shop. Tap result → product detail in that shop.
+</div>
+
+<div class="annot a3">
+  <strong>Leaf tag</strong><br/>
+  Small breadcrumb showing the taxonomy leaf. Useful for the customer to verify it's the type of thing they meant.
+</div>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+  <div class="search-header">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input value="pizza" />
+      <span class="icon">×</span>
+    </div>
+    <div class="filters">
+      <span class="chip active">All</span>
+      <span class="chip">Section: Food <span class="caret">▾</span></span>
+      <span class="chip">Under 20,000 IQD</span>
+      <span class="chip">≤ 30 min</span>
+      <span class="chip">Sort: Best <span class="caret">▾</span></span>
+    </div>
+  </div>
+
+  <div class="results-meta"><strong>12 results</strong> across 3 shops</div>
+
+  <a class="result" href="mobile-product-detail.html">
+    <div class="img" style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400')"></div>
+    <div class="body">
+      <div class="leaf">food · pizza · margherita-style</div>
+      <h3 class="title">Margherita Pizza</h3>
+      <p class="meta">Hamza's Kitchen · ⏱ 18 min · 12"</p>
+      <div class="price-row">
+        <span class="price">15,000 IQD</span>
+        <button class="add-btn">+</button>
+      </div>
+    </div>
+  </a>
+
+  <a class="result" href="#">
+    <div class="img" style="background-image:url('https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400')"></div>
+    <div class="body">
+      <div class="leaf">food · pizza · specialty</div>
+      <h3 class="title">Quattro Stagioni</h3>
+      <p class="meta">Hamza's Kitchen · ⏱ 20 min · 14"</p>
+      <div class="price-row">
+        <span class="price">22,000 IQD</span>
+        <button class="add-btn">+</button>
+      </div>
+    </div>
+  </a>
+
+  <a class="result" href="#">
+    <div class="img" style="background-image:url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400')"></div>
+    <div class="body">
+      <div class="leaf">food · pizza · pepperoni-style</div>
+      <h3 class="title">Pepperoni Supreme</h3>
+      <p class="meta">Pizza Roma · ⏱ 22 min · 12"</p>
+      <div class="price-row">
+        <span class="price">18,000 IQD</span>
+        <button class="add-btn">+</button>
+      </div>
+    </div>
+  </a>
+
+  <a class="result" href="#">
+    <div class="img" style="background-image:url('https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400')"></div>
+    <div class="body">
+      <div class="leaf">food · pizza · margherita-style</div>
+      <h3 class="title">Margherita Classica</h3>
+      <p class="meta">La Vera · ⏱ 16 min · 10"</p>
+      <div class="price-row">
+        <span class="price">13,500 IQD</span>
+        <button class="add-btn">+</button>
+      </div>
+    </div>
+  </a>
+</div>
+
+</body>
+</html>

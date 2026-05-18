@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot · Hamza's Kitchen (mockup)</title>
+<style>
+  :root {
+    --primary: #0F766E;
+    --primary-dark: #115E59;
+    --accent: #F59E0B;
+    --text: #0B0B0F;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #FFFFFF;
+    --surface: #F7F7F8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #E5E7EB;
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  /* phone frame */
+  .phone {
+    width: 390px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    overflow: hidden;
+    border: 10px solid #111;
+  }
+  .status-bar {
+    height: 44px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* hero image */
+  .hero {
+    position: relative;
+    height: 200px;
+    background-image: url("https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800");
+    background-size: cover;
+    background-position: center;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.55) 100%);
+  }
+  .hero .back {
+    position: absolute;
+    top: 16px; left: 16px;
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,.95);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    z-index: 2;
+  }
+  .hero-info {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    color: white;
+    z-index: 2;
+  }
+  .hero-info .name { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+  .hero-info .meta {
+    margin-top: 4px;
+    font-size: 13px;
+    opacity: .92;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .meta-dot { width: 3px; height: 3px; background: white; border-radius: 50%; opacity: .7; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,.18);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    backdrop-filter: blur(8px);
+  }
+
+  /* merch nav (sticky tabs) */
+  .merch-tabs {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 5;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 12px 16px;
+    scrollbar-width: none;
+  }
+  .merch-tabs::-webkit-scrollbar { display: none; }
+  .merch-tab {
+    display: inline-block;
+    padding: 8px 14px;
+    margin-right: 8px;
+    background: var(--surface);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .merch-tab.active {
+    background: var(--text);
+    color: white;
+  }
+
+  /* sections */
+  .section { padding: 16px; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .section-head h2 { margin: 0; font-size: 17px; }
+  .section-head .see-all {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* product grid */
+  .products {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .product {
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .product .img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--surface);
+  }
+  .product .body { padding: 10px 12px 12px; }
+  .product .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .product .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .product .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .product .price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .product .add-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  /* sticky cart cta */
+  .cart-cta {
+    position: sticky;
+    bottom: 16px;
+    margin: 16px;
+    background: var(--text);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    z-index: 10;
+  }
+  .cart-cta .left { font-size: 13px; }
+  .cart-cta .left .count { font-weight: 700; }
+  .cart-cta .right {
+    background: var(--accent);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* annotation */
+  .annot {
+    position: fixed;
+    background: #1F2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    max-width: 220px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    pointer-events: none;
+  }
+  .annot::before {
+    content: "";
+    position: absolute;
+    width: 0; height: 0;
+    border: 6px solid transparent;
+  }
+  .annot.a1 { top: 110px; left: calc(50% - 380px); }
+  .annot.a1::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+  .annot.a2 { top: 320px; left: calc(50% + 200px); }
+  .annot.a2::before { left: -12px; top: 14px; border-right-color: #1F2937; }
+  .annot.a3 { top: 530px; left: calc(50% - 380px); }
+  .annot.a3::before { right: -12px; top: 14px; border-left-color: #1F2937; }
+
+  @media (max-width: 1100px) { .annot { display: none; } }
+
+  .topbar {
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .topbar a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><a href="index.html">← All SP-A mockups</a> · Shop page (Hamza's Kitchen)</div>
+
+<div class="annot a1">
+  <strong>Sticky merch tabs</strong><br/>
+  Shop's own browse buckets ("Pizzas", "Burgers"). Per-shop, flat. From the new <code>merch_category</code> table.
+</div>
+
+<div class="annot a2">
+  <strong>Quick add (+)</strong><br/>
+  Tap to add to cart. In SP-B this gets the fly-to-cart animation you asked for.
+</div>
+
+<div class="annot a3">
+  <strong>Cart-per-store CTA</strong><br/>
+  Stays visible while browsing. Shows count + subtotal scoped to THIS shop. Tap → cart screen (SP-B).
+</div>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+
+  <div class="hero">
+    <div class="back">‹</div>
+    <div class="hero-info">
+      <div class="name">Hamza's Kitchen</div>
+      <div class="meta">
+        <span class="badge">⭐ 4.8 (312)</span>
+        <span class="meta-dot"></span>
+        <span>Delivery 25–35 min</span>
+        <span class="meta-dot"></span>
+        <span>Min 5,000 IQD</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="merch-tabs">
+    <span class="merch-tab active">Pizzas</span>
+    <span class="merch-tab">Burgers</span>
+    <span class="merch-tab">Salads</span>
+    <span class="merch-tab">Pasta</span>
+    <span class="merch-tab">Desserts</span>
+    <span class="merch-tab">Drinks</span>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>Pizzas</h2>
+      <a class="see-all" href="#">See all</a>
+    </div>
+    <div class="products">
+      <div class="product">
+        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600')"></div>
+        <div class="body">
+          <h3 class="title">Margherita Pizza</h3>
+          <p class="meta">⏱ 18 min · 12&quot;</p>
+          <div class="price-row"><span class="price">15,000 IQD</span><button class="add-btn">+</button></div>
+        </div>
+      </div>
+      <div class="product">
+        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600')"></div>
+        <div class="body">
+          <h3 class="title">Quattro Stagioni</h3>
+          <p class="meta">⏱ 20 min · 14&quot;</p>
+          <div class="price-row"><span class="price">22,000 IQD</span><button class="add-btn">+</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>Burgers</h2>
+      <a class="see-all" href="#">See all</a>
+    </div>
+    <div class="products">
+      <div class="product">
+        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600')"></div>
+        <div class="body">
+          <h3 class="title">Classic Beef Burger</h3>
+          <p class="meta">⏱ 12 min · Medium</p>
+          <div class="price-row"><span class="price">12,000 IQD</span><button class="add-btn">+</button></div>
+        </div>
+      </div>
+      <div class="product">
+        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=600')"></div>
+        <div class="body">
+          <h3 class="title">Chicken Burger</h3>
+          <p class="meta">⏱ 12 min · Spicy</p>
+          <div class="price-row"><span class="price">10,000 IQD</span><button class="add-btn">+</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-cta">
+    <div class="left"><span class="count">2</span> items · 27,000 IQD</div>
+    <div class="right">View cart ›</div>
+  </div>
+</div>
+
+</body>
+</html>

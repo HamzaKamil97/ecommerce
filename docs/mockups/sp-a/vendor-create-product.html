@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot Vendor · Create Product (mockup)</title>
+<style>
+  :root {
+    --primary: #0F766E;
+    --accent: #F59E0B;
+    --text: #0B0B0F;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #FFFFFF;
+    --surface: #F7F7F8;
+    --danger: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #F0F2F5;
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .topbar { text-align: center; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  /* desktop browser frame */
+  .browser {
+    max-width: 1080px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  .browser-chrome {
+    height: 40px;
+    background: #F5F5F7;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .browser-chrome .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .browser-chrome .url {
+    flex: 1;
+    background: white;
+    border-radius: 6px;
+    padding: 4px 12px;
+    margin: 0 8px;
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* layout */
+  .app { display: grid; grid-template-columns: 220px 1fr; min-height: 700px; }
+  .sidebar {
+    background: #0B0B0F;
+    color: white;
+    padding: 18px 0;
+  }
+  .sidebar .brand {
+    padding: 0 18px 18px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .sidebar .brand .mark {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: black;
+    border-radius: 7px;
+    font-weight: 800;
+    display: grid; place-items: center;
+  }
+  .sidebar .brand .label { font-weight: 700; }
+  .sidebar .sub { color: rgba(255,255,255,.5); font-size: 11px; padding: 14px 18px 8px; text-transform: uppercase; letter-spacing: .5px; }
+  .sidebar .nav-item {
+    display: block;
+    padding: 9px 18px;
+    color: rgba(255,255,255,.78);
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 2px solid transparent;
+  }
+  .sidebar .nav-item.active {
+    background: rgba(255,255,255,.06);
+    color: white;
+    border-left-color: var(--primary);
+  }
+
+  /* main */
+  .main { padding: 28px 32px; overflow: hidden; }
+  .breadcrumb { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .breadcrumb a { color: var(--primary); text-decoration: none; }
+  .main h1 { margin: 0 0 16px; font-size: 22px; letter-spacing: -.02em; }
+
+  /* stepper */
+  .stepper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 24px;
+  }
+  .step {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .step .num {
+    width: 22px; height: 22px;
+    background: var(--border);
+    color: var(--muted);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .step.done .num { background: var(--primary); color: white; }
+  .step.done { color: var(--text); }
+  .step.active { background: white; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .step.active .num { background: var(--text); color: white; }
+
+  /* form panel */
+  .panel { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .panel h2 { margin: 0 0 4px; font-size: 16px; }
+  .panel .helper { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+  /* cascading picker (step 1 visualization) */
+  .cascade {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .col { background: white; padding: 10px 0; max-height: 280px; overflow: auto; }
+  .col-head {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--muted); padding: 0 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .col-item {
+    padding: 7px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .col-item:hover { background: var(--surface); }
+  .col-item.selected { background: #ECFDF5; color: var(--primary); font-weight: 600; }
+  .col-item .chev { color: var(--muted); }
+  .col-item.leaf { padding-left: 22px; }
+
+  /* selected leaf banner */
+  .leaf-banner {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .leaf-banner code { background: white; padding: 2px 6px; border-radius: 4px; }
+
+  /* (alt panel — step 2 schema preview, shown side-by-side for clarity) */
+  .alt-step {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border);
+  }
+  .alt-step .label {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .field label .req { color: var(--danger); }
+  .field input, .field select {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .field .hint { font-size: 11px; color: var(--muted); }
+  .chips-input {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+  }
+  .chips-input .chip {
+    background: var(--surface);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .chips-input .chip .x { color: var(--muted); font-size: 11px; cursor: pointer; }
+  .chips-input input {
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 4px 0;
+  }
+
+  .custom-section {
+    margin-top: 18px;
+    padding: 14px;
+    background: var(--surface);
+    border-radius: 10px;
+  }
+  .custom-section h3 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .custom-section .helper { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+  .add-field-btn {
+    background: white;
+    border: 1px dashed var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  /* footer actions */
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .btn.secondary { background: white; border: 1px solid var(--border); color: var(--text); }
+  .btn.primary { background: var(--primary); color: white; }
+
+  /* annotations */
+  .annot {
+    position: fixed;
+    background: #1F2937;
+    color: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+    max-width: 240px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    pointer-events: none;
+  }
+  .annot strong { color: var(--accent); }
+  .annot.a1 { top: 280px; right: 24px; }
+  .annot.a2 { top: 540px; right: 24px; }
+  @media (max-width: 1300px) { .annot { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="topbar"><a href="index.html">← All SP-A mockups</a> · Vendor portal · Create product wizard</div>
+
+<div class="annot a1">
+  <strong>Step 1 picker</strong><br/>
+  3 columns = 3 levels. Click cascades right. Selecting a leaf unlocks step 2's form below. Search bar at top lets vendor jump straight to a known leaf.
+</div>
+
+<div class="annot a2">
+  <strong>Step 2 schema form</strong><br/>
+  Fields rendered from the leaf's TS schema. <span style="color:#DC2626">*</span> = required. Enums become dropdowns; <code>string[]</code> becomes chips. Custom fields panel below for shop-specific extras.
+</div>
+
+<div class="browser">
+  <div class="browser-chrome">
+    <div class="dot" style="background:#FF5F57"></div>
+    <div class="dot" style="background:#FEBC2E"></div>
+    <div class="dot" style="background:#28C840"></div>
+    <div class="url">vendor-portal · Hamza's Kitchen / products / new</div>
+  </div>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="mark">H</span>
+        <span class="label">Hanoot Vendor</span>
+      </div>
+      <div class="sub">Hamza's Kitchen</div>
+      <a class="nav-item">📊 Dashboard</a>
+      <a class="nav-item active">📦 Products</a>
+      <a class="nav-item">🏷 Merch categories</a>
+      <a class="nav-item">📋 Orders</a>
+      <a class="nav-item">💳 Payouts</a>
+      <a class="nav-item">⚙️ Shop settings</a>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb"><a>Products</a> › New product</div>
+      <h1>Create product</h1>
+
+      <div class="stepper">
+        <div class="step done"><span class="num">✓</span> 1. Category</div>
+        <div class="step active"><span class="num">2</span> 2. Specs</div>
+        <div class="step"><span class="num">3</span> 3. Merch tag</div>
+        <div class="step"><span class="num">4</span> 4. Standard fields</div>
+      </div>
+
+      <div class="panel">
+        <h2>Step 1 — Pick a product category</h2>
+        <p class="helper">The category determines what specs you'll fill in next. <a href="#" style="color:var(--primary)">Find by name…</a></p>
+
+        <div class="cascade">
+          <div class="col">
+            <div class="col-head">Section</div>
+            <div class="col-item">Grocery <span class="chev">›</span></div>
+            <div class="col-item selected">Food <span class="chev">›</span></div>
+            <div class="col-item">Fashion <span class="chev">›</span></div>
+            <div class="col-item">Electronics <span class="chev">›</span></div>
+            <div class="col-item">Home <span class="chev">›</span></div>
+          </div>
+          <div class="col">
+            <div class="col-head">Category</div>
+            <div class="col-item selected">Pizza <span class="chev">›</span></div>
+            <div class="col-item">Burger <span class="chev">›</span></div>
+            <div class="col-item">Salad <span class="chev">›</span></div>
+            <div class="col-item">Pasta <span class="chev">›</span></div>
+            <div class="col-item">Dessert <span class="chev">›</span></div>
+            <div class="col-item">Drinks <span class="chev">›</span></div>
+          </div>
+          <div class="col">
+            <div class="col-head">Sub-category</div>
+            <div class="col-item leaf selected">Margherita-style</div>
+            <div class="col-item leaf">Specialty</div>
+            <div class="col-item leaf">Pepperoni-style</div>
+            <div class="col-item leaf">White (no sauce)</div>
+            <div class="col-item leaf">Calzone</div>
+          </div>
+        </div>
+
+        <div class="leaf-banner">
+          <span>Selected: <code>food.pizza.margherita-style</code> — 4 core fields, edit-friendly</span>
+          <button class="btn primary" style="padding:6px 12px;font-size:13px;">Continue ›</button>
+        </div>
+      </div>
+
+      <div class="alt-step">
+        <div class="label">⤵ Step 2 preview</div>
+
+        <div class="panel">
+          <h2>Step 2 — Fill specs</h2>
+          <p class="helper">From <code>food.pizza.margherita-style</code> schema. Required fields marked with <span style="color:var(--danger)">*</span>.</p>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Prep time (min) <span class="req">*</span></label>
+              <input value="18" type="number" />
+              <span class="hint">Number, min 1</span>
+            </div>
+            <div class="field">
+              <label>Size (inches) <span class="req">*</span></label>
+              <select><option>8</option><option>10</option><option selected>12</option><option>14</option><option>16</option></select>
+              <span class="hint">Enum: pick one</span>
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Toppings</label>
+              <div class="chips-input">
+                <span class="chip">Basil <span class="x">×</span></span>
+                <span class="chip">Mozzarella <span class="x">×</span></span>
+                <span class="chip">Tomato <span class="x">×</span></span>
+                <input placeholder="Add topping…" />
+              </div>
+              <span class="hint">Free-text tags</span>
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Allergens</label>
+              <div class="chips-input">
+                <span class="chip">Gluten <span class="x">×</span></span>
+                <span class="chip">Dairy <span class="x">×</span></span>
+                <input placeholder="Add allergen…" />
+              </div>
+              <span class="hint">Pick from: gluten · dairy · egg · nuts</span>
+            </div>
+          </div>
+
+          <div class="custom-section">
+            <h3>Custom fields (optional)</h3>
+            <p class="helper">Add anything specific to your shop. No validation, no schema. Renders below the standard specs on the product page.</p>
+            <div class="form-grid">
+              <div class="field">
+                <label>Gluten-free option</label>
+                <input value="Yes · +2,000 IQD" />
+              </div>
+              <div class="field">
+                <label>House special</label>
+                <input value="No" />
+              </div>
+            </div>
+            <button class="add-field-btn" style="margin-top:10px">+ Add custom field</button>
+          </div>
+
+          <div class="actions">
+            <button class="btn secondary">‹ Back</button>
+            <button class="btn primary">Continue to merch tagging ›</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>
