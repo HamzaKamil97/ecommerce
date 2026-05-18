@@ -1,0 +1,101 @@
+SP-A verification log
+
+Date: 2026-05-19
+Plan commit: 8a6c81c
+Seed rewrite commit: bea1997
+
+Step 2 output (seed run):
+info:    Seeding 5 demo shops with taxonomy...
+info:      Sales channel "Hamza's Kitchen" already exists — reusing.
+info:      Removed 6 pre-existing product(s) for re-seeding.
+info:    Processing product.created which has 2 subscribers
+info:    Processing product.created which has 2 subscribers
+info:    Processing product.created which has 2 subscribers
+info:    Processing product.created which has 2 subscribers
+info:    Processing product.created which has 2 subscribers
+info:    Processing product.created which has 2 subscribers
+info:    ✓ Hamza's Kitchen: 6 products
+info:      Sales channel "FreshMart" already exists — reusing.
+info:      Removed 8 pre-existing product(s) for re-seeding.
+info:    ✓ FreshMart: 8 products
+info:      Sales channel "Style Hub" already exists — reusing.
+info:      Removed 6 pre-existing product(s) for re-seeding.
+info:    ✓ Style Hub: 6 products
+info:      Sales channel "TechPoint" already exists — reusing.
+info:      Removed 5 pre-existing product(s) for re-seeding.
+info:    ✓ TechPoint: 5 products
+info:      Sales channel "Bayti — Home & Household" already exists — reusing.
+info:      Removed 7 pre-existing product(s) for re-seeding.
+info:    ✓ Bayti — Home & Household: 7 products
+info:    Demo shops seeded. Total products: 32
+info:    Finished executing script.
+
+Step 3 (tenants):
+      slug      |           name           | display_currency |  vertical   | approval_status
+----------------+--------------------------+------------------+-------------+-----------------
+ bayti          | Bayti — Home & Household | IQD              | home        | approved
+ freshmart      | FreshMart                | IQD              | grocery     | approved
+ hamzas-kitchen | Hamza's Kitchen          | IQD              | food        | approved
+ style-hub      | Style Hub                | USD              | fashion     | approved
+ techpoint      | TechPoint                | USD              | electronics | approved
+(5 rows)
+
+Step 4 (product count): 32
+
+Step 5 (pizza metadata):
+       handle        |                                                                                  metadata
+---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ hk-margherita-pizza | {"core_fields": {"size_in": "12", "is_vegan": false, "prep_min": 18, "toppings": ["basil", "mozzarella", "tomato"], "allergens": ["gluten", "dairy"]}, "custom_fields": {}}
+
+core_fields contains: size_in, prep_min, toppings, allergens — matches food.pizza schema. PASS
+
+Step 6 (t-shirt metadata):
+    handle     |                                                                metadata
+---------------+----------------------------------------------------------------------------------------------------------------------------------------
+ sh-cotton-tee | {"core_fields": {"fit": "regular", "size": "M", "color": "white", "gender": "unisex", "material": "100% cotton"}, "custom_fields": {}}
+
+core_fields contains: size, material, color, fit, gender — PASS
+
+Step 7 (smartwatch metadata):
+   handle      |                                                                        metadata
+---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------
+ tp-smartwatch | {"core_fields": {"brand": "Hanoot Wear", "color": "black", "case_size_mm": 44, "band_material": "silicone", "battery_hours": 168}, "custom_fields": {}}
+
+core_fields contains: brand, case_size_mm, color, band_material, battery_hours — PASS
+
+Step 8 (taxonomy attachments):
+       handle        |    taxonomy_handle
+---------------------+------------------------
+ hk-margherita-pizza | food.pizza
+ sh-cotton-tee       | fashion.shirt
+ tp-smartwatch       | electronics.smartwatch
+(3 rows)
+
+PASS
+
+Step 9 (merch_category count): 24
+
+(5 shops x merch categories: Hamza's Kitchen=6, FreshMart=5, Style Hub=5, TechPoint=3, Bayti=5 = 24 total — exceeds minimum of 22) PASS
+
+Step 10 (idempotency): re-run produced count = 32 ✓
+
+---
+
+PATCHES APPLIED DURING THIS RUN:
+
+Patch: seed-demo-shops.ts — softDeleteProductVariants() before softDeleteProducts()
+
+Root cause: Medusa's softDeleteProducts() does NOT cascade to product_variant rows.
+The unique SKU constraint on product_variant is not filtered by deleted_at, so when the
+seed tried to re-create a product with the same SKU, it failed with:
+  "Product variant with sku: HK-MARGHERITA-PIZZA, already exists."
+
+Fix applied: In the idempotency cleanup block (Step 4 of the seed), the query now fetches
+"variants.id" alongside the product id, then calls:
+  await productSvc.softDeleteProductVariants(variantIds)
+before calling softDeleteProducts(). This explicitly frees the SKU constraint and allows
+clean re-creation on subsequent runs.
+
+The variant unique constraint in Medusa appears to check against all rows (including
+soft-deleted rows from OTHER prior runs), but since productSvc.softDeleteProductVariants()
+was called in the patched seed, the re-run succeeded cleanly with count = 32.
