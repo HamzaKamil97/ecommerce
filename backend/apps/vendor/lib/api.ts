@@ -34,4 +34,30 @@ export const vendorApi = {
   submitProduct: (id: string) => vfetch(`/vendor/products/${id}/submit`, { method: 'POST' }),
   listOrders: () => vfetch('/vendor/orders'),
   analytics: (days = 30) => vfetch(`/vendor/analytics?days=${days}`),
+
+  // Merch categories
+  listMerchCategories: (tenantId: string) =>
+    vfetch(`/admin/tenants/${tenantId}/merch-categories`).then((r: any) => r.merch_categories),
+  createMerchCategory: (tenantId: string, data: { name: string }) =>
+    vfetch(`/admin/tenants/${tenantId}/merch-categories`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }).then((r: any) => r.merch_category),
+
+  // Taxonomy assignment
+  assignProductTaxonomy: (
+    productId: string,
+    body: { taxonomy_handle: string; core_fields: Record<string, unknown>; custom_fields?: Record<string, unknown> }
+  ) =>
+    vfetch(`/admin/products/${productId}/taxonomy`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  // Merch category assignment
+  setProductMerchCategories: (productId: string, merchCategoryIds: string[]) =>
+    vfetch(`/admin/products/${productId}/merch-categories`, {
+      method: 'PUT',
+      body: JSON.stringify({ merch_category_ids: merchCategoryIds }),
+    }),
 }
