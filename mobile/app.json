@@ -1,17 +1,24 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Bazaari",
+    "slug": "bazaari",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "bazaari",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bazaari.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow photo access to upload product images.",
+        "NSCameraUsageDescription": "Allow camera access to take product photos.",
+        "NSLocationWhenInUseUsageDescription": "We use your location to find nearby shops and estimate delivery."
+      }
     },
     "android": {
+      "package": "com.bazaari.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +26,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -43,6 +56,15 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id-here-after-eas-init"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/your-eas-project-id-here-after-eas-init"
+    },
+    "runtimeVersion": { "policy": "appVersion" }
   }
 }

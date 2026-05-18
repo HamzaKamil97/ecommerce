@@ -167,7 +167,7 @@ Legend: ✅ done · 🟡 partial · ❌ not started · 🚫 explicitly deferred
 
 ---
 
-## 5. Backend — Medusa custom modules (12 ✅)
+## 5. Backend — Medusa custom modules (13 ✅)
 
 | Module | Status | Tables |
 |---|---|---|
@@ -182,7 +182,9 @@ Legend: ✅ done · 🟡 partial · ❌ not started · 🚫 explicitly deferred
 | addresses | ✅ | saved_address |
 | wallet | ✅ | wallet, wallet_transaction |
 | loyalty | ✅ | loyalty_account, loyalty_event, referral |
+| promotions | ✅ | promo_code, promo_redemption |
 | payments | ✅ | payment_attempt |
+| promotions | (counted above) | |
 
 ### 5.1 Still to add ❌
 
