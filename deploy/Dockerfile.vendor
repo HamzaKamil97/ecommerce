@@ -1,0 +1,26 @@
+# deploy/Dockerfile.vendor
+FROM node:20-alpine AS deps
+WORKDIR /repo
+COPY backend/package.json backend/package-lock.json* ./backend/
+COPY backend/apps/vendor/package.json ./backend/apps/vendor/
+WORKDIR /repo/backend
+RUN npm install --no-audit --no-fund
+
+FROM node:20-alpine AS build
+WORKDIR /repo
+COPY --from=deps /repo/backend/node_modules ./backend/node_modules
+COPY backend/ ./backend/
+WORKDIR /repo/backend/apps/vendor
+ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://srv1162617.hstgr.cloud
+ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=$NEXT_PUBLIC_MEDUSA_BACKEND_URL
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /repo/backend/apps/vendor/.next ./.next
+COPY --from=build /repo/backend/apps/vendor/public ./public
+COPY --from=build /repo/backend/apps/vendor/package.json ./package.json
+COPY --from=build /repo/backend/node_modules ./node_modules
+EXPOSE 9100
+CMD ["npx", "next", "start", "-p", "9100"]
