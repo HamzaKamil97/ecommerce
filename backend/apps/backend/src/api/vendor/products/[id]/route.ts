@@ -39,11 +39,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     status: body.status,
   })
 
-  if (body.vertical_fields) {
-    const verticalFields = req.scope.resolve("vertical_fields") as any
-    await verticalFields.setForProduct(req.params.id, ctx.tenant.vertical, body.vertical_fields).catch(() => {})
-  }
-
   res.json({ product: updated })
 }
 

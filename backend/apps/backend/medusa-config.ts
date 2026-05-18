@@ -20,7 +20,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/tenant" },
     { resolve: "./src/modules/merch" },
     { resolve: "./src/modules/ai" },
-    { resolve: "./src/modules/vertical-fields" },
+
     { resolve: "./src/modules/delivery" },
     { resolve: "./src/modules/notification" },
     { resolve: "./src/modules/reviews" },

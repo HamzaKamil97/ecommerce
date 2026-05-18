@@ -5,7 +5,7 @@ import type ApprovalService from "../../../modules/approval/service"
 
 // GET  /vendor/products              list this vendor's products
 // POST /vendor/products              create product in this vendor's tenant (sales channel scoped)
-//   body: { title, description?, thumbnail?, status?, variants[], vertical_fields? }
+//   body: { title, description?, thumbnail?, status?, variants[] }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const ctx = await resolveVendorContext(req, res)
@@ -19,14 +19,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     { take: 100 }
   )
 
-  // Attach approval + vertical fields for each
+  // Attach approval status for each product
   const approval = req.scope.resolve(APPROVAL_MODULE) as ApprovalService
-  const verticalFields = req.scope.resolve("vertical_fields") as any
   const enriched = await Promise.all(
     products.map(async (p: any) => {
       const a = await approval.getApproval(p.id)
-      const vf = await verticalFields.getForProduct(p.id)
-      return { ...p, approval: a, vertical_fields: vf?.fields ?? null }
+      return { ...p, approval: a }
     })
   )
   res.json({ products: enriched, count: enriched.length })
@@ -61,17 +59,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       },
     ],
   })
-
-  // Attach vertical fields if provided
-  if (body.vertical_fields) {
-    const verticalFields = req.scope.resolve("vertical_fields") as any
-    try {
-      await verticalFields.setForProduct(product.id, ctx.tenant.vertical, body.vertical_fields)
-    } catch (e: any) {
-      // We still return the product; vendor can patch the vertical fields later.
-      return res.status(201).json({ product, vertical_fields_error: e?.message })
-    }
-  }
 
   res.status(201).json({ product })
 }
