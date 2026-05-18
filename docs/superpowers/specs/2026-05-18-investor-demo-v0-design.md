@@ -2,7 +2,7 @@
 
 **Status:** Approved by user 2026-05-18. Ready for implementation planning.
 **Owner:** Hamza (`2ngryprogrammer@gmail.com`)
-**Timeline:** 2 weeks
+**Timeline:** 3 weeks (revised from 2 weeks after Phase-I scope additions)
 **Goal:** A live, deployable, demoable version of Hanoot — the InstaShop-style multi-vertical super-app — that can be put on a real phone and shown to investors / partners for buy-in.
 
 ---
@@ -19,14 +19,25 @@ Five verticals, each with exactly **one fully-built demo shop** so every categor
 | 🛒 Groceries | FreshMart | 8 | IQD | unit (kg/g), organic, expiry_date, origin |
 | 👕 Fashion | Style Hub | 6 | USD | sizes (S/M/L/XL), colors, material, gender |
 | 🎧 Electronics | TechPoint | 5 | USD | brand, model, specs, warranty_months |
-| 🌹 Flowers | Petals & Co | 4 | IQD | stem_count, occasion_tags, delivery_date_required, freshness_days |
+| 🏠 Home & Household | Bayti (بيتي) | 7 | IQD | room (kitchen/bath/bedroom/living), material, dimensions, care_instructions |
 
-**Total: 29 demo products** across 5 shops. Each shop has logo, banner, branding color, delivery zone, opening hours, mock rating (4.5–4.9).
+**Bayti's 7 products** (supermarket-style household goods, excluding edible groceries):
+1. Stainless steel cookware set (kitchen)
+2. Bath towel set (bathroom)
+3. Cotton bedding set (bedroom)
+4. Cleaning supplies bundle — detergent, dish soap, multi-surface (kitchen/bath)
+5. Aromatic candle (living)
+6. Electric kettle (kitchen)
+7. Picture frame set (living)
+
+**Total: 32 demo products** across 5 shops. Each shop has logo, banner, branding color, delivery zone, opening hours, mock rating (4.5–4.9).
 
 ### 1.2 Product imagery
 
-- v0: Unsplash free images, one per product, dimensions consistent
-- Phase II: per-tenant photo upload via vendor portal
+- v0: **4 Unsplash images per product** (hero / detail / lifestyle / packaging-or-secondary-angle), consistent dimensions, square crops
+- Total images: 32 × 4 = **128 images** sourced + dimensioned during the content seed step
+- Mobile + storefront product detail screen shows a horizontal swipeable image carousel with 4 dots
+- Phase II: per-tenant photo upload via vendor portal (replaces Unsplash with real shop photos)
 
 ### 1.3 Demo accounts
 
@@ -152,7 +163,7 @@ Each shop's products carry the price in their primary currency only. The dual-di
 | FreshMart | IQD |
 | Style Hub | USD |
 | TechPoint | USD |
-| Petals & Co | IQD |
+| Bayti | IQD |
 
 This split itself is a demo moment ("watch the price display flip per shop based on how each shop actually quotes").
 
@@ -221,85 +232,127 @@ I produce a `docs/demo/demo-video-script.md` with the exact words + screen seque
 
 ---
 
-## 5. Demo choreography
+## 5. Phase I additions (added late in design — high investor-facing value)
 
-### 5.1 Length
+These four features were originally Phase II; user moved them up because they meaningfully strengthen the demo. ~7-8 days of added work, hence the timeline stretch to 3 weeks.
 
-5 minutes live demo + 5 minutes Q&A = 10 minutes total.
+### 5.1 TikTok-style discovery feed ("Scrolls")
 
-### 5.2 The script
+A vertical full-screen swipeable feed of products — Lezzoo's most-loved feature. Each card fills the screen, swipe up reveals next product. Personalized later via embeddings; for v0 the order is curated.
 
-| Time | What happens |
-|---|---|
-| 0:00–0:30 | **Hook.** "MENA spends $4B/yr on food delivery. Talabat just bought InstaShop for $32M. Toters raised $18M for Iraq. The gap: nobody combines marketplace + white-label SaaS + AI discovery. We do — meet Hanoot." Open app → onboarding plays → home with 5 category tiles. |
-| 0:30–2:00 | **Customer journey.** Tap Food → Hamza's Kitchen → pizza (show prep time badge) → add to cart (✓ flash). Switch to Flowers → red roses (show stem count + occasion tags — *different fields per vertical*). Cart → Checkout → shipping form pre-filled → payment picker (5 options shown) → Cash on delivery → Place order → success animation. |
-| 2:00–3:00 | **AI shopping agent moment.** Open chat → type "I need a gift for my mom's birthday" → AI returns reply + tappable action buttons (`[Open Petals & Co]`, `[Open Red Roses Bouquet]`) → tap one → deep-link into the product. Soundbite: "No MENA player has this. Customers don't search — they ask." |
-| 3:00–4:00 | **Vendor portal walkthrough.** Switch to laptop where **two browser tabs are pre-opened**: tab 1 logged in as Hamza's Kitchen (food vendor), tab 2 logged in as Petals & Co (flower vendor). Each tab uses a separate browser profile/cookie jar so sessions don't collide. In tab 1, click "+ New product" → form shows prep_minutes, spice_level, allergens. Cmd+click tab 2 → form re-renders with stem_count, occasion_tags, delivery_date_required. Soundbite: "Per-vertical product templates. Other super-apps force one schema on every shop. We give each shop only the fields that make sense." |
-| 4:00–4:30 | **Web + multi-tenancy.** Open `https://srv1162617.hstgr.cloud` in browser. Same backend, web storefront. Soundbite: "Same backend powers mobile, web, and the vendor portal. Tomorrow when a shop wants their own white-label app on their own domain, we deliver it from the same backend — multi-tenant by design." |
-| 4:30–5:00 | **Roadmap + ask.** Single PDF slide. ✅ Today / 🚀 Phase II (driver app, real-time tracking, in-app games, TikTok discovery, subscription, Stripe Connect) / 💰 Ask. Close. |
+**Mobile screen**: new tab or floating-action entry from Shop tab.
+- New file: `mobile/app/feed.tsx`
+- Vertical `FlatList` with `pagingEnabled` + `snapToInterval={screenHeight}`
+- Each item: full-bleed hero image + product title + shop name + price + ★ rating + "Add to cart" pill + "Save" heart
+- Reanimated overlay text fades in as item snaps
+- Initial dataset: 32 demo products randomized
 
-### 5.3 Pre-demo checklist (the morning of)
+**Backend**: reuse existing `/store/products` with a `?feed=true` flag (returns random ordering for v0; embedding-based ranking comes later).
 
-- [ ] All 3 services responding HTTPS on `srv1162617.hstgr.cloud`
-- [ ] Mobile phone connected to internet, Expo Go open, QR scanned, app loaded
-- [ ] Demo customer account logged in on phone
-- [ ] Laptop browser tabs open: vendor portal (food vendor logged in) + web storefront + roadmap PDF in same tab order as script
-- [ ] Backup demo video on Google Drive, link tested
-- [ ] Phone fully charged, screen brightness up
+**Demo value**: visible in 5 seconds, "TikTok for shopping" is an instantly understood pitch.
 
-### 5.4 Top 5 Q&A prep (rehearsed answers)
+### 5.2 Butler / concierge service (Toters pattern)
 
-1. **"What's your edge vs Talabat?"** → AI agent + open vendor portal + white-label tier. Talabat is a closed aggregator; we're a marketplace + SaaS.
-2. **"How do you make money?"** → Commission per order (15-30%, vertical-dependent, matching Talabat/Toters benchmarks) + premium subscription tier for white-label dedicated apps ($300/mo per shop).
-3. **"Why Iraq?"** → $3B+ ecommerce, 25%+ YoY growth, 70%+ smartphone penetration, only 3 incumbents (Talabat, Toters, Lezzoo) with limited multi-vertical depth, no AI-first competitor.
-4. **"Team?"** → (your story)
-5. **"Time to break even per shop?"** → 3-4 weeks once onboarded (Talabat/Toters benchmark); lower CAC than competitors because of white-label angle attracting shops directly.
+Customer describes what they want — even if not in our catalog — and the platform finds someone to get it.
 
-### 5.5 What we explicitly DON'T demo
+**Mobile screen**: new screen at `mobile/app/butler.tsx`, entry point from Profile or a small CTA tile on Home.
+- Form: "What do you need?" textarea + delivery address + budget ceiling (optional)
+- "Send request" button → shows confirmation + estimated response time
 
-- Real payments (no merchant accounts yet)
-- Driver app / live tracking (Phase II)
-- Real-time order updates (mocked cycling on the Live order tile only)
-- In-app games / TikTok feed / social (Phase II)
-- The 65 backend endpoints (internal detail — say "13 modules, fully documented" if asked)
+**Backend**:
+- New custom module `butler` with single table `butler_request(id, customer_id, description, address, budget_cents, status, assigned_to, created_at)`
+- `POST /store/butler-requests` — customer creates
+- `GET /admin/butler-requests` + `POST /admin/butler-requests/{id}/assign` — admin views queue + assigns to a shopper
+
+**Demo value**: differentiator vs. Talabat. Investors recognize the Toters butler pattern; we show it works.
+
+### 5.3 Full English + Arabic i18n with RTL
+
+Already-scaffolded i18n keys get used throughout the app, with full RTL support and a language switcher.
+
+**Mobile**:
+- Add `expo-localization` package; init on app boot via `initLocale(Localization.getLocales()[0]?.languageCode)`
+- Toggle `I18nManager.forceRTL(isRTL())` and require app reload when switching (standard RN pattern)
+- Replace all hardcoded English strings with `t('key')` calls (mostly already keyed; need to wire in 8-10 screens)
+- Profile → Settings → Language selector (English / العربية)
+- New strings to add to `en.ts` and `ar.ts`: butler, scrolls feed, reviews, wallet, loyalty, notifications, payment provider labels
+
+**Storefront (Next.js)**:
+- Use `next-intl` or built-in routing: `/en/*` and `/ar/*` paths
+- Mirror keys from mobile i18n catalog
+
+**Vendor portal**:
+- English only at v0 (vendors are tech-comfortable; defer AR to Phase II)
+
+**Demo value**: at the demo, switch to Arabic mid-flow — the entire app flips RTL and re-renders. Powerful "this is built for MENA, not retrofitted" moment.
+
+### 5.4 Post-order reviews / ratings flow
+
+Customer rates the order after delivery; review feeds into shop average rating and per-product ratings.
+
+**Backend** (already exists, just needs subscriber + frontend wiring):
+- `reviews` module has `ProductReview` + `ShopReview` entities ✅
+- Add subscriber on `order.completed` event → creates an in-app notification: "Rate your order from [shop]"
+- Existing endpoints `POST /store/reviews/products/{id}` + `POST /store/reviews/shops/{id}` already work
+
+**Mobile**:
+- New screen `mobile/app/reviews/order/[id].tsx` — order-level review with:
+  - Overall stars (1-5) for the shop
+  - Delivery rating, packaging rating, accuracy rating (optional)
+  - Free-text comment
+  - Per-product mini-rating (star row beside each ordered product)
+  - "Submit" button → POSTs to backend, marks notification read
+- Notification inbox shows "Rate your order from [shop]" as a tappable card → opens this screen
+- Shop detail screen + product detail screen show aggregate rating + recent reviews
+
+**Demo value**: shows the loop — customer → shop → review → shop reputation. Investors recognize the network-effect mechanic.
 
 ---
 
-## 6. Two-week timeline
+## 6. Three-week timeline (revised from 2 weeks after Phase I additions)
 
-| Day | What lands | Owner |
-|---|---|---|
-| 1 | GitHub repo connected, Expo account, code pushed | You signup, I push |
-| 2 | GitHub Actions builds 3 images → ghcr.io; first deploy via Hostinger Docker API; Caddy issues HTTPS cert on srv1162617.hstgr.cloud | Me |
-| 3 | All 5 demo shops created in Medusa Admin with logos, banners, products, prices in correct currencies | Me |
-| 4 | Brand swap to Hanoot (name, colors, icon, splash) across mobile + storefront + vendor portal | Me |
-| 5 | New mobile features: featured shops carousel, hero banner, delivery time chip on cards, live order tile, reorder button | Me |
-| 6 | Vendor portal polish — branded dashboard, vertical template viewer visible, walkthrough-friendly | Me |
-| 7 | AI chatbot demo data — seed product embeddings for all 29 products so semantic search returns good action buttons | Me |
-| 8 | Animations layer — 3 subtle additions (tab bounce, cart tick, list stagger) | Me |
-| 9 | End-to-end smoke test of the demo script. Fix anything that breaks. | Me |
-| 10 | Dry-run the demo script with you. Iterate. | Together |
-| 11 | Record backup demo video | You |
-| 12 | Roadmap PDF + leave-behind one-pager | Me |
-| 13 | Final dry-run + bug fixes | Together |
-| 14 | Buffer day | — |
+| Week | Day | What lands | Owner |
+|---|---|---|---|
+| **1: Foundation** | 1 | GitHub repo connected, Expo account, code pushed, Hostinger API token in repo secrets | You signup, I push |
+|  | 2 | GitHub Actions builds 3 images → ghcr.io; first deploy via Hostinger Docker API; Caddy issues HTTPS cert on srv1162617.hstgr.cloud | Me |
+|  | 3 | All 5 demo shops created in Medusa Admin with logos, banners, products, prices in correct currencies, 4 images/product | Me |
+|  | 4 | Brand swap to Hanoot (name, colors, icon, splash) across mobile + storefront + vendor portal | Me |
+|  | 5 | Multi-currency wiring: tenant.display_currency + show_secondary, PriceText extended | Me |
+|  | 6 | Mobile UX additions: featured shops carousel, hero banner, delivery time chip, live order tile, reorder button, trust signals | Me |
+|  | 7 | Buffer / catch-up day | — |
+| **2: Phase I features** | 8 | i18n full pass: wire `t()` everywhere in mobile + Profile language switcher + RTL toggle | Me |
+|  | 9 | i18n storefront (Next.js routing /en/* /ar/*) | Me |
+|  | 10 | Scrolls feed screen + backend `?feed=true` flag + 32-product carousel | Me |
+|  | 11 | Butler module + admin queue UI + mobile request form | Me |
+|  | 12 | Reviews flow: post-order screen, notification on order.completed, shop-aggregate display | Me |
+|  | 13 | AI agent demo seeding (embeddings for all 32 products, tested chat queries) | Me |
+|  | 14 | Subtle animations layer (tab bounce, cart tick, list stagger) | Me |
+| **3: Polish & demo prep** | 15 | Vendor portal polish: branded dashboard, multi-vertical form switcher demo-friendly | Me |
+|  | 16 | End-to-end smoke test of the full demo script | Me |
+|  | 17 | First dry-run with you | Together |
+|  | 18 | Bug fixes from dry-run | Me |
+|  | 19 | Backup demo video recording | You |
+|  | 20 | Final dry-run + roadmap PDF + leave-behind one-pager | Together |
+|  | 21 | Buffer day | — |
 
 ### 6.1 If we slip
 
 Highest-priority cuts (drop in this order if behind):
-1. EAS Build APK (stretch goal anyway — Expo Go works)
-2. New animations (3 already in place are enough)
-3. Hero banner + carousel (nice-to-have)
-4. Reorder button + live order tile (nice-to-have)
+1. EAS Build APK (Expo Go works for the demo)
+2. Subtle animations (existing 3 are enough)
+3. Storefront i18n /ar/* routing (mobile i18n is the demo-visible piece)
+4. Butler service (nice-to-have, AI agent is the differentiator focus)
+5. Live order tile + reorder button + featured shops carousel (nice-to-have)
 
 Things we **don't cut**:
-- Live deployment on Hostinger
+- Live deployment on Hostinger (the whole point)
 - All 5 shops with products
 - AI agent with deep-link actions
 - Vendor portal per-vertical form switcher
 - Mobile + web both working
-
----
+- Mobile i18n + RTL toggle (one of the biggest "wow" moments)
+- Reviews/ratings UI
+- Scrolls feed
 
 ## 7. Risks + mitigations
 
@@ -316,23 +369,24 @@ Things we **don't cut**:
 
 ## 8. Phase II (post-demo, in roadmap PDF only)
 
-Listed here so it's captured in the spec but explicitly out of v0 scope:
+Listed here so it's captured in the spec but explicitly out of v0 scope. Note: TikTok feed, butler, i18n, reviews originally lived here but were promoted to Phase I per user direction.
 
 - Driver app (Expo) + dispatch system
 - Real-time order tracking (websockets)
 - In-app games while waiting (Lezzoo pattern)
-- TikTok-style food discovery feed (Lezzoo "Scrolls" pattern)
-- Toters-style butler/concierge service
 - Subscription tier (Talabat Pro pattern — free delivery + discounts)
 - Stripe Connect for marketplace payouts
 - Real ZainCash / Qi Card live credentials
-- Push notifications fully wired (token registration on login)
+- Push notifications fully wired (token registration on login + FCM/APNs)
 - pgvector for semantic search at scale
-- Real-time FX API integration
-- Native iOS + Android app store submissions
-- Per-tenant white-label EAS Build pipeline
-- KYC for vendor onboarding
-- Multi-language (English + Arabic UI throughout, already scaffolded)
+- Real-time FX API integration (replaces static `FX_USD_TO_IQD`)
+- Native iOS + Android app store submissions (EAS Build → Play Store + App Store)
+- Per-tenant white-label EAS Build pipeline (dedicated shop apps with custom domains)
+- KYC for vendor onboarding (manual now, integrated KYC service later)
+- Vendor portal in Arabic (currently English only; mobile + storefront have AR in Phase I)
+- Loyalty challenges + gamification (daily/weekly missions)
+- Multi-warehouse inventory + transfers
+- Audit log viewer in admin
 
 ---
 
@@ -341,24 +395,39 @@ Listed here so it's captured in the spec but explicitly out of v0 scope:
 (Not exhaustive — full file list comes in the implementation plan.)
 
 ### Backend (`backend/apps/backend/`)
-- `medusa-config.ts` — verify all 13 modules registered
-- `src/scripts/seed-demo-shops.ts` — new: creates 5 tenants, 5 sales channels, 29 products, vertical fields, demo accounts
-- `src/scripts/seed-embeddings.ts` — new: indexes all products for AI semantic search
-- `src/api/store/.../price-with-secondary.ts` — new helper for dual-currency rendering data
+- `medusa-config.ts` — register new `butler` module
+- `src/modules/tenant/models/tenant.ts` — add `display_currency` + `show_secondary` columns
+- `src/modules/butler/` — new module: index, service, model `butler_request`
+- `src/api/store/butler-requests/route.ts` — new (customer creates)
+- `src/api/admin/butler-requests/route.ts` + `[id]/assign/route.ts` — new (admin manages)
+- `src/api/store/products/route.ts` — extend with `?feed=true` parameter for Scrolls
+- `src/subscribers/review-prompt-on-order-complete.ts` — new (creates inbox notification on `order.completed`)
+- `src/scripts/seed-demo-shops.ts` — new: creates 5 tenants, 5 sales channels, 32 products, vertical fields, demo accounts, 4 images/product
+- `src/scripts/seed-embeddings.ts` — new: indexes all 32 products for AI semantic search
+- `.env` — add `FX_USD_TO_IQD=1310`
 
 ### Mobile (`mobile/`)
 - `app.json` — name "Hanoot", icon, splash
 - `assets/images/icon.png` + `splash-icon.png` — new generated assets
 - `src/theme/colors.ts` — replace palette with teal+saffron
-- `app/(tabs)/index.tsx` — add hero banner carousel, featured shops, live order tile
-- `app/(tabs)/orders.tsx` — add reorder button
-- `src/components/PriceText.tsx` — extend for dual-currency
+- `src/i18n/` — wire `initLocale` on boot, add missing keys for butler/scrolls/reviews/wallet/loyalty
+- `app/_layout.tsx` — call `initLocale()` + apply `I18nManager.forceRTL`
+- `app/(tabs)/index.tsx` — hero banner carousel, featured shops, live order tile
+- `app/(tabs)/orders.tsx` — reorder button
+- `app/feed.tsx` — new (Scrolls TikTok-style feed)
+- `app/butler.tsx` — new (concierge request form)
+- `app/reviews/order/[id].tsx` — new (post-order review screen)
+- `app/profile/settings.tsx` — new (language switcher)
+- `src/components/PriceText.tsx` — extend for dual-currency (primary + optional secondary line)
 - `src/components/HeroBanner.tsx`, `FeaturedShopsCarousel.tsx`, `LiveOrderTile.tsx`, `DeliveryTimeChip.tsx`, `TrustBadges.tsx` — new
+- `src/components/ProductImageCarousel.tsx` — new (4-image swipe on product detail)
+- `src/components/RatingStars.tsx` — new (interactive 1-5 star input for reviews)
 - 3 animation additions in existing tab/cart components
 
 ### Storefront (`backend/apps/storefront/`)
 - Brand customization (logo, colors)
 - Hero on landing page
+- i18n routing `/en/*` and `/ar/*` via `next-intl`
 
 ### Vendor portal (`backend/apps/vendor/`)
 - Brand customization
@@ -366,7 +435,7 @@ Listed here so it's captured in the spec but explicitly out of v0 scope:
 
 ### Deploy (`deploy/` + `.github/workflows/`)
 - `docker-compose.prod.yml` — extend with storefront + vendor portal containers
-- `Caddyfile` — extend for 3 subpaths
+- `Caddyfile` — extend for 3 subpaths (api, web, vendor) all on `srv1162617.hstgr.cloud`
 - `.github/workflows/deploy.yml` — new: build 3 images, push to ghcr.io, trigger Hostinger Docker API
 - `deploy/hostinger-deploy.sh` — new: the API call payload
 
@@ -392,3 +461,51 @@ Failure modes we explicitly avoid:
 - "It's still rough" (everything visible must feel finished)
 - "Show me the iOS version" (we have a graceful "Phase II native" answer)
 - "Where does my data go?" (we show the vendor portal + Medusa Admin to prove the platform is real)
+
+---
+
+## 11. Demo choreography (script — finalized at end-of-build)
+
+This section is intentionally last because it depends on what we actually build. Will be re-validated during week-3 dry runs.
+
+### 11.1 Length
+
+~6-7 minutes live demo + 4-5 minutes Q&A. Slightly longer than the 5-min original because we now demonstrate the Phase-I additions (Scrolls feed, RTL toggle, reviews).
+
+### 11.2 The script (draft, refine in week 3)
+
+| Time | What happens |
+|---|---|
+| 0:00–0:30 | **Hook.** "MENA spends $4B/yr on food delivery. Talabat just bought InstaShop for $32M. Toters raised $18M for Iraq. The gap: marketplace + AI agent + white-label SaaS in one. We do — meet Hanoot." Open app → onboarding plays → home with 5 category tiles. |
+| 0:30–2:00 | **Customer journey.** Tap Food → Hamza's Kitchen → pizza (prep time badge visible, 4-image carousel swipes). Add to cart (✓ flash). Switch to Bayti (Home & Household) → kettle → different per-vertical fields render. Cart → Checkout → shipping form pre-filled → payment picker (5 options shown) → Cash on delivery → Place order → success animation. |
+| 2:00–2:45 | **Scrolls feed.** Open Scrolls tab → full-screen swipeable product feed → swipe through 4 products from different shops, tap "Add to cart" on one. Soundbite: "TikTok meets shopping. Discovery as scrolling, not searching." |
+| 2:45–3:30 | **AI shopping agent moment.** Open chat → type "I need a gift for my mom's birthday" → AI replies with action buttons (`[Open Bayti]`, `[Open Aromatic Candle]`, etc.) → tap one → deep-link into product. Soundbite: "No MENA player has this. Customers don't search — they ask." |
+| 3:30–4:00 | **Arabic moment.** Profile → Settings → switch language to العربية → app reloads in full RTL with Arabic text → swipe home → everything mirrored. Soundbite: "Built for MENA from day one, not retrofitted." |
+| 4:00–5:00 | **Vendor portal walkthrough.** Switch to laptop with two browser profiles pre-opened: Hamza's Kitchen (food) + Bayti (home). In food tab, click "+ New product" → form shows prep_minutes, spice_level, allergens. Switch to home tab → form re-renders with room, material, dimensions. Soundbite: "Per-vertical product templates. Other super-apps force one schema. We don't." |
+| 5:00–5:30 | **Web + multi-tenancy.** Open `https://srv1162617.hstgr.cloud` in browser. Same backend, web storefront. Brief flip. Soundbite: "Same backend powers mobile, web, vendor portal — multi-tenant by design." |
+| 5:30–6:30 | **Roadmap + ask.** Single PDF slide. ✅ Today (mobile + web + vendor + AI + Scrolls + i18n + reviews) / 🚀 Phase II (driver app, real-time tracking, in-app games, subscription, Stripe Connect) / 💰 Ask. Close. |
+
+### 11.3 Pre-demo checklist (the morning of)
+
+- [ ] All 3 services responding HTTPS on `srv1162617.hstgr.cloud`
+- [ ] Mobile phone connected to internet, Expo Go open, QR scanned, app loaded
+- [ ] Demo customer account logged in on phone, language set to English (we switch to Arabic mid-demo for the wow moment)
+- [ ] Laptop: two browser profiles pre-opened (Hamza's Kitchen vendor + Bayti vendor); web storefront tab; roadmap PDF tab
+- [ ] Backup demo video on Google Drive, link tested on backup device
+- [ ] Phone fully charged, screen brightness up, do-not-disturb on
+
+### 11.4 Top 5 Q&A prep (rehearsed answers)
+
+1. **"What's your edge vs Talabat?"** → AI agent (no MENA player has this) + open vendor portal + white-label tier. Talabat is a closed aggregator; we're a marketplace + SaaS.
+2. **"How do you make money?"** → Commission per order (15-30%, vertical-dependent, matching Talabat/Toters benchmarks) + premium subscription tier for white-label dedicated apps ($300/mo per shop).
+3. **"Why Iraq?"** → $3B+ ecommerce, 25%+ YoY growth, 70%+ smartphone penetration, only 3 incumbents (Talabat, Toters, Lezzoo) with limited multi-vertical depth, no AI-first competitor.
+4. **"Team?"** → (your story)
+5. **"Time to break even per shop?"** → 3-4 weeks once onboarded (Talabat/Toters benchmark); lower CAC than competitors because of white-label angle attracting shops directly.
+
+### 11.5 What we explicitly DON'T demo
+
+- Real payments (no merchant accounts yet — adapters exist but stub mode)
+- Driver app / live tracking (Phase II)
+- Real-time order updates (mocked cycling on the Live order tile only)
+- In-app games / social (Phase II)
+- The 65 backend endpoints (internal detail — say "13 modules, fully documented" if asked)
