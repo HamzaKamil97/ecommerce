@@ -1,19 +1,54 @@
-# Caddy reverse proxy. Auto-HTTPS via Let's Encrypt using the VPS reverse-DNS hostname.
-# Replace srv1162617.hstgr.cloud with a custom domain once you have one.
+# deploy/Caddyfile
+# Single domain, path-based routing because we don't have subdomains yet.
+# /app, /admin, /auth, /store/* -> Medusa backend
+# /vendor/* -> Medusa backend (vendor scoped routes)
+# /vendor-portal/* -> Vendor portal Next.js
+# /admin-ui (Medusa Admin lives under /app) -> Medusa
+# everything else -> storefront
 
 srv1162617.hstgr.cloud {
     encode gzip
-    reverse_proxy medusa:9000 {
-        header_up X-Forwarded-Proto {scheme}
-        header_up X-Forwarded-Host {host}
+
+    # Medusa Admin UI
+    handle /app* {
+        reverse_proxy medusa:9000
+    }
+
+    # Backend API surface (admin/store/auth/vendor namespaces)
+    handle /admin/* {
+        reverse_proxy medusa:9000
+    }
+    handle /store/* {
+        reverse_proxy medusa:9000
+    }
+    handle /auth/* {
+        reverse_proxy medusa:9000
+    }
+    handle /vendor/* {
+        reverse_proxy medusa:9000
+    }
+    handle /health {
+        reverse_proxy medusa:9000
+    }
+
+    # Vendor portal Next.js
+    handle /vendor-portal* {
+        reverse_proxy vendor:9100
+    }
+
+    # Storefront catch-all
+    handle {
+        reverse_proxy storefront:8000 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+        }
     }
 }
 
-# Fallback for IP-only access (no auto HTTPS for raw IP — Caddy can't issue).
+# Fallback for direct IP access (no HTTPS — Caddy can't issue for raw IP)
 :80 {
-    @api host 72.62.49.100
-    handle @api {
+    @ip host 72.62.49.100
+    handle @ip {
         reverse_proxy medusa:9000
     }
-    respond "OK" 200
 }
