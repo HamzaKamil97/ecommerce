@@ -93,6 +93,41 @@
           ],
           "mappedType": "enum"
         },
+        "display_currency": {
+          "name": "display_currency",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'IQD'",
+          "comment": null,
+          "enumItems": [
+            "IQD",
+            "USD"
+          ],
+          "mappedType": "enum"
+        },
+        "show_secondary": {
+          "name": "show_secondary",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "plan": {
           "name": "plan",
           "type": "text",

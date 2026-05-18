@@ -15,6 +15,8 @@ export const Tenant = model.define("tenant", {
     "fashion",
     "general",
   ]).default("general"),
+  display_currency: model.enum(["IQD", "USD"]).default("IQD"),
+  show_secondary: model.boolean().default(false),
   plan: model.enum(["marketplace", "dedicated"]).default("marketplace"),
   domain: model.text().nullable(),
   branding: model.json().nullable(), // { logo_url, primary_color, secondary_color, font }
