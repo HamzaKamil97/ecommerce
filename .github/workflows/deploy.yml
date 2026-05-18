@@ -1,0 +1,93 @@
+# .github/workflows/deploy.yml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.medusa
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/hanoot-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-storefront:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.storefront
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/hanoot-storefront:latest
+          build-args: |
+            MEDUSA_BACKEND_URL=https://srv1162617.hstgr.cloud
+
+  build-vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.vendor
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/hanoot-vendor:latest
+
+  deploy:
+    needs: [build-backend, build-storefront, build-vendor]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq + envsubst
+        run: sudo apt-get update && sudo apt-get install -y jq gettext-base
+      - name: Make ghcr.io images public
+        run: |
+          # First push runs may default to private; ensure they're readable by VPS
+          # (Or, configure ghcr.io package settings manually one-time in GitHub UI)
+          echo "Skipping — done one-time in GitHub package settings"
+      - name: Deploy to Hostinger
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+          HOSTINGER_VPS_ID: ${{ secrets.HOSTINGER_VPS_ID }}
+          GITHUB_USERNAME: ${{ github.repository_owner }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+          STORE_CORS: https://srv1162617.hstgr.cloud
+          ADMIN_CORS: https://srv1162617.hstgr.cloud
+          AUTH_CORS: https://srv1162617.hstgr.cloud
+          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+        run: bash deploy/hostinger-deploy.sh
