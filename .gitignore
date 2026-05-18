@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+.expo/
+.expo-shared/
+.medusa/
+
+# Env / secrets
+.env
+.env.local
+.env.prod
+.env.development.local
+.env.test.local
+.env.production.local
+docs/credentials.md
+deploy/.env.prod
+deploy/.deploy-key*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Postgres data (local)
+local-pg-data/
+local-pg.log
+
+# Backend data
+backend/.medusa/
+backend/data/
+backend/apps/*/dist/
+backend/apps/*/.next/
+backend/apps/*/.medusa/
+
+# Mobile
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/*.orig.*
+
+# EAS local builds
+mobile/ios/
+mobile/android/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+temp/

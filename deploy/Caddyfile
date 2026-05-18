@@ -1,0 +1,19 @@
+# Caddy reverse proxy. Auto-HTTPS via Let's Encrypt using the VPS reverse-DNS hostname.
+# Replace srv1162617.hstgr.cloud with a custom domain once you have one.
+
+srv1162617.hstgr.cloud {
+    encode gzip
+    reverse_proxy medusa:9000 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+}
+
+# Fallback for IP-only access (no auto HTTPS for raw IP — Caddy can't issue).
+:80 {
+    @api host 72.62.49.100
+    handle @api {
+        reverse_proxy medusa:9000
+    }
+    respond "OK" 200
+}

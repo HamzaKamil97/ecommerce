@@ -1,0 +1,19 @@
+# Postgres (native Windows install for dev; Hostinger for prod)
+DATABASE_URL=postgres://medusa:medusa@localhost:5432/medusa_db
+
+# Redis (optional for dev — Medusa runs in-memory if absent)
+# REDIS_URL=redis://localhost:6379
+
+# Secrets — rotate before deploy
+JWT_SECRET=change-this-jwt-secret-in-prod
+COOKIE_SECRET=change-this-cookie-secret-in-prod
+
+# CORS — comma-separated origins. Expo Go on phone uses your LAN IP.
+STORE_CORS=http://localhost:8081,http://localhost:19006,http://localhost:3000,http://192.168.33.6:8081,http://192.168.33.6:19006,exp://192.168.33.6:8081
+ADMIN_CORS=http://localhost:7001,http://localhost:5173,http://localhost:3000,http://localhost:9000
+AUTH_CORS=http://localhost:7001,http://localhost:8081,http://localhost:19006,http://localhost:3000,http://192.168.33.6:8081,http://192.168.33.6:19006
+
+MEDUSA_BACKEND_URL=http://localhost:9000
+
+# Set after creating one in Medusa Admin → Settings → Publishable API Keys
+MEDUSA_PUBLISHABLE_API_KEY=
