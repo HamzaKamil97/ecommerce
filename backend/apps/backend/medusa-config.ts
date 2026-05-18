@@ -18,6 +18,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/pos" },
     { resolve: "./src/modules/approval" },
     { resolve: "./src/modules/tenant" },
+    { resolve: "./src/modules/merch" },
     { resolve: "./src/modules/ai" },
     { resolve: "./src/modules/vertical-fields" },
     { resolve: "./src/modules/delivery" },
