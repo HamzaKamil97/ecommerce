@@ -9,10 +9,10 @@ export const Tenant = model.define("tenant", {
   sales_channel_id: model.text().nullable(),
   vertical: model.enum([
     "food",
-    "flowers",
-    "vegetables",
-    "electronics",
+    "grocery",
+    "home",
     "fashion",
+    "electronics",
     "general",
   ]).default("general"),
   display_currency: model.enum(["IQD", "USD"]).default("IQD"),

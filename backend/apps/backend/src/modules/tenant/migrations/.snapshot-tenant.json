@@ -85,10 +85,10 @@
           "comment": null,
           "enumItems": [
             "food",
-            "flowers",
-            "vegetables",
-            "electronics",
+            "grocery",
+            "home",
             "fashion",
+            "electronics",
             "general"
           ],
           "mappedType": "enum"
