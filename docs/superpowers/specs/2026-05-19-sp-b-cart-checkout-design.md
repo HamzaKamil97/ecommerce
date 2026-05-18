@@ -1,6 +1,6 @@
 # SP-B: Cart & Checkout UX Rebuild — Design Spec
 
-**Status:** Draft
+**Status:** Draft — IMPORTANT addendum at bottom about existing `addresses` module
 **Date:** 2026-05-19
 **Parent milestone:** First-customer launch v0
 **Position in roadmap:** Sub-project B of 7. Depends on SP-A (taxonomy + merch). Builds on existing CartFab and PriceText (from earlier phases).
@@ -380,3 +380,53 @@ Every "done" gate runs at least one of these verifications.
 - Currency mismatch: what if the cart is in USD (Style Hub) and customer wants to switch to IQD shop (Hamza's)? → Cross-shop prompt covers it (clear cart). No mixed-currency cart.
 - Delivery fee: per-shop static for v0 (each shop has a `delivery_fee_iqd` setting). Distance-based fee is future work.
 - Cart persistence across app launches: localStorage on web, AsyncStorage on mobile — store hydration is required so cart survives close+reopen within a session.
+
+---
+
+## Addendum (2026-05-19, post-Task-1.1) — use existing `addresses` module
+
+Task 1.1 in the original plan proposed creating a new `customer-address` module. After landing the first attempt (commit `a0f7c98`, reverted in `3a98343`), the implementer flagged that an **existing `addresses` module** already covers the same purpose:
+
+- Module: `src/modules/addresses/` with key `"addresses"` (constant `ADDRESSES_MODULE`)
+- Table: `saved_address`
+- Service: `AddressesService` (extends `MedusaService` with `CustomerAddress` model)
+- Methods: `listForCustomer(customerId)`, `setDefault(addressId, customerId)`, plus standard CRUD from base
+- API routes already exist:
+  - `GET  /store/addresses` — list current customer's addresses
+  - `POST /store/addresses` — create
+  - `POST /store/addresses/:id` (with `{set_default: true}` in body) — mark default
+  - `DELETE /store/addresses/:id` — delete
+
+**Field-name mapping** (existing module → what this spec called for):
+
+| Existing field        | This spec called    | Notes |
+|---|---|---|
+| `street`              | `street`            | same |
+| `city`                | `city`              | same |
+| `region`              | `area`              | rename in code consumers |
+| `country_code`        | `country`           | rename in code consumers — value e.g. "IQ" |
+| `delivery_instructions` | `notes`           | rename in code consumers |
+| `apartment`           | `floor` + `building` | existing module has one field; concat for display |
+| `building`            | `building`          | same |
+| `label`               | `label`             | nullable in existing |
+| `recipient_name`      | `recipient_name`    | nullable in existing |
+| `phone`               | `phone`             | nullable in existing |
+| `is_default`          | `is_default`        | same |
+| `lat` / `lng`         | (not in spec)       | bonus — keep, useful for SP-F delivery |
+| `postcode`            | (not in spec)       | bonus — keep, may be useful |
+
+**API path differences:**
+
+| This spec called                                     | Use instead                                     |
+|---|---|
+| `GET /store/customers/me/addresses`                  | `GET /store/addresses`                          |
+| `POST /store/customers/me/addresses`                 | `POST /store/addresses`                         |
+| `DELETE /store/customers/me/addresses/:id`           | `DELETE /store/addresses/:id`                   |
+| `POST /store/customers/me/addresses/:id/default`     | `POST /store/addresses/:id` body `{set_default: true}` |
+
+**What still needs to be built** (vs. spec original):
+- Add the `is_default` auto-flip behavior to the existing `POST /store/addresses` (currently no flip happens on create — only via `set_default: true`). Either fix the existing create route to flip if `body.is_default === true`, or only allow setting default via the dedicated route.
+- The remaining SP-B work (workflow, cart, checkout UI) consumes the existing module via `ADDRESSES_MODULE` and `/store/addresses/*` instead of the spec's original `customer_address` / `/store/customers/me/addresses` references.
+- Integration tests for the existing `addresses` module if none exist — quick coverage of `listForCustomer`, `setDefault`, and tenant isolation.
+
+**No new module is being created.** Task 1.1 marked DONE via reuse of existing infrastructure; original `customer-address` module reverted.
