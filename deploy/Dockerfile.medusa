@@ -1,24 +1,20 @@
-# Multi-stage Dockerfile for Medusa v2 backend.
-# Context: backend/apps/backend (so paths are relative to that).
-
-FROM node:20-alpine AS deps
-WORKDIR /app
-RUN apk add --no-cache python3 make g++ libc6-compat
-COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-
 FROM node:20-alpine AS build
-WORKDIR /app
 RUN apk add --no-cache python3 make g++ libc6-compat
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build || true
+WORKDIR /repo
+COPY backend/package.json backend/package-lock.json* ./backend/
+COPY backend/apps/backend/package.json ./backend/apps/backend/
+WORKDIR /repo/backend
+RUN npm install --no-audit --no-fund
+COPY backend/ ./backend/
+WORKDIR /repo/backend/apps/backend
+RUN npx medusa build || true
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apk add --no-cache tini curl
-COPY --from=build /app /app
+COPY --from=build /repo/backend /app/backend
+WORKDIR /app/backend/apps/backend
 EXPOSE 9000
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["sh", "-c", "npx medusa db:migrate && npm run start"]
