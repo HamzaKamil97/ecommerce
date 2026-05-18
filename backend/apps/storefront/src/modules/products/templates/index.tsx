@@ -9,6 +9,8 @@ import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import type { LeafSchema } from "@lib/types/taxonomy"
+import DetailsPanel from "@modules/products/components/details-panel"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 
@@ -17,6 +19,7 @@ type ProductTemplateProps = {
   region: HttpTypes.StoreRegion
   countryCode: string
   images: HttpTypes.StoreProductImage[]
+  leafSchema?: LeafSchema | null
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -24,10 +27,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   region,
   countryCode,
   images,
+  leafSchema,
 }) => {
   if (!product || !product.id) {
     return notFound()
   }
+
+  const coreFields = (product.metadata as any)?.core_fields ?? {}
+  const customFields = (product.metadata as any)?.custom_fields ?? {}
 
   return (
     <>
@@ -38,6 +45,13 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
           <ProductInfo product={product} />
           <ProductTabs product={product} />
+          {leafSchema && (
+            <DetailsPanel
+              schema={leafSchema}
+              coreFields={coreFields}
+              customFields={customFields}
+            />
+          )}
         </div>
         <div className="block w-full relative">
           <ImageGallery images={images} />
