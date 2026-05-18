@@ -1,25 +1,40 @@
 export type FieldType = "string" | "number" | "boolean" | "enum" | "string[]"
 
-export interface FieldDef {
+interface FieldDefBase {
   key: string
   label: string
-  type: FieldType
   required: boolean
-  /** For number type — minimum allowed value. */
-  min?: number
-  /** For number type — maximum allowed value. */
-  max?: number
-  /** For enum and string[] — allowed values. */
-  options?: string[]
   /** Human-readable hint shown under the field in admin UI. */
   hint?: string
 }
 
+export type FieldDef =
+  | (FieldDefBase & { type: "string" })
+  | (FieldDefBase & {
+      type: "number"
+      /** Minimum allowed value. */
+      min?: number
+      /** Maximum allowed value. */
+      max?: number
+    })
+  | (FieldDefBase & { type: "boolean" })
+  | (FieldDefBase & {
+      type: "enum"
+      /** Allowed string values. Required for enum. */
+      options: string[]
+    })
+  | (FieldDefBase & {
+      type: "string[]"
+      /** Optional whitelist of allowed elements. If absent, free-text tags. */
+      options?: string[]
+    })
+
 export interface LeafSchema {
   /** Dot-namespaced taxonomy handle, e.g. "food.pizza" or "fashion.mens.shirts". */
   handle: string
+  /** Human-readable label shown in admin UI and breadcrumbs. */
   display_name: string
-  /** Parent handle. Null only for root sections (not used in v0 — schemas don't live on Sections). */
+  /** Parent handle, e.g. "food" for "food.pizza". */
   parent: string
   core_fields: FieldDef[]
 }

@@ -36,4 +36,14 @@ describe("taxonomy types", () => {
       expect(bad.errors[0].reason).toBe("required")
     }
   })
+
+  it("LeafSchema accepts core_fields = []", () => {
+    const schema: LeafSchema = {
+      handle: "section.with.no.fields",
+      display_name: "Pass-through",
+      parent: "section",
+      core_fields: [],
+    }
+    expect(schema.core_fields).toHaveLength(0)
+  })
 })
