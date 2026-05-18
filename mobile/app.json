@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Bazaari",
-    "slug": "bazaari",
+    "name": "Hanoot",
+    "slug": "hanoot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "bazaari",
+    "scheme": "hanoot",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bazaari.app",
+      "bundleIdentifier": "com.hanoot.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow photo access to upload product images.",
         "NSCameraUsageDescription": "Allow camera access to take product photos.",
@@ -18,7 +18,7 @@
       }
     },
     "android": {
-      "package": "com.bazaari.app",
+      "package": "com.hanoot.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
