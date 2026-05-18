@@ -824,6 +824,7 @@ const SHOPS: ShopSeed[] = [
 export default async function seedDemoShops({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const link = container.resolve(ContainerRegistrationKeys.LINK)
   const tenantSvc: any = container.resolve(TENANT_MODULE)
   const merchSvc: any = container.resolve(MERCH_MODULE)
   const productSvc: any = container.resolve(Modules.PRODUCT)
@@ -898,15 +899,27 @@ export default async function seedDemoShops({ container }: ExecArgs) {
     }
 
     // ---- 4. Remove existing demo products (idempotent) ----
+    // We must also soft-delete variants explicitly: Medusa's softDeleteProducts()
+    // does NOT cascade to product_variant, so the unique SKU constraint would block
+    // re-creation on subsequent runs.
     const handles = shop.products.map((p) => p.handle)
     const { data: existingProducts } = await query.graph({
       entity: "product",
-      fields: ["id", "handle"],
+      fields: ["id", "handle", "variants.id"],
       filters: { handle: handles } as any,
     })
 
     if (existingProducts && existingProducts.length > 0) {
       const idsToDelete = existingProducts.map((p: any) => p.id)
+
+      // Collect all variant ids and soft-delete them first
+      const variantIds: string[] = existingProducts.flatMap(
+        (p: any) => (p.variants ?? []).map((v: any) => v.id)
+      )
+      if (variantIds.length > 0) {
+        await productSvc.softDeleteProductVariants(variantIds)
+      }
+
       await productSvc.softDeleteProducts(idsToDelete)
       logger.info(`  Removed ${idsToDelete.length} pre-existing product(s) for re-seeding.`)
     }
@@ -951,16 +964,21 @@ export default async function seedDemoShops({ container }: ExecArgs) {
         },
       })
 
-      // Tag into per-shop merch category by appending to category_ids
+      // Tag into per-shop merch category via the module link table
       const merch = merchByHandle[ps.merch_category_handle]
       if (merch) {
-        const [fullProduct] = await productSvc.listProducts(
-          { id: productId },
-          { relations: ["categories"] }
-        )
-        const existingCatIds: string[] = ((fullProduct?.categories ?? []) as any[]).map((c: any) => c.id)
-        await productSvc.updateProducts(productId, {
-          category_ids: [...existingCatIds, merch.id],
+        // Dismiss any existing link for this product before (re-)creating
+        try {
+          await link.dismiss({
+            [Modules.PRODUCT]: { product_id: productId },
+            [MERCH_MODULE]: { merch_category_id: merch.id },
+          })
+        } catch {
+          // No existing link — nothing to dismiss
+        }
+        await link.create({
+          [Modules.PRODUCT]: { product_id: productId },
+          [MERCH_MODULE]: { merch_category_id: merch.id },
         })
       } else {
         logger.warn(`    No merch_category found for handle "${ps.merch_category_handle}" in shop "${shop.slug}"`)
