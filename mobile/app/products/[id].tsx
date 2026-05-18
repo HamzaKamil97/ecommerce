@@ -8,14 +8,21 @@ import { AppButton } from '@/src/components/AppButton';
 import { PriceText } from '@/src/components/PriceText';
 import { VerticalFieldsBlock } from '@/src/components/VerticalFieldsBlock';
 import { useCartStore } from '@/src/store/cartStore';
+import { DetailsPanel } from '@/src/components/DetailsPanel';
+import { CartFab } from '@/src/components/CartFab';
+import { fetchLeafSchema } from '@/src/lib/api/taxonomy';
+import type { LeafSchema } from '@/src/lib/api/types';
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, typography, radius } = useTheme();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
+  const cart = useCartStore((s) => s.cart);
+  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
   const [product, setProduct] = useState<Product | null>(null);
   const [verticalData, setVerticalData] = useState<VerticalFields | null>(null);
+  const [schema, setSchema] = useState<LeafSchema | null>(null);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
@@ -31,6 +38,16 @@ export default function ProductDetailsScreen() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+    const p = product as any;
+    const taxonomyCat = p.categories?.find((c: any) => c.metadata?.is_taxonomy === true);
+    if (!taxonomyCat) return;
+    fetchLeafSchema(taxonomyCat.handle)
+      .then(setSchema)
+      .catch((err) => console.error('leaf schema fetch failed:', err));
+  }, [product]);
 
   if (loading) {
     return (
@@ -78,6 +95,13 @@ export default function ProductDetailsScreen() {
             <Text style={[typography.body, { color: colors.textMuted }]}>{product.description}</Text>
           ) : null}
           <VerticalFieldsBlock data={verticalData} />
+          {schema && (
+            <DetailsPanel
+              schema={schema}
+              coreFields={((product as any).metadata?.core_fields as Record<string, unknown>) ?? {}}
+              customFields={((product as any).metadata?.custom_fields as Record<string, unknown>) ?? {}}
+            />
+          )}
           <Pressable
             onPress={() => router.push(`/reviews/${product.id}`)}
             style={({ pressed }) => ({
@@ -106,6 +130,7 @@ export default function ProductDetailsScreen() {
       >
         <AppButton title="Add to cart" onPress={onAdd} loading={adding} disabled={!variant} />
       </View>
+      <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
     </SafeAreaView>
   );
 }

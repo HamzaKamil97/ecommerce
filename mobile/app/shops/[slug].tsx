@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, ScrollView, Text, View, Image, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getShopBySlug, emojiForVertical, Shop } from '@/src/api/shops';
 import { listProducts } from '@/src/api/products';
 import { Product } from '@/src/types/product';
@@ -8,12 +8,22 @@ import { ProductCard } from '@/src/components/ProductCard';
 import { ProductCardSkeleton } from '@/src/components/Skeleton';
 import { EmptyState } from '@/src/components/EmptyState';
 import { useTheme } from '@/src/theme/useTheme';
+import { MerchTabs } from '@/src/components/MerchTabs';
+import { CartFab } from '@/src/components/CartFab';
+import { fetchShopMerchCategories } from '@/src/lib/api/merch';
+import { useCartStore } from '@/src/store/cartStore';
+import type { MerchCategory } from '@/src/lib/api/types';
 
 export default function ShopDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
+  const router = useRouter();
   const { colors, spacing, typography, radius } = useTheme();
+  const cart = useCartStore((s) => s.cart);
+  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
   const [shop, setShop] = useState<Shop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [merch, setMerch] = useState<MerchCategory[]>([]);
+  const [activeMerch, setActiveMerch] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +47,16 @@ export default function ShopDetailScreen() {
     return () => {
       mounted = false;
     };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug) return;
+    fetchShopMerchCategories(slug)
+      .then((cats) => {
+        setMerch(cats);
+        setActiveMerch(cats[0]?.handle ?? null);
+      })
+      .catch((err) => console.error('merch fetch failed:', err));
   }, [slug]);
 
   if (loading) {
@@ -70,6 +90,7 @@ export default function ShopDetailScreen() {
             gap: spacing.md,
           }}
         >
+
           <View
             style={{
               width: 96,
@@ -95,6 +116,14 @@ export default function ShopDetailScreen() {
           </Text>
         </View>
 
+        {merch.length > 0 && (
+          <MerchTabs
+            categories={merch}
+            activeHandle={activeMerch}
+            onSelect={setActiveMerch}
+          />
+        )}
+
         <View style={{ padding: spacing.lg }}>
           <Text style={[typography.heading, { color: colors.text, marginBottom: spacing.md }]}>
             Products from {shop.name}
@@ -115,6 +144,7 @@ export default function ShopDetailScreen() {
           )}
         </View>
       </ScrollView>
+      <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
     </SafeAreaView>
   );
 }

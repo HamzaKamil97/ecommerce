@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Pressable,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { listProducts } from '@/src/api/products';
 import { listCategories, emojiForCategory, Category } from '@/src/api/categories';
 import { Product } from '@/src/types/product';
@@ -19,10 +20,16 @@ import { CategoryChip } from '@/src/components/CategoryChip';
 import { EmptyState } from '@/src/components/EmptyState';
 import { useTheme } from '@/src/theme/useTheme';
 import { useAuthStore } from '@/src/store/authStore';
+import { FilterChips, ChipDef } from '@/src/components/FilterChips';
+import { CartFab } from '@/src/components/CartFab';
+import { useCartStore } from '@/src/store/cartStore';
 
 export default function HomeScreen() {
   const { colors, spacing, radius, typography } = useTheme();
+  const router = useRouter();
   const customer = useAuthStore((s) => s.customer);
+  const cart = useCartStore((s) => s.cart);
+  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -30,6 +37,24 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // FilterChips state
+  const [section, setSection] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
+  const [fastOnly, setFastOnly] = useState(false);
+  const [sort, setSort] = useState<'best' | 'cheapest' | 'fastest'>('best');
+
+  const chips: ChipDef[] = useMemo(() => [
+    { id: 'section', label: section ?? 'Section', active: !!section, hasCaret: true },
+    { id: 'category', label: category ?? 'Category', active: !!category, hasCaret: true },
+    { id: 'fast', label: 'Fast delivery', active: fastOnly, prefix: '⚡' },
+    { id: 'sort', label: `Sort: ${sort}`, active: false, hasCaret: true },
+  ], [section, category, fastOnly, sort]);
+
+  function onChip(id: string) {
+    if (id === 'fast') setFastOnly((x) => !x);
+    // section/category/sort pickers wired in SP-G or later — for now no-op
+  }
 
   const load = useCallback(async (q?: string, categoryId?: string | null) => {
     setError(null);
@@ -114,6 +139,8 @@ export default function HomeScreen() {
         />
       </View>
 
+      <FilterChips chips={chips} onPress={onChip} />
+
       {categories.length > 0 && (
         <ScrollView
           horizontal
@@ -172,6 +199,7 @@ export default function HomeScreen() {
           }
         />
       )}
+      <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
     </SafeAreaView>
   );
 }
