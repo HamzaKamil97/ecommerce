@@ -1,36 +1,67 @@
-'use client'
+"use client"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import CategoryPicker from "@/components/create-product/CategoryPicker"
+import SchemaForm from "@/components/create-product/SchemaForm"
+import CustomFieldsEditor from "@/components/create-product/CustomFieldsEditor"
+import MerchTagger from "@/components/create-product/MerchTagger"
+import { vendorApi } from "@/lib/api"
 
-import { useEffect, useState } from 'react'
-import { vendorApi } from '@/lib/api'
-import { useRouter } from 'next/navigation'
+type Step = 1 | 2 | 3 | 4
 
-export default function NewProduct() {
+interface WizardState {
+  taxonomyHandle: string | null
+  coreFields: Record<string, unknown>
+  customFields: Record<string, unknown>
+  merchCategoryIds: string[]
+  product: { title: string; description: string; thumbnail: string; priceCents: string }
+}
+
+const init: WizardState = {
+  taxonomyHandle: null,
+  coreFields: {},
+  customFields: {},
+  merchCategoryIds: [],
+  product: { title: "", description: "", thumbnail: "", priceCents: "" },
+}
+
+export default function NewProductPage() {
   const router = useRouter()
+  const [step, setStep] = useState<Step>(1)
+  const [state, setState] = useState<WizardState>(init)
   const [me, setMe] = useState<any>(null)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [thumbnail, setThumbnail] = useState('')
-  const [priceCents, setPriceCents] = useState('')
-  const [verticalFields, setVerticalFields] = useState<Record<string, any>>({})
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    vendorApi.me().then(setMe).catch((e) => setError(e.message))
+    vendorApi.me().then(setMe).catch((e: any) => setError(e.message))
   }, [])
 
-  const submit = async () => {
+  const tenantId = me?.tenant?.id ?? ""
+
+  async function submit() {
+    if (!state.taxonomyHandle) { setError("Pick a category"); return }
     setSubmitting(true)
     setError(null)
     try {
-      await vendorApi.createProduct({
-        title,
-        description,
-        thumbnail,
-        prices: priceCents ? [{ amount: Number(priceCents), currency_code: 'usd' }] : [],
-        vertical_fields: verticalFields,
+      const created = await vendorApi.createProduct({
+        title: state.product.title,
+        description: state.product.description,
+        thumbnail: state.product.thumbnail,
+        prices: state.product.priceCents
+          ? [{ amount: Number(state.product.priceCents), currency_code: "iqd" }]
+          : [],
       })
-      router.push('/products')
+      const productId = created.product?.id ?? created.id
+      await vendorApi.assignProductTaxonomy(productId, {
+        taxonomy_handle: state.taxonomyHandle!,
+        core_fields: state.coreFields,
+        custom_fields: state.customFields,
+      })
+      if (state.merchCategoryIds.length > 0) {
+        await vendorApi.setProductMerchCategories(productId, state.merchCategoryIds)
+      }
+      router.push("/products")
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -38,126 +69,113 @@ export default function NewProduct() {
     }
   }
 
-  if (!me) return <div className="container"><p className="muted">Loading…</p></div>
-
   return (
-    <div className="container">
-      <h1>New product</h1>
-      <p className="muted">Vertical: <span className="tag">{me.tenant?.vertical}</span></p>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <div className="grid">
-          <div>
-            <label className="muted">Title *</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Margherita Pizza" />
-          </div>
-          <div>
-            <label className="muted">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              placeholder="Tomato, mozzarella, fresh basil…"
-            />
-          </div>
-          <div>
-            <label className="muted">Thumbnail URL</label>
-            <input value={thumbnail} onChange={(e) => setThumbnail(e.target.value)} placeholder="https://…" />
-          </div>
-          <div>
-            <label className="muted">Price (cents, e.g. 1499 = $14.99)</label>
-            <input
-              type="number"
-              value={priceCents}
-              onChange={(e) => setPriceCents(e.target.value)}
-              placeholder="1499"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3 style={{ marginTop: 0 }}>
-          {me.vertical_template?.emoji} {me.vertical_template?.label} specifics
-        </h3>
-        {(me.vertical_template?.fields ?? []).map((f: any) => (
-          <div key={f.key} style={{ marginBottom: 12 }}>
-            <label className="muted">{f.label}{f.required ? ' *' : ''}</label>
-            {f.type === 'boolean' ? (
-              <select
-                value={String(verticalFields[f.key] ?? '')}
-                onChange={(e) =>
-                  setVerticalFields({ ...verticalFields, [f.key]: e.target.value === 'true' })
-                }
-              >
-                <option value="">—</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            ) : f.type === 'select' ? (
-              <select
-                value={verticalFields[f.key] ?? ''}
-                onChange={(e) => setVerticalFields({ ...verticalFields, [f.key]: e.target.value })}
-              >
-                <option value="">—</option>
-                {(f.options ?? []).map((o: string) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
-            ) : f.type === 'multiselect' ? (
-              <select
-                multiple
-                value={verticalFields[f.key] ?? []}
-                onChange={(e) =>
-                  setVerticalFields({
-                    ...verticalFields,
-                    [f.key]: Array.from(e.target.selectedOptions).map((o) => o.value),
-                  })
-                }
-                style={{ minHeight: 80 }}
-              >
-                {(f.options ?? []).map((o: string) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
-            ) : f.type === 'number' ? (
-              <input
-                type="number"
-                value={verticalFields[f.key] ?? ''}
-                onChange={(e) =>
-                  setVerticalFields({ ...verticalFields, [f.key]: Number(e.target.value) || null })
-                }
-              />
-            ) : f.type === 'json' || f.type === 'tags' ? (
-              <textarea
-                rows={3}
-                value={verticalFields[f.key] ?? ''}
-                onChange={(e) => setVerticalFields({ ...verticalFields, [f.key]: e.target.value })}
-                placeholder={f.help ?? ''}
-              />
-            ) : (
-              <input
-                value={verticalFields[f.key] ?? ''}
-                onChange={(e) => setVerticalFields({ ...verticalFields, [f.key]: e.target.value })}
-                placeholder={f.help ?? ''}
-              />
-            )}
-            {f.help && <div className="muted" style={{ fontSize: 12 }}>{f.help}</div>}
-          </div>
-        ))}
-      </div>
+    <div className="container" style={{ maxWidth: 900, padding: "24px 16px" }}>
+      <h1 style={{ marginBottom: 24 }}>Create product</h1>
+      <Stepper step={step} />
 
       {error && (
-        <div className="card" style={{ marginTop: 16, borderColor: '#dc2626' }}>
-          <span style={{ color: '#f87171' }}>{error}</span>
+        <div style={{ marginTop: 16, padding: "10px 14px", background: "#2D0A0A", border: "1px solid #7F1D1D", borderRadius: 8, color: "#FCA5A5", fontSize: 13 }}>
+          {error}
         </div>
       )}
 
-      <div className="row" style={{ marginTop: 16 }}>
-        <button onClick={submit} disabled={submitting || !title}>
-          {submitting ? 'Saving…' : 'Save as draft'}
-        </button>
-        <button className="secondary" onClick={() => router.push('/products')}>Cancel</button>
+      {step === 1 && (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ marginBottom: 16 }}>Step 1 — Pick a product category</h2>
+          <CategoryPicker value={state.taxonomyHandle} onChange={(h) => setState({ ...state, taxonomyHandle: h })} />
+          <Nav onBack={null} onNext={() => state.taxonomyHandle && setStep(2)} nextDisabled={!state.taxonomyHandle} />
+        </div>
+      )}
+
+      {step === 2 && state.taxonomyHandle && (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ marginBottom: 16 }}>Step 2 — Fill specs</h2>
+          <SchemaForm taxonomyHandle={state.taxonomyHandle} value={state.coreFields} onChange={(v) => setState({ ...state, coreFields: v })} />
+          <CustomFieldsEditor value={state.customFields} reservedKeys={Object.keys(state.coreFields)} onChange={(v) => setState({ ...state, customFields: v })} />
+          <Nav onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        </div>
+      )}
+
+      {step === 3 && (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ marginBottom: 16 }}>Step 3 — Tag merch categories</h2>
+          {tenantId ? (
+            <MerchTagger tenantId={tenantId} value={state.merchCategoryIds} onChange={(v) => setState({ ...state, merchCategoryIds: v })} />
+          ) : (
+            <div className="muted">Loading shop info…</div>
+          )}
+          <Nav onBack={() => setStep(2)} onNext={() => setStep(4)} />
+        </div>
+      )}
+
+      {step === 4 && (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ marginBottom: 16 }}>Step 4 — Standard fields</h2>
+          <StandardFields product={state.product} onChange={(p) => setState({ ...state, product: p })} />
+          <Nav onBack={() => setStep(3)} onNext={submit} nextLabel={submitting ? "Creating…" : "Create product"} nextDisabled={submitting || !state.product.title} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Stepper({ step }: { step: Step }) {
+  const items = ["Category", "Specs", "Merch tag", "Standard fields"]
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, background: "#1a1a1f", borderRadius: 10, padding: 8 }}>
+      {items.map((label, i) => {
+        const idx = (i + 1) as Step
+        const done = idx < step
+        const active = idx === step
+        return (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, background: active ? "#0B0B0F" : "transparent", boxShadow: active ? "0 1px 3px rgba(0,0,0,0.4)" : "none" }}>
+            <span style={{ width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0, background: done ? "#0F766E" : active ? "#F7F7F8" : "#27272A", color: done ? "#fff" : active ? "#0B0B0F" : "#9CA3AF" }}>
+              {done ? "✓" : idx}
+            </span>
+            <span style={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? "#F7F7F8" : done ? "#D1D5DB" : "#6B7280" }}>
+              {label}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function Nav({ onBack, onNext, nextDisabled, nextLabel }: { onBack: (() => void) | null; onNext: () => void; nextDisabled?: boolean; nextLabel?: string }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, paddingTop: 16, borderTop: "1px solid #27272A" }}>
+      {onBack ? (
+        <button className="secondary" onClick={onBack}>‹ Back</button>
+      ) : (
+        <span />
+      )}
+      <button onClick={onNext} disabled={nextDisabled}>
+        {nextLabel ?? "Continue ›"}
+      </button>
+    </div>
+  )
+}
+
+function StandardFields({ product, onChange }: { product: any; onChange: (p: any) => void }) {
+  return (
+    <div className="grid">
+      <div>
+        <label className="muted">Title *</label>
+        <input value={product.title} onChange={(e) => onChange({ ...product, title: e.target.value })} placeholder="e.g. Classic Margherita" />
+      </div>
+      <div>
+        <label className="muted">Price (IQD)</label>
+        <input type="number" value={product.priceCents} onChange={(e) => onChange({ ...product, priceCents: e.target.value })} placeholder="e.g. 5000" />
+      </div>
+      <div>
+        <label className="muted">Description</label>
+        <textarea rows={4} value={product.description} onChange={(e) => onChange({ ...product, description: e.target.value })} placeholder="Short description shown to customers" />
+      </div>
+      <div>
+        <label className="muted">Thumbnail URL</label>
+        <input value={product.thumbnail} onChange={(e) => onChange({ ...product, thumbnail: e.target.value })} placeholder="https://…" />
       </div>
     </div>
   )

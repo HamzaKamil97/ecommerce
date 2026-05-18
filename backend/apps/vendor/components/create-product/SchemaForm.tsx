@@ -9,12 +9,38 @@ interface Props {
   onChange: (next: Record<string, unknown>) => void
 }
 
+// Palette — matches CategoryPicker.tsx
+const C = {
+  bg: "#0B0B0F",
+  surface: "#15151B",
+  border: "#27272A",
+  text: "#F7F7F8",
+  textMuted: "#9CA3AF",
+  primary: "#0F766E",
+  danger: "#DC2626",
+}
+
+const inputStyle: React.CSSProperties = {
+  padding: "8px 10px",
+  border: `1px solid ${C.border}`,
+  borderRadius: 8,
+  fontSize: 14,
+  backgroundColor: C.surface,
+  color: C.text,
+  fontFamily: "inherit",
+  outline: "none",
+}
+
 export default function SchemaForm({ taxonomyHandle, value, onChange }: Props) {
   const [schema, setSchema] = useState<LeafSchema | null>(null)
 
-  useEffect(() => { fetchLeafSchema(taxonomyHandle).then(setSchema) }, [taxonomyHandle])
+  useEffect(() => {
+    let mounted = true
+    fetchLeafSchema(taxonomyHandle).then((s) => { if (mounted) setSchema(s) })
+    return () => { mounted = false }
+  }, [taxonomyHandle])
 
-  if (!schema) return <div className="text-sm text-gray-500">Loading schema…</div>
+  if (!schema) return <div style={{ fontSize: 14, color: C.textMuted }}>Loading schema…</div>
 
   function set(key: string, v: unknown) {
     if (v === undefined || v === "" || (Array.isArray(v) && v.length === 0)) {
@@ -25,7 +51,7 @@ export default function SchemaForm({ taxonomyHandle, value, onChange }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
       {schema.core_fields.map((f) => (
         <FieldEditor key={f.key} field={f} value={value[f.key]} onChange={(v) => set(f.key, v)} />
       ))}
@@ -34,39 +60,55 @@ export default function SchemaForm({ taxonomyHandle, value, onChange }: Props) {
 }
 
 function FieldEditor({ field, value, onChange }: { field: FieldDef; value: unknown; onChange: (v: unknown) => void }) {
-  const colSpan = field.type === "string[]" ? "col-span-2" : ""
+  const spanFull = field.type === "string[]" ? { gridColumn: "span 2" } : {}
   return (
-    <div className={`flex flex-col gap-1.5 ${colSpan}`}>
-      <label className="text-sm font-semibold">
-        {field.label} {field.required && <span className="text-red-600">*</span>}
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, ...spanFull }}>
+      <label style={{ fontSize: 13, fontWeight: 600, color: C.text }}>
+        {field.label} {field.required && <span style={{ color: C.danger }}>*</span>}
       </label>
       {renderInput(field, value, onChange)}
-      {field.hint && <span className="text-[11px] text-gray-500">{field.hint}</span>}
+      {field.hint && <span style={{ fontSize: 11, color: C.textMuted }}>{field.hint}</span>}
     </div>
   )
 }
 
 function renderInput(field: FieldDef, value: unknown, onChange: (v: unknown) => void) {
-  const cls = "px-2.5 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
   if (field.type === "string") {
-    return <input className={cls} value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} />
+    return <input style={inputStyle} value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} />
   }
   if (field.type === "number") {
-    return <input type="number" className={cls} min={field.min} max={field.max} value={(value as number) ?? ""} onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))} />
+    return (
+      <input
+        type="number" style={inputStyle}
+        min={field.min} max={field.max}
+        value={(value as number) ?? ""}
+        onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+      />
+    )
   }
   if (field.type === "boolean") {
-    return <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" className="accent-teal-700" checked={(value as boolean) ?? false} onChange={(e) => onChange(e.target.checked)} /><span>{value ? "Yes" : "No"}</span></label>
+    return (
+      <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: C.text }}>
+        <input
+          type="checkbox" style={{ accentColor: C.primary }}
+          checked={(value as boolean) ?? false}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <span>{value ? "Yes" : "No"}</span>
+      </label>
+    )
   }
   if (field.type === "enum") {
     return (
-      <select className={cls} value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
+      <select style={inputStyle} value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
         <option value="">Select…</option>
-        {field.options.map((o) => <option key={o} value={o}>{o}</option>)}
+        {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     )
   }
   if (field.type === "string[]") {
-    return <ChipsInput value={(value as string[]) ?? []} options={field.options} onChange={onChange as (v: string[]) => void} />
+    const arr = (value as string[]) ?? []
+    return <ChipsInput value={arr} options={field.options} onChange={onChange as (v: string[]) => void} />
   }
   return null
 }
@@ -81,20 +123,45 @@ function ChipsInput({ value, options, onChange }: { value: string[]; options?: s
     setDraft("")
   }
   function remove(s: string) { onChange(value.filter((x) => x !== s)) }
+
   return (
-    <div className="flex flex-wrap gap-1 border border-gray-200 rounded-lg p-1.5 bg-white">
+    <div style={{
+      display: "flex", flexWrap: "wrap", gap: 4,
+      padding: "6px 8px",
+      border: `1px solid ${C.border}`,
+      borderRadius: 8,
+      backgroundColor: C.surface,
+    }}>
       {value.map((s) => (
-        <span key={s} className="bg-gray-100 px-2 py-0.5 rounded text-[13px] flex items-center gap-1">
-          {s}<button type="button" onClick={() => remove(s)} className="text-gray-400 text-xs">×</button>
+        <span key={s} style={{
+          backgroundColor: "#23232b",
+          color: C.text,
+          padding: "2px 8px", borderRadius: 6, fontSize: 13,
+          display: "flex", alignItems: "center", gap: 4,
+        }}>
+          {s}
+          <button type="button" onClick={() => remove(s)} style={{
+            background: "none", border: "none", color: C.textMuted,
+            fontSize: 11, cursor: "pointer",
+          }}>×</button>
         </span>
       ))}
       {options ? (
-        <select className="border-none outline-none text-sm bg-transparent" value="" onChange={(e) => add(e.target.value)}>
+        <select
+          style={{ border: "none", outline: "none", fontSize: 14, background: "transparent", color: C.text }}
+          value="" onChange={(e) => add(e.target.value)}
+        >
           <option value="">Add…</option>
           {options.filter((o) => !value.includes(o)).map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
       ) : (
-        <input className="border-none outline-none text-sm bg-transparent flex-1 min-w-20" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(draft) } }} placeholder="Type and press Enter" />
+        <input
+          style={{ border: "none", outline: "none", fontSize: 13, background: "transparent", color: C.text, flex: 1, minWidth: 80, padding: "4px 0" }}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(draft) } }}
+          placeholder="Type and press Enter"
+        />
       )}
     </div>
   )
