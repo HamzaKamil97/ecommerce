@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Text, SafeAreaView } from 'react-native';
+import { View, TextInput, Text, SafeAreaView, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/src/store/authStore';
 import { useTheme } from '@/src/theme/useTheme';
@@ -13,14 +13,18 @@ export default function RegisterScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async () => {
     setError(null);
+    if (!firstName.trim()) { setError('First name is required'); return; }
+    if (!email.trim()) { setError('Email is required'); return; }
+    if (!password.trim()) { setError('Password is required'); return; }
     try {
-      await register({ email, password, first_name: firstName, last_name: lastName });
-      router.replace('/(tabs)/profile');
+      await register({ email, password, first_name: firstName, last_name: lastName, phone: phone || undefined });
+      router.replace('/(tabs)');
     } catch (e: any) {
       setError(e?.response?.data?.message ?? 'Registration failed');
     }
@@ -35,16 +39,55 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ padding: spacing.lg, gap: spacing.md }}>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }} keyboardShouldPersistTaps="handled">
         <Text style={[typography.title, { color: colors.text }]}>Create account</Text>
-        <TextInput placeholder="First name" placeholderTextColor={colors.textMuted} value={firstName} onChangeText={setFirstName} style={inputStyle} />
-        <TextInput placeholder="Last name" placeholderTextColor={colors.textMuted} value={lastName} onChangeText={setLastName} style={inputStyle} />
-        <TextInput placeholder="Email" placeholderTextColor={colors.textMuted} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} style={inputStyle} />
-        <TextInput placeholder="Password" placeholderTextColor={colors.textMuted} secureTextEntry value={password} onChangeText={setPassword} style={inputStyle} />
+        <TextInput
+          placeholder="First name *"
+          placeholderTextColor={colors.textMuted}
+          value={firstName}
+          onChangeText={setFirstName}
+          style={inputStyle}
+        />
+        <TextInput
+          placeholder="Last name"
+          placeholderTextColor={colors.textMuted}
+          value={lastName}
+          onChangeText={setLastName}
+          style={inputStyle}
+        />
+        <TextInput
+          placeholder="Email *"
+          placeholderTextColor={colors.textMuted}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          style={inputStyle}
+        />
+        <TextInput
+          placeholder="Phone (optional)"
+          placeholderTextColor={colors.textMuted}
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+          style={inputStyle}
+        />
+        <TextInput
+          placeholder="Password *"
+          placeholderTextColor={colors.textMuted}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          style={inputStyle}
+        />
         {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
         <AppButton title="Create account" onPress={onSubmit} loading={isLoading} />
-        <AppButton title="Already have an account? Log in" variant="secondary" onPress={() => router.replace('/auth/login')} />
-      </View>
+        <AppButton
+          title="Already have an account? Log in"
+          variant="secondary"
+          onPress={() => router.replace('/auth/login')}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -13,7 +13,9 @@ interface AuthState {
     password: string;
     first_name?: string;
     last_name?: string;
+    phone?: string;
   }) => Promise<void>;
+  updateProfile: (params: { first_name?: string; last_name?: string; phone?: string }) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -34,6 +36,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (params) => {
     set({ isLoading: true });
     const customer = await authApi.register(params);
+    set({ customer, isLoading: false });
+  },
+  updateProfile: async (params) => {
+    set({ isLoading: true });
+    const customer = await authApi.updateMe(params);
     set({ customer, isLoading: false });
   },
   logout: async () => {

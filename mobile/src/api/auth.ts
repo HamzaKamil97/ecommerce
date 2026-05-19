@@ -6,6 +6,7 @@ export interface Customer {
   email: string;
   first_name?: string;
   last_name?: string;
+  phone?: string;
 }
 
 export async function register(params: {
@@ -13,6 +14,7 @@ export async function register(params: {
   password: string;
   first_name?: string;
   last_name?: string;
+  phone?: string;
 }): Promise<Customer> {
   const tokenRes = await medusaClient.post('/auth/customer/emailpass/register', {
     email: params.email,
@@ -25,6 +27,7 @@ export async function register(params: {
     email: params.email,
     first_name: params.first_name,
     last_name: params.last_name,
+    phone: params.phone,
   });
   return data?.customer;
 }
@@ -35,6 +38,15 @@ export async function login(email: string, password: string): Promise<Customer> 
   if (token) await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
 
   const { data } = await medusaClient.get('/store/customers/me');
+  return data?.customer;
+}
+
+export async function updateMe(params: {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+}): Promise<Customer> {
+  const { data } = await medusaClient.post('/store/customers/me', params);
   return data?.customer;
 }
 

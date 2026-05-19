@@ -41,7 +41,14 @@ export default function ProfileScreen() {
                   {customer.first_name ?? ''} {customer.last_name ?? ''}
                 </Text>
                 <Text style={styles.userContact}>{customer.email}</Text>
+                {customer.phone ? <Text style={styles.userContact}>{customer.phone}</Text> : null}
               </View>
+              <Pressable
+                onPress={() => router.push('/profile/edit')}
+                style={({ pressed }) => [styles.editProfileBtn, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <Text style={styles.editProfileText}>Edit</Text>
+              </Pressable>
             </View>
 
             {/* Quick stats */}
@@ -59,7 +66,7 @@ export default function ProfileScreen() {
             {/* Menu */}
             <View style={styles.menuGroup}>
               <MenuRow icon="📦" label="My orders" onPress={() => router.push('/(tabs)/orders')} />
-              <MenuRow icon="📍" label="Addresses" onPress={() => {}} />
+              <MenuRow icon="📍" label="Addresses" onPress={() => router.push('/addresses')} />
               <MenuRow icon="💳" label="Payment methods" onPress={() => {}} />
               <MenuRow icon="🎁" label="Rewards & referrals" onPress={() => router.push('/loyalty')} />
               <MenuRow icon="💰" label="Wallet" onPress={() => router.push('/wallet')} />
@@ -269,5 +276,17 @@ const styles = StyleSheet.create({
     color: tokens.colors.textSubtle,
     paddingTop: tokens.spacing.xl,
     paddingBottom: tokens.spacing.lg,
+  },
+  editProfileBtn: {
+    paddingHorizontal: tokens.spacing.md,
+    paddingVertical: tokens.spacing.xs,
+    borderRadius: tokens.radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    alignSelf: 'flex-start',
+  },
+  editProfileText: {
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.semibold,
+    color: tokens.colors.white,
   },
 })

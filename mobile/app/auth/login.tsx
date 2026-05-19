@@ -18,7 +18,7 @@ export default function LoginScreen() {
     setError(null);
     try {
       await login(email, password);
-      router.replace('/(tabs)/profile');
+      router.replace('/(tabs)');
     } catch (e: any) {
       setError(e?.response?.data?.message ?? 'Login failed');
     }
