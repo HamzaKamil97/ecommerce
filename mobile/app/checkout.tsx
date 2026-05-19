@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import { StatusBar } from "expo-status-bar"
 import { useRouter } from "expo-router"
+import { t } from "@/src/i18n"
 import { useCartStore } from "@/src/store/cartStore"
 import {
   listAddresses,
@@ -257,6 +258,38 @@ export default function CheckoutScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Notes (read-only review of cart-screen entries) */}
+        {(cart.shop_notes || cart.delivery_notes) && (
+          <>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 22 }]}>
+              {t('cart.notes').toUpperCase()}
+            </Text>
+            <View style={[styles.summaryCard, { backgroundColor: colors.surface }]}>
+              {cart.shop_notes ? (
+                <View style={{ paddingVertical: 4 }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 2 }}>
+                    {t('cart.shopNotesLabel')}
+                  </Text>
+                  <Text style={{ color: colors.text, fontSize: 14 }}>{cart.shop_notes}</Text>
+                </View>
+              ) : null}
+              {cart.delivery_notes ? (
+                <View style={{ paddingVertical: 4 }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 12, marginBottom: 2 }}>
+                    {t('cart.deliveryNotesLabel')}
+                  </Text>
+                  <Text style={{ color: colors.text, fontSize: 14 }}>{cart.delivery_notes}</Text>
+                </View>
+              ) : null}
+              <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: 'flex-start', paddingTop: 6 }}>
+                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 13 }}>
+                  {t('cart.edit')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
         {error && (
           <Text style={{ color: colors.danger, marginTop: 12 }}>{error}</Text>

@@ -181,6 +181,15 @@ export const en = {
   'forYou.badge': 'For you',
   'forYou.reason.becauseYou': 'Because you ordered from {shop}',
   'forYou.reason.trendingIn': 'Trending in {vertical}',
+
+  // SP-1.2 — UX upgrades
+  'product.addedToCart': 'Added to cart ✓',
+  'cart.shopNotesLabel': 'Note for the shop',
+  'cart.shopNotesPlaceholder': 'e.g. extra sauce on the side',
+  'cart.deliveryNotesLabel': 'Delivery instructions',
+  'cart.deliveryNotesPlaceholder': 'e.g. apartment 12, leave at door',
+  'cart.notes': 'Notes',
+  'cart.edit': 'Edit',
 } as const;
 
 export type EnDict = typeof en;

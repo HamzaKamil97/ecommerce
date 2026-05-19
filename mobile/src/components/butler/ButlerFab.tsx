@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Pressable, Text, StyleSheet, Animated } from 'react-native'
+import { Pressable, StyleSheet, Animated } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { ButlerSheet } from './ButlerSheet'
 
@@ -25,7 +26,7 @@ export function ButlerFab() {
           style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
           hitSlop={8}
         >
-          <Text style={styles.icon}>✨</Text>
+          <Ionicons name="sparkles" size={26} color={tokens.colors.white} />
         </Pressable>
       </Animated.View>
       <ButlerSheet visible={open} onClose={() => setOpen(false)} />
@@ -51,8 +52,5 @@ const styles = StyleSheet.create({
   },
   fabPressed: {
     opacity: 0.85,
-  },
-  icon: {
-    fontSize: 26,
   },
 })

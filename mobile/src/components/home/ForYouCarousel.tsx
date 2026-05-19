@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import { View, Text, Image, Pressable, ScrollView, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { tokens } from '@/src/theme/tokens'
@@ -7,6 +8,7 @@ import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { useCartStore } from '@/src/store/cartStore'
 import { DEMO_FOR_YOU, type ForYouRecommendation } from '@/src/data/demoForYou'
+import { QuantityStepper } from '@/src/components/QuantityStepper'
 
 function formatPrice(price: number, currency: 'iqd' | 'usd'): string {
   if (currency === 'iqd') return `${price.toLocaleString('en-US')} IQD`
@@ -17,6 +19,9 @@ export function ForYouCarousel() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
   const addItem = useCartStore((s) => s.addItem)
+  const incQty = useCartStore((s) => s.incQty)
+  const decQty = useCartStore((s) => s.decQty)
+  const cartItems = useCartStore((s) => s.items)
 
   const onAdd = useCallback(
     (rec: ForYouRecommendation) => {
@@ -62,7 +67,23 @@ export function ForYouCarousel() {
                 <Text style={styles.shopName} numberOfLines={1}>{rec.shopName}</Text>
               </View>
               <View style={styles.fyBadge}>
-                <Text style={styles.fyBadgeText}>✨ {t('forYou.badge')}</Text>
+                <Ionicons name="sparkles" size={12} color={tokens.colors.white} />
+                <Text style={styles.fyBadgeText}>{t('forYou.badge')}</Text>
+              </View>
+              <View style={styles.stepperWrap}>
+                {(() => {
+                  const variantId = `${rec.productId}-default`
+                  const qty = cartItems.find((ci) => ci.variant_id === variantId)?.qty ?? 0
+                  return (
+                    <QuantityStepper
+                      qty={qty}
+                      onAdd={() => onAdd(rec)}
+                      onIncrement={() => incQty(variantId)}
+                      onDecrement={() => decQty(variantId)}
+                      size="sm"
+                    />
+                  )
+                })()}
               </View>
             </View>
             <View style={styles.body}>
@@ -70,16 +91,6 @@ export function ForYouCarousel() {
               <Text style={styles.reason} numberOfLines={2}>{reason}</Text>
               <View style={styles.priceRow}>
                 <Text style={styles.price}>{formatPrice(rec.price, rec.currency)}</Text>
-                <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation()
-                    onAdd(rec)
-                  }}
-                  style={({ pressed }) => [styles.addBtn, pressed && styles.addBtnPressed]}
-                  hitSlop={6}
-                >
-                  <Text style={styles.addBtnText}>{t('forYou.add')}</Text>
-                </Pressable>
               </View>
             </View>
           </Pressable>
@@ -144,11 +155,19 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.pill,
     paddingHorizontal: tokens.spacing.sm,
     paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
   },
   fyBadgeText: {
     fontSize: tokens.fontSize.xs,
     fontWeight: tokens.fontWeight.bold,
     color: tokens.colors.white,
+  },
+  stepperWrap: {
+    position: 'absolute',
+    bottom: tokens.spacing.sm,
+    right: tokens.spacing.sm,
   },
   body: {
     padding: tokens.spacing.md,
@@ -174,19 +193,5 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.md,
     fontWeight: tokens.fontWeight.extrabold,
     color: tokens.colors.text,
-  },
-  addBtn: {
-    backgroundColor: tokens.colors.primary,
-    borderRadius: tokens.radius.pill,
-    paddingHorizontal: tokens.spacing.md,
-    paddingVertical: 6,
-  },
-  addBtnPressed: {
-    opacity: 0.85,
-  },
-  addBtnText: {
-    fontSize: tokens.fontSize.sm,
-    fontWeight: tokens.fontWeight.bold,
-    color: tokens.colors.white,
   },
 })

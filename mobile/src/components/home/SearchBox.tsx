@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 // Two separate Pressables side-by-side: avoids parent Pressable swallowing the
 // filter tap on some Android devices.
 import { tokens } from '@/src/theme/tokens'
@@ -18,14 +19,14 @@ export function SearchBox({
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress} style={styles.searchArea}>
-        <Text style={styles.icon}>🔍</Text>
+        <Ionicons name="search" size={18} color={tokens.colors.textMuted} />
         <Text style={styles.placeholder} numberOfLines={1}>
           {placeholder}
         </Text>
       </Pressable>
       {onFilter && (
         <Pressable onPress={onFilter} style={styles.filterBtn} hitSlop={12}>
-          <Text style={styles.filterIcon}>≡</Text>
+          <Ionicons name="options-outline" size={20} color={tokens.colors.textMuted} />
         </Pressable>
       )}
     </View>

@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text, ScrollView, Pressable, SafeAreaView, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, Pressable, SafeAreaView, StyleSheet, TextInput } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useCartStore } from '@/src/store/cartStore'
 import { tokens } from '@/src/theme/tokens'
@@ -21,6 +22,14 @@ export default function CartScreen() {
   const subtotal = useCartStore((s) => s.subtotalMinor())
   const currency = useCartStore((s) => s.shop_display_currency)
   const clearCart = useCartStore((s) => s.clear)
+  const shopNotes = useCartStore((s) => s.shop_notes)
+  const deliveryNotes = useCartStore((s) => s.delivery_notes)
+  const setShopNotes = useCartStore((s) => s.setShopNotes)
+  const setDeliveryNotes = useCartStore((s) => s.setDeliveryNotes)
+  const [localShopNotes, setLocalShopNotes] = React.useState(shopNotes)
+  const [localDeliveryNotes, setLocalDeliveryNotes] = React.useState(deliveryNotes)
+  React.useEffect(() => { setLocalShopNotes(shopNotes) }, [shopNotes])
+  React.useEffect(() => { setLocalDeliveryNotes(deliveryNotes) }, [deliveryNotes])
 
   if (items.length === 0) {
     return (
@@ -29,7 +38,7 @@ export default function CartScreen() {
           <Text style={styles.headerTitle}>{t('cart.myBasket')}</Text>
         </View>
         <View style={styles.emptyBody}>
-          <Text style={styles.emptyIcon}>🛒</Text>
+          <Ionicons name="cart-outline" size={64} color={tokens.colors.textSubtle} style={styles.emptyIcon} />
           <Text style={styles.emptyTitle}>{t('cart.basketEmpty')}</Text>
           <Text style={styles.emptySubtitle}>{t('cart.addItemsFromShop')}</Text>
           <Pressable
@@ -83,11 +92,39 @@ export default function CartScreen() {
           />
         ))}
 
+        <View style={styles.notesCard}>
+          <Text style={styles.notesLabel}>{t('cart.shopNotesLabel')}</Text>
+          <TextInput
+            value={localShopNotes}
+            onChangeText={setLocalShopNotes}
+            onBlur={() => setShopNotes(localShopNotes)}
+            placeholder={t('cart.shopNotesPlaceholder')}
+            placeholderTextColor={tokens.colors.textSubtle}
+            multiline
+            maxLength={200}
+            style={styles.notesInput}
+          />
+        </View>
+
         <CartSummary
           subtotal={subtotal}
           currency={currency}
           deliveries={deliveries}
         />
+
+        <View style={styles.notesCard}>
+          <Text style={styles.notesLabel}>{t('cart.deliveryNotesLabel')}</Text>
+          <TextInput
+            value={localDeliveryNotes}
+            onChangeText={setLocalDeliveryNotes}
+            onBlur={() => setDeliveryNotes(localDeliveryNotes)}
+            placeholder={t('cart.deliveryNotesPlaceholder')}
+            placeholderTextColor={tokens.colors.textSubtle}
+            multiline
+            maxLength={200}
+            style={styles.notesInput}
+          />
+        </View>
       </ScrollView>
 
       <StickyCheckoutBar
@@ -148,8 +185,29 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.sm,
   },
   emptyIcon: {
-    fontSize: 56,
     marginBottom: tokens.spacing.sm,
+  },
+  notesCard: {
+    marginHorizontal: tokens.spacing.lg,
+    marginBottom: tokens.spacing.md,
+    padding: tokens.spacing.md,
+    backgroundColor: tokens.colors.bg,
+    borderRadius: tokens.radius.lg,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+  },
+  notesLabel: {
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.semibold,
+    color: tokens.colors.text,
+    marginBottom: tokens.spacing.xs,
+  },
+  notesInput: {
+    fontSize: tokens.fontSize.base,
+    color: tokens.colors.text,
+    minHeight: 56,
+    textAlignVertical: 'top',
+    paddingVertical: tokens.spacing.xs,
   },
   emptyTitle: {
     fontSize: tokens.fontSize.lg,

@@ -16,6 +16,8 @@ import { ImageCarousel } from '@/src/components/product/ImageCarousel'
 import { ShopBadge } from '@/src/components/product/ShopBadge'
 import { StickyAddToCart } from '@/src/components/product/StickyAddToCart'
 import { DEMO_PRODUCTS } from '@/src/components/home/demo-data'
+import { showToast } from '@/src/components/Toast'
+import { t } from '@/src/i18n'
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -67,6 +69,13 @@ export default function ProductDetailsScreen() {
       .catch(() => {})
   }, [product])
 
+  const returnAfterAdd = (shopSlug: string | null) => {
+    showToast({ message: t('product.addedToCart') })
+    if (router.canGoBack()) router.back()
+    else if (shopSlug) router.replace(`/shops/${shopSlug}` as never)
+    else router.replace('/(tabs)/' as never)
+  }
+
   const onAdd = () => {
     setAdding(true)
 
@@ -83,7 +92,7 @@ export default function ProductDetailsScreen() {
       }
       for (let i = 0; i < quantity; i++) addItem(shop, item)
       setAdding(false)
-      router.push('/(tabs)/cart')
+      returnAfterAdd(demoProduct.shopSlug)
       return
     }
 
@@ -116,11 +125,11 @@ export default function ProductDetailsScreen() {
         onCrossShopNeeded: () => {},
       })
       setAdding(false)
-      setTimeout(() => router.push('/(tabs)/cart'), 450)
+      setTimeout(() => returnAfterAdd(resolvedShop.slug), 450)
     } else {
       try {
         const result = addItem(resolvedShop, cartItem)
-        if (result === 'added') router.push('/(tabs)/cart')
+        if (result === 'added') returnAfterAdd(resolvedShop.slug)
       } finally {
         setAdding(false)
       }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 
 export interface ShopRowData {
@@ -34,14 +35,18 @@ export function ShopRow({ shop, onPress }: Props) {
             <Text style={styles.verticalText}>{shop.vertical}</Text>
           </View>
         </View>
-        <Text style={styles.meta}>
-          ⭐ {shop.rating.toFixed(1)} · {shop.deliveryMinutes}–{shop.deliveryMinutes + 10} min · Min {shop.minOrder}
-        </Text>
+        <View style={styles.metaRow}>
+          <Ionicons name="star" size={12} color={tokens.colors.accent} />
+          <Text style={styles.meta}>
+            {' '}{shop.rating.toFixed(1)} · {shop.deliveryMinutes}–{shop.deliveryMinutes + 10} min · Min {shop.minOrder}
+          </Text>
+        </View>
       </View>
       <View style={styles.right}>
         <View style={[styles.statusBadge, shop.isOpen ? styles.openBadge : styles.closedBadge]}>
+          <View style={[styles.statusDot, { backgroundColor: shop.isOpen ? tokens.colors.success : tokens.colors.danger }]} />
           <Text style={[styles.statusText, shop.isOpen ? styles.openText : styles.closedText]}>
-            {shop.isOpen ? 'Open' : 'Closed'}
+            {shop.isOpen ? 'OPEN' : 'CLOSED'}
           </Text>
         </View>
       </View>
@@ -99,6 +104,10 @@ const styles = StyleSheet.create({
     fontWeight: tokens.fontWeight.medium,
     color: tokens.colors.textMuted,
   },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   meta: {
     fontSize: tokens.fontSize.sm,
     color: tokens.colors.textMuted,
@@ -109,13 +118,25 @@ const styles = StyleSheet.create({
     height: 72,
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     borderRadius: tokens.radius.pill,
     paddingHorizontal: tokens.spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 2,
   },
   openBadge: { backgroundColor: tokens.colors.success + '22' },
   closedBadge: { backgroundColor: tokens.colors.danger + '18' },
-  statusText: { fontSize: tokens.fontSize.xs, fontWeight: tokens.fontWeight.semibold },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: tokens.fontWeight.bold,
+    letterSpacing: 0.4,
+  },
   openText: { color: tokens.colors.success },
   closedText: { color: tokens.colors.danger },
 })

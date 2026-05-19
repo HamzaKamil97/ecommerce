@@ -11,6 +11,7 @@ import { useAuthStore } from '@/src/store/authStore';
 import { ONBOARDING_KEY } from './onboarding';
 import { FlyToCartHost } from '@/src/components/cart/FlyToCartHost';
 import { CrossShopModal } from '@/src/components/cart/CrossShopModal';
+import { ToastHost } from '@/src/components/Toast';
 import { useLanguageStore } from '@/src/store/languageStore';
 
 export const unstable_settings = {
@@ -52,6 +53,7 @@ export default function RootLayout() {
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />
+      <ToastHost />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

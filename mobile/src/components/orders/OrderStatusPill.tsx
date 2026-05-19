@@ -52,6 +52,7 @@ export function OrderStatusPill({ status, size = 'sm' }: Props) {
         { backgroundColor: color + '22' },
       ]}
     >
+      <View style={[styles.dot, { backgroundColor: color }]} />
       <Text
         style={[
           styles.text,
@@ -69,22 +70,32 @@ const styles = StyleSheet.create({
   pill: {
     alignSelf: 'flex-start',
     borderRadius: tokens.radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   pillSm: {
     paddingHorizontal: tokens.spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 2,
   },
   pillLg: {
     paddingHorizontal: tokens.spacing.md,
-    paddingVertical: 6,
+    paddingVertical: 5,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   text: {
-    fontWeight: tokens.fontWeight.semibold,
+    fontWeight: tokens.fontWeight.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   textSm: {
-    fontSize: tokens.fontSize.xs,
+    fontSize: 10,
   },
   textLg: {
-    fontSize: tokens.fontSize.base,
+    fontSize: tokens.fontSize.sm,
   },
 })

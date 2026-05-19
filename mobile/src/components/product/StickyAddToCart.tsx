@@ -47,7 +47,10 @@ export function StickyAddToCart({ quantity, setQuantity, price, currencyCode, on
         disabled={disabled}
         style={({ pressed }) => [
           styles.addBtn,
-          { opacity: disabled ? 0.5 : pressed ? 0.88 : 1 },
+          {
+            opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+            transform: pressed && !disabled ? [{ scale: 0.98 }] : undefined,
+          },
         ]}
       >
         <Text style={styles.addBtnText}>
@@ -107,9 +110,9 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     flex: 1,
-    height: 48,
+    height: 52,
     backgroundColor: tokens.colors.primary,
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },

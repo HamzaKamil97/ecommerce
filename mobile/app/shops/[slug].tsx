@@ -72,6 +72,9 @@ export default function ShopDetailScreen() {
   const router = useRouter()
   const itemCount: number = useCartStore((s) => s.itemCount())
   const addItem = useCartStore((s) => s.addItem)
+  const incQty = useCartStore((s) => s.incQty)
+  const decQty = useCartStore((s) => s.decQty)
+  const cartItems = useCartStore((s) => s.items)
 
   const [shop, setShop] = useState<Shop | null>(null)
   const [products, setProducts] = useState<ProductWithCats[]>([])
@@ -331,19 +334,26 @@ export default function ShopDetailScreen() {
               keyExtractor={(p) => p.id}
               scrollEnabled={false}
               contentContainerStyle={styles.grid}
-              renderItem={({ item }) => (
-                <ProductGridCard
-                  product={{
-                    id: item.id,
-                    title: item.title,
-                    thumbnail: item.thumbnail,
-                    price_minor: item.price_minor,
-                    currencyCode: item.currency.toUpperCase(),
-                  }}
-                  onPress={() => router.push(`/products/${item.id}`)}
-                  onAdd={(fromX, fromY, sourceSize) => handleDemoAdd(item, fromX, fromY, sourceSize)}
-                />
-              )}
+              renderItem={({ item }) => {
+                const variantId = `${item.id}-v1`
+                const qty = cartItems.find((ci) => ci.variant_id === variantId)?.qty ?? 0
+                return (
+                  <ProductGridCard
+                    product={{
+                      id: item.id,
+                      title: item.title,
+                      thumbnail: item.thumbnail,
+                      price_minor: item.price_minor,
+                      currencyCode: item.currency.toUpperCase(),
+                    }}
+                    onPress={() => router.push(`/products/${item.id}`)}
+                    onAdd={(fromX, fromY, sourceSize) => handleDemoAdd(item, fromX, fromY, sourceSize)}
+                    qty={qty}
+                    onIncrement={() => incQty(variantId)}
+                    onDecrement={() => decQty(variantId)}
+                  />
+                )
+              }}
             />
           ) : activeProducts.length > 0 ? (
             <FlatList
@@ -354,6 +364,8 @@ export default function ShopDetailScreen() {
               contentContainerStyle={styles.grid}
               renderItem={({ item }) => {
                 const { amount, currencyCode } = getFirstPrice(item)
+                const variantId = item.variants?.[0]?.id ?? ''
+                const qty = cartItems.find((ci) => ci.variant_id === variantId)?.qty ?? 0
                 return (
                   <ProductGridCard
                     product={{
@@ -365,6 +377,9 @@ export default function ShopDetailScreen() {
                     }}
                     onPress={() => router.push(`/products/${item.handle}`)}
                     onAdd={(fromX, fromY, sourceSize) => handleRealAdd(item, fromX, fromY, sourceSize)}
+                    qty={qty}
+                    onIncrement={() => variantId && incQty(variantId)}
+                    onDecrement={() => variantId && decQty(variantId)}
                   />
                 )
               }}

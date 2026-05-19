@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { PriceText } from '@/src/components/PriceText'
+import { QuantityStepper } from '@/src/components/QuantityStepper'
 
 interface ProductItem {
   id: string
@@ -16,13 +17,15 @@ interface Props {
   onPress: () => void
   /** Called with (pageX, pageY, size) of the image centre so caller can trigger fly animation */
   onAdd: (fromX: number, fromY: number, sourceSize: number) => void
+  qty?: number
+  onIncrement?: () => void
+  onDecrement?: () => void
 }
 
-export function ProductGridCard({ product, onPress, onAdd }: Props) {
+export function ProductGridCard({ product, onPress, onAdd, qty = 0, onIncrement, onDecrement }: Props) {
   const imageRef = useRef<View>(null)
 
-  function handleAdd(e: any) {
-    e.stopPropagation()
+  function fireAdd() {
     if (imageRef.current) {
       imageRef.current.measureInWindow((x, y, w, h) => {
         onAdd(x + w / 2, y + h / 2, Math.min(w, h))
@@ -47,15 +50,16 @@ export function ProductGridCard({ product, onPress, onAdd }: Props) {
             <Text style={styles.imageFallbackText}>🛍️</Text>
           </View>
         )}
-        {/* Add button overlapping image bottom-right */}
-        <Pressable
-          onPress={handleAdd}
-          style={styles.addBtn}
-          hitSlop={6}
-          accessibilityLabel={`Add ${product.title} to cart`}
-        >
-          <Text style={styles.addBtnText}>+</Text>
-        </Pressable>
+        {/* Stepper bottom-right */}
+        <View style={styles.stepperWrap}>
+          <QuantityStepper
+            qty={qty}
+            onAdd={fireAdd}
+            onIncrement={onIncrement ?? fireAdd}
+            onDecrement={onDecrement ?? (() => {})}
+            size="sm"
+          />
+        </View>
       </View>
 
       {/* Info */}
@@ -95,24 +99,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imageFallbackText: { fontSize: 32 },
-  addBtn: {
+  stepperWrap: {
     position: 'absolute',
     bottom: tokens.spacing.sm,
     right: tokens.spacing.sm,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: tokens.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...tokens.shadow.floating,
-  },
-  addBtnText: {
-    fontSize: 22,
-    lineHeight: 28,
-    color: tokens.colors.white,
-    fontWeight: tokens.fontWeight.bold,
-    marginTop: -2,
   },
   info: {
     padding: tokens.spacing.sm,

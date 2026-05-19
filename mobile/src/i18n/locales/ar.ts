@@ -183,4 +183,13 @@ export const ar: any = {
   'forYou.badge': 'مختار لك',
   'forYou.reason.becauseYou': 'لأنك طلبت من {shop}',
   'forYou.reason.trendingIn': 'الأكثر رواجًا في {vertical}',
+
+  // SP-1.2 — UX upgrades
+  'product.addedToCart': 'أضيف إلى السلة ✓',
+  'cart.shopNotesLabel': 'ملاحظة للمتجر',
+  'cart.shopNotesPlaceholder': 'مثال: صلصة إضافية على الجانب',
+  'cart.deliveryNotesLabel': 'تعليمات التوصيل',
+  'cart.deliveryNotesPlaceholder': 'مثال: شقة 12، اتركها عند الباب',
+  'cart.notes': 'ملاحظات',
+  'cart.edit': 'تعديل',
 }

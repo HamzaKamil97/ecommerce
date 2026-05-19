@@ -99,19 +99,21 @@ export function ScrollCard({ scroll }: Props) {
 
       <View style={styles.rightRail} pointerEvents="box-none">
         <ScrollRailAction
-          icon={liked ? '❤️' : '🤍'}
+          icon={liked ? 'heart' : 'heart-outline'}
           label={t('scrolls.like')}
           subLabel={scroll.likes}
           onPress={onLike}
           active={liked}
+          activeTint={tokens.colors.danger}
         />
         <ScrollRailAction
-          icon={saved ? '🔖' : '📑'}
+          icon={saved ? 'bookmark' : 'bookmark-outline'}
           label={t('scrolls.save')}
           onPress={onSave}
           active={saved}
+          activeTint={tokens.colors.accent}
         />
-        <ScrollRailAction icon="↗" label={t('scrolls.share')} onPress={onShare} />
+        <ScrollRailAction icon="share-outline" label={t('scrolls.share')} onPress={onShare} />
       </View>
 
       <View style={styles.bottomBlock} pointerEvents="box-none">
