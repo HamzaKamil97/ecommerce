@@ -1,6 +1,6 @@
 import { Pressable, View, Text, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Animated, {
   useSharedValue,
   withSequence,
@@ -12,19 +12,23 @@ import { Product } from '../types/product';
 import { PriceText } from './PriceText';
 import { useTheme } from '../theme/useTheme';
 import { useCartStore } from '../store/cartStore';
+import { useFlyToCart } from '../hooks/useFlyToCart';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 interface ProductCardProps {
   product: Product;
+  shop?: { slug: string; name: string; currency: "iqd" | "usd" };
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, shop }: ProductCardProps) {
   const router = useRouter();
   const { colors, spacing, radius, typography } = useTheme();
   const addItem = useCartStore((s) => s.addItem);
   const [adding, setAdding] = useState(false);
   const [addedFlash, setAddedFlash] = useState(false);
+  const imgRef = useRef<View>(null);
+  const fly = useFlyToCart();
 
   const cardScale = useSharedValue(1);
   const addBtnScale = useSharedValue(1);
@@ -42,27 +46,47 @@ export function ProductCard({ product }: ProductCardProps) {
       withSpring(1.25, { damping: 4, stiffness: 200 }),
       withSpring(1, { damping: 6, stiffness: 150 })
     );
-    try {
-      // TODO(SP-B): shop context (slug/name/currency) not yet on ProductCard; placeholder until Phase 4 shop-scoped screens.
-      const result = addItem(
-        { slug: (product as any)?.store?.handle ?? "unknown", name: (product as any)?.store?.name ?? "Shop", currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd" },
-        {
-          product_id: product.id,
-          variant_id: variant.id,
-          product_handle: (product as any).handle ?? product.id,
-          title: product.title,
-          thumbnail: product.thumbnail ?? null,
-          unit_price_minor: price ?? 0,
-          currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
-        }
-      );
-      if (result === "added") {
-        setAddedFlash(true);
-        setTimeout(() => setAddedFlash(false), 1200);
-      }
-      // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
-    } finally {
+
+    const resolvedShop = shop ?? {
+      slug: (product as any)?.store?.handle ?? "unknown",
+      name: (product as any)?.store?.name ?? "Shop",
+      currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+    };
+    const cartItem = {
+      product_id: product.id,
+      variant_id: variant.id,
+      product_handle: (product as any).handle ?? product.id,
+      title: product.title,
+      thumbnail: product.thumbnail ?? null,
+      unit_price_minor: price ?? 0,
+      currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+    };
+
+    if (product.thumbnail) {
+      // Fly animation: item is added via onComplete callback after animation
+      fly({
+        sourceRef: imgRef,
+        shop: resolvedShop,
+        item: cartItem,
+        onCrossShopNeeded: () => {
+          // "needs_confirm" case — Phase 6 modal will catch pending_add
+        },
+      });
+      setAddedFlash(true);
+      setTimeout(() => setAddedFlash(false), 1200);
       setAdding(false);
+    } else {
+      // No thumbnail — skip animation, add directly
+      try {
+        const result = addItem(resolvedShop, cartItem);
+        if (result === "added") {
+          setAddedFlash(true);
+          setTimeout(() => setAddedFlash(false), 1200);
+        }
+        // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
+      } finally {
+        setAdding(false);
+      }
     }
   };
 
@@ -88,11 +112,13 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         <View style={{ position: 'relative' }}>
           {product.thumbnail ? (
-            <Image
-              source={{ uri: product.thumbnail }}
-              style={[styles.image, { borderRadius: radius.md }]}
-              resizeMode="cover"
-            />
+            <View ref={imgRef}>
+              <Image
+                source={{ uri: product.thumbnail }}
+                style={[styles.image, { borderRadius: radius.md }]}
+                resizeMode="cover"
+              />
+            </View>
           ) : (
             <View
               style={[

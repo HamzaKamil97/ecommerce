@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/src/store/authStore';
 // cartStore now uses Zustand persist — no explicit init() needed
 import { ONBOARDING_KEY } from './onboarding';
+import { FlyToCartHost } from '@/src/components/cart/FlyToCartHost';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -41,6 +42,7 @@ export default function RootLayout() {
         <Stack.Screen name="checkout" options={{ title: 'Checkout' }} />
         <Stack.Screen name="order-success" options={{ title: 'Order placed', headerBackVisible: false }} />
       </Stack>
+      <FlyToCartHost />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

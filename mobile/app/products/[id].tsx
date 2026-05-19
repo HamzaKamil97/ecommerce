@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ScrollView, View, Text, Image, ActivityIndicator, SafeAreaView, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getProduct, getProductVerticalFields, VerticalFields } from '@/src/api/products';
@@ -12,6 +12,7 @@ import { DetailsPanel } from '@/src/components/DetailsPanel';
 import { CartFab } from '@/src/components/CartFab';
 import { fetchLeafSchema } from '@/src/lib/api/taxonomy';
 import type { LeafSchema } from '@/src/lib/api/types';
+import { useFlyToCart } from '@/src/hooks/useFlyToCart';
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -19,6 +20,8 @@ export default function ProductDetailsScreen() {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
   const itemCount: number = useCartStore((s) => s.itemCount());
+  const imgRef = useRef<View>(null);
+  const fly = useFlyToCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [verticalData, setVerticalData] = useState<VerticalFields | null>(null);
   const [schema, setSchema] = useState<LeafSchema | null>(null);
@@ -71,27 +74,44 @@ export default function ProductDetailsScreen() {
   const onAdd = () => {
     if (!variant) return;
     setAdding(true);
-    try {
-      // TODO(SP-B): shop context (slug/name/currency) not yet available on product detail screen;
-      // using placeholder until shop-scoped product pages are wired in Phase 4.
-      const result = addItem(
-        { slug: (product as any)?.store?.handle ?? "unknown", name: (product as any)?.store?.name ?? "Shop", currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd" },
-        {
-          product_id: product.id,
-          variant_id: variant.id,
-          product_handle: product.handle ?? product.id,
-          title: product.title,
-          thumbnail: product.thumbnail ?? null,
-          unit_price_minor: price ?? 0,
-          currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
-        }
-      );
-      if (result === "added") {
-        router.push('/(tabs)/cart');
-      }
-      // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
-    } finally {
+
+    const resolvedShop = {
+      slug: (product as any)?.store?.handle ?? "unknown",
+      name: (product as any)?.store?.name ?? "Shop",
+      currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+    };
+    const cartItem = {
+      product_id: product.id,
+      variant_id: variant.id,
+      product_handle: product.handle ?? product.id,
+      title: product.title,
+      thumbnail: product.thumbnail ?? null,
+      unit_price_minor: price ?? 0,
+      currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+    };
+
+    if (product.thumbnail) {
+      fly({
+        sourceRef: imgRef,
+        shop: resolvedShop,
+        item: cartItem,
+        onCrossShopNeeded: () => {
+          // "needs_confirm" — Phase 6 modal will catch pending_add
+        },
+      });
       setAdding(false);
+      // Navigate to cart after a short delay to let animation complete
+      setTimeout(() => router.push('/(tabs)/cart'), 450);
+    } else {
+      try {
+        const result = addItem(resolvedShop, cartItem);
+        if (result === "added") {
+          router.push('/(tabs)/cart');
+        }
+        // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
+      } finally {
+        setAdding(false);
+      }
     }
   };
 
@@ -99,7 +119,9 @@ export default function ProductDetailsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxl }}>
         {product.thumbnail ? (
-          <Image source={{ uri: product.thumbnail }} style={{ width: '100%', aspectRatio: 1 }} />
+          <View ref={imgRef}>
+            <Image source={{ uri: product.thumbnail }} style={{ width: '100%', aspectRatio: 1 }} />
+          </View>
         ) : (
           <View style={{ width: '100%', aspectRatio: 1, backgroundColor: colors.surface }} />
         )}
