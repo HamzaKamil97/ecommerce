@@ -27,6 +27,7 @@ import {
   HERO_COVERS,
   SHOP_META,
   DEMO_SHOPS,
+  DEMO_MERCH_BY_SHOP,
 } from '@/src/components/home/demo-data'
 
 // Product from API may include categories; extend locally rather than mutating
@@ -65,11 +66,36 @@ export default function ShopDetailScreen() {
 
   useEffect(() => {
     if (!slug) return
+    const slugStr = typeof slug === 'string' ? slug : slug?.[0] ?? ''
     let mounted = true
     ;(async () => {
       setLoading(true)
-      const s = await getShopBySlug(slug)
+      let s: Shop | null = null
+      try {
+        // Race against 1.5s timeout so the screen renders even when the
+        // backend is unreachable (e.g., static web preview without CORS).
+        s = await Promise.race([
+          getShopBySlug(slug),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500)),
+        ])
+      } catch { s = null }
       if (!mounted) return
+      if (!s) {
+        // Fallback to demo data when backend isn't reachable (e.g., static
+        // web preview without CORS-allowed origin). Lets the screen render.
+        const demo = DEMO_SHOPS.find((d) => d.slug === slugStr)
+        if (demo) {
+          s = {
+            id: 'demo-' + demo.slug,
+            slug: demo.slug,
+            name: demo.name,
+            vertical: demo.vertical,
+            approval_status: 'approved',
+            sales_channel_id: null,
+            branding: { logo_url: demo.logoUrl, primary_color: tokens.colors.primary },
+          } as unknown as Shop
+        }
+      }
       setShop(s)
       if (s?.sales_channel_id) {
         const prods = await listProducts({
@@ -86,12 +112,24 @@ export default function ShopDetailScreen() {
 
   useEffect(() => {
     if (!slug) return
+    const slugStr = typeof slug === 'string' ? slug : slug?.[0] ?? ''
     fetchShopMerchCategories(slug)
       .then((cats) => {
-        setMerch(cats)
-        setActiveMerch(cats[0]?.handle ?? null)
+        if (cats.length > 0) {
+          setMerch(cats)
+          setActiveMerch(cats[0]?.handle ?? null)
+        } else {
+          // Demo fallback per shop
+          const demo = DEMO_MERCH_BY_SHOP[slugStr] ?? []
+          setMerch(demo)
+          setActiveMerch(demo[0]?.handle ?? null)
+        }
       })
-      .catch((err) => console.error('merch fetch failed:', err))
+      .catch(() => {
+        const demo = DEMO_MERCH_BY_SHOP[slugStr] ?? []
+        setMerch(demo)
+        setActiveMerch(demo[0]?.handle ?? null)
+      })
   }, [slug])
 
   if (loading) {

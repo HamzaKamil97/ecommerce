@@ -181,6 +181,49 @@ export const SHOP_META: Record<string, ShopDetailMeta> = {
   'bayti': { rating: 4.5, ratingCount: 67, deliveryMinutes: '30–45', minOrder: '15,000 IQD', deliveryFee: 'Free', isOpen: true },
 }
 
+// ── Demo merch categories per shop (for offline / static-preview rendering) ──
+import type { MerchCategory } from '@/src/lib/api/types'
+
+function mk(handle: string, name: string, position: number): MerchCategory {
+  return { id: `demo-${handle}`, handle, name, position, icon_url: null }
+}
+
+export const DEMO_MERCH_BY_SHOP: Record<string, MerchCategory[]> = {
+  'hamzas-kitchen': [
+    mk('pizzas', 'Pizzas', 1),
+    mk('burgers', 'Burgers', 2),
+    mk('salads', 'Salads', 3),
+    mk('pasta', 'Pasta', 4),
+    mk('desserts', 'Desserts', 5),
+    mk('drinks', 'Drinks', 6),
+  ],
+  'freshmart': [
+    mk('pantry', 'Pantry', 1),
+    mk('dairy', 'Dairy', 2),
+    mk('fresh', 'Fresh', 3),
+    mk('bakery', 'Bakery', 4),
+    mk('snacks', 'Snacks', 5),
+  ],
+  'style-hub': [
+    mk('mens', 'Mens', 1),
+    mk('womens', 'Womens', 2),
+    mk('shoes', 'Shoes', 3),
+    mk('accessories', 'Accessories', 4),
+  ],
+  'techpoint': [
+    mk('audio', 'Audio', 1),
+    mk('charging', 'Charging', 2),
+    mk('wearables', 'Wearables', 3),
+  ],
+  'bayti': [
+    mk('kitchen', 'Kitchen', 1),
+    mk('bedroom', 'Bedroom', 2),
+    mk('bathroom', 'Bathroom', 3),
+    mk('decor', 'Decor', 4),
+    mk('cleaning', 'Cleaning', 5),
+  ],
+}
+
 // ── Mock active baskets — real state comes in SP-B ───────────────────────────
 export const DEMO_ACTIVE_BASKETS: DemoBasket[] = [
   {
