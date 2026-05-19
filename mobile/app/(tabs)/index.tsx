@@ -1,206 +1,113 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import React from 'react'
+import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native'
+import { useRouter } from 'expo-router'
+import { useCartStore } from '@/src/store/cartStore'
+import { tokens } from '@/src/theme/tokens'
+
+import { TopBar } from '@/src/components/home/TopBar'
+import { SearchBox } from '@/src/components/home/SearchBox'
+import { HeroBanner } from '@/src/components/home/HeroBanner'
+import { CategoriesCarousel } from '@/src/components/home/CategoriesCarousel'
+import { ActiveBasketsCarousel } from '@/src/components/home/ActiveBasketsCarousel'
+import { FeaturedShopsCarousel } from '@/src/components/home/FeaturedShopsCarousel'
+import { PromoStrip } from '@/src/components/home/PromoStrip'
+import { SectionHeader } from '@/src/components/home/SectionHeader'
+import { ShopRow } from '@/src/components/home/ShopRow'
 import {
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  SafeAreaView,
-  Pressable,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { listProducts } from '@/src/api/products';
-import { listCategories, emojiForCategory, Category } from '@/src/api/categories';
-import { Product } from '@/src/types/product';
-import { ProductCard } from '@/src/components/ProductCard';
-import { ProductCardSkeleton } from '@/src/components/Skeleton';
-import { CategoryChip } from '@/src/components/CategoryChip';
-import { EmptyState } from '@/src/components/EmptyState';
-import { useTheme } from '@/src/theme/useTheme';
-import { useAuthStore } from '@/src/store/authStore';
-import { FilterChips, ChipDef } from '@/src/components/FilterChips';
-import { CartFab } from '@/src/components/CartFab';
-import { useCartStore } from '@/src/store/cartStore';
+  DEMO_SLIDES,
+  DEMO_CATEGORIES,
+  DEMO_SHOPS,
+  DEMO_ACTIVE_BASKETS,
+} from '@/src/components/home/demo-data'
 
 export default function HomeScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
-  const router = useRouter();
-  const customer = useAuthStore((s) => s.customer);
-  const itemCount: number = useCartStore((s) => s.itemCount());
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const itemCount: number = useCartStore((s) => s.itemCount())
 
-  // FilterChips state
-  const [section, setSection] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
-  const [fastOnly, setFastOnly] = useState(false);
-  const [sort, setSort] = useState<'best' | 'cheapest' | 'fastest'>('best');
-
-  const chips: ChipDef[] = useMemo(() => [
-    { id: 'section', label: section ?? 'Section', active: !!section, hasCaret: true },
-    { id: 'category', label: category ?? 'Category', active: !!category, hasCaret: true },
-    { id: 'fast', label: 'Fast delivery', active: fastOnly, prefix: '⚡' },
-    { id: 'sort', label: `Sort: ${sort}`, active: false, hasCaret: true },
-  ], [section, category, fastOnly, sort]);
-
-  function onChip(id: string) {
-    if (id === 'fast') setFastOnly((x) => !x);
-    // section/category/sort pickers wired in SP-G or later — for now no-op
-  }
-
-  const load = useCallback(async (q?: string, categoryId?: string | null) => {
-    setError(null);
-    try {
-      const data = await listProducts({
-        q: q || undefined,
-        category_id: categoryId ? [categoryId] : undefined,
-        limit: 50,
-      });
-      setProducts(data);
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to load products');
-      setProducts([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    Promise.all([listCategories().catch(() => []), listProducts({ limit: 50 }).catch(() => [])])
-      .then(([cats, prods]) => {
-        if (!mounted) return;
-        setCategories(cats);
-        setProducts(prods);
-      })
-      .finally(() => mounted && setLoading(false));
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // debounced search
-  useEffect(() => {
-    if (loading) return;
-    const t = setTimeout(() => {
-      load(query, activeCategory);
-    }, 350);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeCategory]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await load(query, activeCategory);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const greeting = useMemo(() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 18) return 'Good afternoon';
-    return 'Good evening';
-  }, []);
-
-  const skeletonData = useMemo(() => Array.from({ length: 6 }, (_, i) => i), []);
+  const hasActiveBaskets = DEMO_ACTIVE_BASKETS.length > 0
+  const featuredShops = DEMO_SHOPS.slice(0, 3)
+  const nearbyShops = DEMO_SHOPS
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.sm }}>
-        <Text style={[typography.caption, { color: colors.textMuted }]}>
-          {greeting}
-          {customer ? `, ${customer.first_name ?? ''}` : ''}
-        </Text>
-        <Text style={[typography.title, { color: colors.text, fontSize: 28 }]}>What are you craving?</Text>
-        <TextInput
-          placeholder="Search products, shops, categories…"
-          placeholderTextColor={colors.textMuted}
-          value={query}
-          onChangeText={setQuery}
-          returnKeyType="search"
-          style={{
-            backgroundColor: colors.surface,
-            color: colors.text,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.md,
-            borderRadius: radius.lg,
-            marginTop: spacing.sm,
-          }}
+    <SafeAreaView style={styles.safeArea}>
+      <TopBar
+        location="Deliver to · Baghdad"
+        cartCount={itemCount}
+        onCart={() => router.push('/(tabs)/cart')}
+      />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Search */}
+        <View style={styles.searchWrapper}>
+          <SearchBox onPress={() => router.push('/(tabs)/shops' as any)} />
+        </View>
+
+        {/* Hero banner */}
+        <View style={styles.heroBannerWrapper}>
+          <HeroBanner slides={DEMO_SLIDES} onCta={() => {}} />
+        </View>
+
+        {/* Categories */}
+        <CategoriesCarousel
+          categories={DEMO_CATEGORIES}
+          onSelect={(c) => router.push(`/(tabs)/shops` as any)}
         />
-      </View>
 
-      <FilterChips chips={chips} onPress={onChip} />
+        {/* InstaShop "Continue shopping" — only renders if baskets exist */}
+        {hasActiveBaskets && (
+          <>
+            <SectionHeader title="Continue shopping" actionLabel={null} />
+            <ActiveBasketsCarousel
+              baskets={DEMO_ACTIVE_BASKETS}
+              onResume={(b) => router.push(`/shops/${b.shopSlug}`)}
+            />
+          </>
+        )}
 
-      {categories.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.md,
-          }}
-          style={{ flexGrow: 0, maxHeight: 56 }}
-        >
-          <CategoryChip
-            label="All"
-            emoji="🌟"
-            selected={activeCategory === null}
-            onPress={() => setActiveCategory(null)}
+        {/* Featured shops horizontal carousel */}
+        <FeaturedShopsCarousel
+          shops={featuredShops}
+          onSelect={(s) => router.push(`/shops/${s.slug}`)}
+        />
+
+        {/* Promo strip */}
+        <PromoStrip
+          icon="🚚"
+          headline="Free delivery over 25,000 IQD"
+          subtext="Limited time offer for Baghdad"
+          bg="saffron"
+        />
+
+        {/* Near you — vertical list */}
+        <SectionHeader title="Shops near you" actionLabel="See all" />
+        {nearbyShops.map((shop) => (
+          <ShopRow
+            key={shop.slug}
+            shop={shop}
+            onPress={() => router.push(`/shops/${shop.slug}`)}
           />
-          {categories.map((cat) => (
-            <CategoryChip
-              key={cat.id}
-              label={cat.name}
-              emoji={emojiForCategory(cat.handle)}
-              selected={activeCategory === cat.id}
-              onPress={() => setActiveCategory(cat.id === activeCategory ? null : cat.id)}
-            />
-          ))}
-        </ScrollView>
-      )}
-
-      {loading ? (
-        <FlatList
-          data={skeletonData}
-          numColumns={2}
-          keyExtractor={(i) => String(i)}
-          contentContainerStyle={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xl }}
-          renderItem={() => <ProductCardSkeleton />}
-        />
-      ) : (
-        <FlatList
-          data={products}
-          numColumns={2}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xl }}
-          renderItem={({ item }) => <ProductCard product={item} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.text}
-            />
-          }
-          ListEmptyComponent={
-            <EmptyState
-              title={error ? 'Could not load products' : 'No products found'}
-              subtitle={error ?? 'Try a different search or category.'}
-            />
-          }
-        />
-      )}
-      <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
+        ))}
+      </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: tokens.colors.bg,
+  },
+  scrollContent: {
+    paddingBottom: 96,
+  },
+  searchWrapper: {
+    paddingHorizontal: tokens.spacing.lg,
+    paddingVertical: tokens.spacing.md,
+  },
+  heroBannerWrapper: {
+    paddingHorizontal: tokens.spacing.lg,
+    marginBottom: tokens.spacing.sm,
+  },
+})
