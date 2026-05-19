@@ -224,23 +224,6 @@ export const DEMO_MERCH_BY_SHOP: Record<string, MerchCategory[]> = {
   ],
 }
 
-// ── Demo promo cards ─────────────────────────────────────────────────────────
-export interface DemoPromo {
-  id: string
-  title: string
-  subtitle: string
-  discountLabel: string
-  iconUrl?: string
-  bg: 'teal' | 'saffron' | 'red' | 'navy'
-}
-
-export const DEMO_PROMOS: DemoPromo[] = [
-  { id: 'p1', title: 'First Order Bonus', subtitle: '20% off your first 3 orders', discountLabel: '20%', bg: 'saffron' },
-  { id: 'p2', title: 'Free Delivery Week', subtitle: 'On all orders over 25,000 IQD', discountLabel: 'FREE', bg: 'teal' },
-  { id: 'p3', title: 'Buy 1 Get 1 Pizza', subtitle: "Hamza's Kitchen — today only", discountLabel: 'BOGO', bg: 'red' },
-  { id: 'p4', title: 'Tech Sale', subtitle: 'Up to 40% off electronics', discountLabel: '40%', bg: 'navy' },
-]
-
 // ── Demo products ─────────────────────────────────────────────────────────────
 export interface DemoProduct {
   id: string
@@ -299,6 +282,48 @@ export const DEMO_PRODUCTS: Record<string, DemoProduct> = {
     shopLogoUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200',
   },
 }
+
+// ── Top deals (image-card carousel — same visual pattern as featured shops) ──
+// Admin (later) can swap these. Replaces the earlier solid-color boxes which
+// felt empty.
+export interface DemoDeal {
+  id: string
+  title: string
+  subtitle: string
+  imageUrl: string
+  badge: string
+}
+
+export const DEMO_DEALS: DemoDeal[] = [
+  {
+    id: 'deal-margherita',
+    title: 'Buy 1 Get 1 Pizza',
+    subtitle: "Hamza's Kitchen — today only",
+    imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600',
+    badge: 'BOGO',
+  },
+  {
+    id: 'deal-electronics',
+    title: 'Tech Week',
+    subtitle: 'Up to 40% off headphones, watches & more',
+    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600',
+    badge: '40% off',
+  },
+  {
+    id: 'deal-grocery',
+    title: 'Fresh & Free',
+    subtitle: 'Free delivery on grocery over 25,000 IQD',
+    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600',
+    badge: 'FREE',
+  },
+  {
+    id: 'deal-fashion',
+    title: 'First Order Bonus',
+    subtitle: '20% off your first 3 orders',
+    imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600',
+    badge: '20% off',
+  },
+]
 
 // ── Mock active baskets — real state comes in SP-B ───────────────────────────
 export const DEMO_ACTIVE_BASKETS: DemoBasket[] = [

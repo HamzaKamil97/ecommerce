@@ -12,7 +12,7 @@ import { CategoriesCarousel } from '@/src/components/home/CategoriesCarousel'
 import { ActiveBasketsCarousel } from '@/src/components/home/ActiveBasketsCarousel'
 import { FeaturedShopsCarousel } from '@/src/components/home/FeaturedShopsCarousel'
 import { PromoStrip } from '@/src/components/home/PromoStrip'
-import { PromoCarousel } from '@/src/components/home/PromoCarousel'
+import { DealsCarousel } from '@/src/components/home/DealsCarousel'
 import { SectionHeader } from '@/src/components/home/SectionHeader'
 import { ShopRow } from '@/src/components/home/ShopRow'
 import {
@@ -20,7 +20,7 @@ import {
   DEMO_CATEGORIES,
   DEMO_SHOPS,
   DEMO_ACTIVE_BASKETS,
-  DEMO_PROMOS,
+  DEMO_DEALS,
 } from '@/src/components/home/demo-data'
 
 export default function HomeScreen() {
@@ -32,10 +32,6 @@ export default function HomeScreen() {
   const featuredShops = DEMO_SHOPS.slice(0, 3)
   const nearbyShops = DEMO_SHOPS
 
-  const promosWithPress = DEMO_PROMOS.map((p) => ({
-    ...p,
-    onPress: () => router.push('/(tabs)/shops' as any),
-  }))
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: tokens.colors.primary }]}>
@@ -69,10 +65,6 @@ export default function HomeScreen() {
             <HeroBanner slides={DEMO_SLIDES} onCta={() => {}} />
           </View>
 
-          {/* Top deals promo carousel */}
-          <SectionHeader title="Top deals" actionLabel={null} />
-          <PromoCarousel promos={promosWithPress} />
-
           {/* Categories */}
           <CategoriesCarousel
             categories={DEMO_CATEGORIES}
@@ -94,6 +86,12 @@ export default function HomeScreen() {
           <FeaturedShopsCarousel
             shops={featuredShops}
             onSelect={(s) => router.push(`/shops/${s.slug}`)}
+          />
+
+          {/* Top deals — same visual pattern as featured shops, image cards */}
+          <DealsCarousel
+            deals={DEMO_DEALS}
+            onSelect={() => router.push('/(tabs)/shops' as any)}
           />
 
           {/* Promo strip */}
