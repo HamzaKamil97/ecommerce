@@ -1,3 +1,8 @@
+// TODO(SP-B+): Sync this client store with Medusa's /store/carts endpoints.
+// Each add/inc/dec/remove should mirror to a server-side cart scoped to
+// the shop's sales_channel_id. Checkout uses /store/carts/:id/complete.
+// Until then, this store IS the cart — persisted to AsyncStorage.
+
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import AsyncStorage from "@react-native-async-storage/async-storage"

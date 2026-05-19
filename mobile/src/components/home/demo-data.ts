@@ -283,6 +283,44 @@ export const DEMO_PRODUCTS: Record<string, DemoProduct> = {
   },
 }
 
+// ── Demo products grouped by shop (used in shop screen when backend is down) ──
+export interface DemoProductCard {
+  id: string
+  title: string
+  thumbnail: string
+  price_minor: number
+  currency: 'iqd' | 'usd'
+}
+
+export const DEMO_PRODUCTS_BY_SHOP: Record<string, DemoProductCard[]> = {
+  'hamzas-kitchen': [
+    { id: 'hk-margherita-pizza', title: 'Margherita Pizza', thumbnail: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400', price_minor: 15000, currency: 'iqd' },
+    { id: 'hk-bbq-burger', title: 'BBQ Smash Burger', thumbnail: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', price_minor: 12000, currency: 'iqd' },
+    { id: 'hk-caesar-salad', title: 'Caesar Salad', thumbnail: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', price_minor: 8000, currency: 'iqd' },
+    { id: 'hk-carbonara', title: 'Spaghetti Carbonara', thumbnail: 'https://images.unsplash.com/photo-1627286394628-253e6ddb0aae?w=400', price_minor: 14000, currency: 'iqd' },
+    { id: 'hk-tiramisu', title: 'Tiramisu', thumbnail: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400', price_minor: 6000, currency: 'iqd' },
+    { id: 'hk-cola', title: 'Coca-Cola 500ml', thumbnail: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=400', price_minor: 1500, currency: 'iqd' },
+  ],
+  'freshmart': [
+    { id: 'fm-fresh-milk', title: 'Fresh Milk 1L', thumbnail: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400', price_minor: 3500, currency: 'iqd' },
+    { id: 'fm-eggs-12', title: 'Free Range Eggs ×12', thumbnail: 'https://images.unsplash.com/photo-1559598484-d83a4c2f7c27?w=400', price_minor: 5000, currency: 'iqd' },
+    { id: 'fm-bread', title: 'Sourdough Loaf', thumbnail: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400', price_minor: 4500, currency: 'iqd' },
+    { id: 'fm-yogurt', title: 'Greek Yogurt 500g', thumbnail: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400', price_minor: 4000, currency: 'iqd' },
+  ],
+  'style-hub': [
+    { id: 'sh-tshirt', title: 'Classic White Tee', thumbnail: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', price_minor: 15000, currency: 'iqd' },
+    { id: 'sh-jeans', title: 'Slim Fit Jeans', thumbnail: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', price_minor: 35000, currency: 'iqd' },
+  ],
+  'techpoint': [
+    { id: 'tp-wireless-earbuds', title: 'Pro Wireless Earbuds', thumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', price_minor: 45000, currency: 'iqd' },
+    { id: 'tp-charger', title: '65W USB-C Charger', thumbnail: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400', price_minor: 18000, currency: 'iqd' },
+  ],
+  'bayti': [
+    { id: 'by-kettle', title: 'Electric Kettle 1.7L', thumbnail: 'https://images.unsplash.com/photo-1544781887-d2cac94dfad6?w=400', price_minor: 25000, currency: 'iqd' },
+    { id: 'by-cushion', title: 'Linen Throw Cushion', thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400', price_minor: 12000, currency: 'iqd' },
+  ],
+}
+
 // ── Top deals (image-card carousel — same visual pattern as featured shops) ──
 // Admin (later) can swap these. Replaces the earlier solid-color boxes which
 // felt empty.
