@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
+import { CartProvider } from "@lib/context/cart-context"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import CartFabWrapper from "@modules/layout/components/cart-fab/wrapper"
@@ -30,7 +31,7 @@ export default async function PageLayout(props: {
   }
 
   return (
-    <>
+    <CartProvider>
       <Nav />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
@@ -46,6 +47,6 @@ export default async function PageLayout(props: {
       {props.children}
       <CartFabWrapper cart={cart} countryCode={params.countryCode} />
       <Footer />
-    </>
+    </CartProvider>
   )
 }

@@ -18,8 +18,7 @@ export default function ShopDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const { colors, spacing, typography, radius } = useTheme();
-  const cart = useCartStore((s) => s.cart);
-  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
+  const itemCount: number = useCartStore((s) => s.itemCount());
   const [shop, setShop] = useState<Shop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [merch, setMerch] = useState<MerchCategory[]>([]);

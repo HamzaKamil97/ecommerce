@@ -1,80 +1,134 @@
-import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as cartApi from '../api/cart';
+import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const CART_ID_KEY = 'medusa.cart.id';
-
-interface CartState {
-  cartId: string | null;
-  cart: any | null;
-  isLoading: boolean;
-  init: () => Promise<void>;
-  ensureCart: () => Promise<string>;
-  addItem: (variantId: string, quantity?: number) => Promise<void>;
-  updateItem: (lineId: string, quantity: number) => Promise<void>;
-  removeItem: (lineId: string) => Promise<void>;
-  refresh: () => Promise<void>;
-  clear: () => Promise<void>;
+export interface CartItem {
+  product_id: string
+  variant_id: string
+  product_handle: string
+  title: string
+  thumbnail: string | null
+  unit_price_minor: number
+  currency_code: "iqd" | "usd"
+  qty: number
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
-  cartId: null,
-  cart: null,
-  isLoading: false,
+export interface PendingAdd {
+  shop_slug: string
+  shop_name: string
+  shop_currency: "iqd" | "usd"
+  item: CartItem
+}
 
-  init: async () => {
-    const storedId = await AsyncStorage.getItem(CART_ID_KEY);
-    if (storedId) {
-      try {
-        const cart = await cartApi.getCart(storedId);
-        set({ cartId: storedId, cart });
-      } catch {
-        await AsyncStorage.removeItem(CART_ID_KEY);
-      }
+interface CartState {
+  shop_slug: string | null
+  shop_name: string | null
+  shop_display_currency: "iqd" | "usd"
+  items: CartItem[]
+  shop_notes: string
+  delivery_notes: string
+  coupon_code: string | null
+  discount_minor: number
+  pending_add: PendingAdd | null
+
+  // actions
+  addItem: (shop: { slug: string; name: string; currency: "iqd" | "usd" }, item: Omit<CartItem, "qty">) => "added" | "needs_confirm"
+  confirmCrossShopAdd: () => void
+  cancelCrossShopAdd: () => void
+  incQty: (variantId: string) => void
+  decQty: (variantId: string) => void
+  removeItem: (variantId: string) => void
+  setShopNotes: (notes: string) => void
+  setDeliveryNotes: (notes: string) => void
+  setCoupon: (code: string | null, discountMinor: number) => void
+  clear: () => void
+
+  // selectors
+  itemCount: () => number
+  subtotalMinor: () => number
+}
+
+export const useCartStore = create<CartState>()(persist((set, get) => ({
+  shop_slug: null, shop_name: null, shop_display_currency: "iqd",
+  items: [], shop_notes: "", delivery_notes: "",
+  coupon_code: null, discount_minor: 0, pending_add: null,
+
+  addItem: (shop, item) => {
+    const state = get()
+    const sameShop = state.shop_slug === null || state.shop_slug === shop.slug
+    if (!sameShop && state.items.length > 0) {
+      set({ pending_add: { shop_slug: shop.slug, shop_name: shop.name, shop_currency: shop.currency, item: { ...item, qty: 1 } } })
+      return "needs_confirm"
     }
+    const existing = state.items.find((i) => i.variant_id === item.variant_id)
+    if (existing) {
+      set({
+        items: state.items.map((i) => i.variant_id === item.variant_id ? { ...i, qty: i.qty + 1 } : i),
+        shop_slug: shop.slug, shop_name: shop.name, shop_display_currency: shop.currency,
+      })
+    } else {
+      set({
+        items: [...state.items, { ...item, qty: 1 }],
+        shop_slug: shop.slug, shop_name: shop.name, shop_display_currency: shop.currency,
+      })
+    }
+    return "added"
   },
 
-  ensureCart: async () => {
-    const existing = get().cartId;
-    if (existing) return existing;
-    const cart = await cartApi.createCart();
-    await AsyncStorage.setItem(CART_ID_KEY, cart.id);
-    set({ cartId: cart.id, cart });
-    return cart.id;
+  confirmCrossShopAdd: () => {
+    const p = get().pending_add
+    if (!p) return
+    set({
+      shop_slug: p.shop_slug, shop_name: p.shop_name, shop_display_currency: p.shop_currency,
+      items: [p.item],
+      shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0,
+      pending_add: null,
+    })
   },
 
-  addItem: async (variantId, quantity = 1) => {
-    set({ isLoading: true });
-    const cartId = await get().ensureCart();
-    const cart = await cartApi.addLineItem(cartId, variantId, quantity);
-    set({ cart, isLoading: false });
-  },
+  cancelCrossShopAdd: () => set({ pending_add: null }),
 
-  updateItem: async (lineId, quantity) => {
-    const cartId = get().cartId;
-    if (!cartId) return;
-    set({ isLoading: true });
-    const cart = await cartApi.updateLineItem(cartId, lineId, quantity);
-    set({ cart, isLoading: false });
-  },
+  incQty: (variantId) => set((s) => ({
+    items: s.items.map((i) => i.variant_id === variantId ? { ...i, qty: i.qty + 1 } : i),
+  })),
 
-  removeItem: async (lineId) => {
-    const cartId = get().cartId;
-    if (!cartId) return;
-    set({ isLoading: true });
-    const cart = await cartApi.removeLineItem(cartId, lineId);
-    set({ cart, isLoading: false });
-  },
+  decQty: (variantId) => set((s) => {
+    const next = s.items.map((i) => i.variant_id === variantId ? { ...i, qty: Math.max(0, i.qty - 1) } : i).filter((i) => i.qty > 0)
+    if (next.length === 0) {
+      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0 }
+    }
+    return { items: next }
+  }),
 
-  refresh: async () => {
-    const cartId = get().cartId;
-    if (!cartId) return;
-    const cart = await cartApi.getCart(cartId);
-    set({ cart });
-  },
+  removeItem: (variantId) => set((s) => {
+    const next = s.items.filter((i) => i.variant_id !== variantId)
+    if (next.length === 0) {
+      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0 }
+    }
+    return { items: next }
+  }),
 
-  clear: async () => {
-    await AsyncStorage.removeItem(CART_ID_KEY);
-    set({ cartId: null, cart: null });
-  },
-}));
+  setShopNotes: (shop_notes) => set({ shop_notes }),
+  setDeliveryNotes: (delivery_notes) => set({ delivery_notes }),
+  setCoupon: (code, discount) => set({ coupon_code: code, discount_minor: discount }),
+  clear: () => set({
+    items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "",
+    coupon_code: null, discount_minor: 0, pending_add: null,
+  }),
+
+  itemCount: () => get().items.reduce((n, i) => n + i.qty, 0),
+  subtotalMinor: () => get().items.reduce((n, i) => n + i.qty * i.unit_price_minor, 0),
+}), {
+  name: "hanoot-cart",
+  storage: createJSONStorage(() => AsyncStorage),
+  partialize: (state) => ({
+    shop_slug: state.shop_slug,
+    shop_name: state.shop_name,
+    shop_display_currency: state.shop_display_currency,
+    items: state.items,
+    shop_notes: state.shop_notes,
+    delivery_notes: state.delivery_notes,
+    coupon_code: state.coupon_code,
+    discount_minor: state.discount_minor,
+  }),
+}))

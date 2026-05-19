@@ -28,8 +28,7 @@ export default function HomeScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const customer = useAuthStore((s) => s.customer);
-  const cart = useCartStore((s) => s.cart);
-  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
+  const itemCount: number = useCartStore((s) => s.itemCount());
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);

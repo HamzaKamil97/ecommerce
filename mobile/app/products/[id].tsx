@@ -18,8 +18,7 @@ export default function ProductDetailsScreen() {
   const { colors, spacing, typography, radius } = useTheme();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
-  const cart = useCartStore((s) => s.cart);
-  const itemCount: number = cart?.items?.reduce((sum: number, i: any) => sum + (i.quantity ?? 1), 0) ?? 0;
+  const itemCount: number = useCartStore((s) => s.itemCount());
   const [product, setProduct] = useState<Product | null>(null);
   const [verticalData, setVerticalData] = useState<VerticalFields | null>(null);
   const [schema, setSchema] = useState<LeafSchema | null>(null);
@@ -69,12 +68,28 @@ export default function ProductDetailsScreen() {
   const price = variant?.calculated_price?.calculated_amount;
   const currency = variant?.calculated_price?.currency_code ?? 'USD';
 
-  const onAdd = async () => {
+  const onAdd = () => {
     if (!variant) return;
     setAdding(true);
     try {
-      await addItem(variant.id, 1);
-      router.push('/(tabs)/cart');
+      // TODO(SP-B): shop context (slug/name/currency) not yet available on product detail screen;
+      // using placeholder until shop-scoped product pages are wired in Phase 4.
+      const result = addItem(
+        { slug: (product as any)?.store?.handle ?? "unknown", name: (product as any)?.store?.name ?? "Shop", currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd" },
+        {
+          product_id: product.id,
+          variant_id: variant.id,
+          product_handle: product.handle ?? product.id,
+          title: product.title,
+          thumbnail: product.thumbnail ?? null,
+          unit_price_minor: price ?? 0,
+          currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+        }
+      );
+      if (result === "added") {
+        router.push('/(tabs)/cart');
+      }
+      // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
     } finally {
       setAdding(false);
     }

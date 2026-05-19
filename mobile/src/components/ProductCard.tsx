@@ -33,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const price = variant?.calculated_price?.calculated_amount;
   const currency = variant?.calculated_price?.currency_code ?? 'USD';
 
-  const onQuickAdd = async (e: any) => {
+  const onQuickAdd = (e: any) => {
     e.stopPropagation?.();
     if (!variant) return;
     setAdding(true);
@@ -43,9 +43,24 @@ export function ProductCard({ product }: ProductCardProps) {
       withSpring(1, { damping: 6, stiffness: 150 })
     );
     try {
-      await addItem(variant.id, 1);
-      setAddedFlash(true);
-      setTimeout(() => setAddedFlash(false), 1200);
+      // TODO(SP-B): shop context (slug/name/currency) not yet on ProductCard; placeholder until Phase 4 shop-scoped screens.
+      const result = addItem(
+        { slug: (product as any)?.store?.handle ?? "unknown", name: (product as any)?.store?.name ?? "Shop", currency: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd" },
+        {
+          product_id: product.id,
+          variant_id: variant.id,
+          product_handle: (product as any).handle ?? product.id,
+          title: product.title,
+          thumbnail: product.thumbnail ?? null,
+          unit_price_minor: price ?? 0,
+          currency_code: (currency?.toLowerCase() as "iqd" | "usd") ?? "iqd",
+        }
+      );
+      if (result === "added") {
+        setAddedFlash(true);
+        setTimeout(() => setAddedFlash(false), 1200);
+      }
+      // "needs_confirm" case handled by CrossShopConfirmDialog in Phase 4
     } finally {
       setAdding(false);
     }

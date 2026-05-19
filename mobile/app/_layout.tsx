@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/src/store/authStore';
-import { useCartStore } from '@/src/store/cartStore';
+// cartStore now uses Zustand persist — no explicit init() needed
 import { ONBOARDING_KEY } from './onboarding';
 
 export const unstable_settings = {
@@ -18,15 +18,13 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const initAuth = useAuthStore((s) => s.init);
-  const initCart = useCartStore((s) => s.init);
 
   useEffect(() => {
     initAuth();
-    initCart();
     AsyncStorage.getItem(ONBOARDING_KEY).then((v) => {
       if (!v) router.replace('/onboarding');
     });
-  }, [initAuth, initCart, router]);
+  }, [initAuth, router]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

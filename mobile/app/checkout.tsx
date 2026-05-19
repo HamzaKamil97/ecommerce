@@ -45,9 +45,13 @@ const EMPTY_ADDRESS: AddressForm = {
 export default function CheckoutScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
-  const cart = useCartStore((s) => s.cart);
-  const cartId = useCartStore((s) => s.cartId);
+  // TODO(SP-B): adapt to new cartStore API — cart/cartId replaced by items/subtotalMinor/shop_slug in Phase 7 checkout wiring
+  const items = useCartStore((s) => s.items);
+  const subtotalMinor = useCartStore((s) => s.subtotalMinor);
+  const shop_display_currency = useCartStore((s) => s.shop_display_currency);
   const clearCart = useCartStore((s) => s.clear);
+  // Medusa server-side cart still needed at checkout submit time (Phase 7)
+  const cartId: string | null = null; // TODO(SP-B): created server-side at checkout submit (Phase 7)
   const customer = useAuthStore((s) => s.customer);
 
   const [address, setAddress] = useState<AddressForm>(EMPTY_ADDRESS);
@@ -57,7 +61,7 @@ export default function CheckoutScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listPaymentProviders(cart?.currency_code?.toUpperCase() ?? 'IQD')
+    listPaymentProviders(shop_display_currency?.toUpperCase() ?? 'IQD')
       .then((p) => {
         setProviders(p);
         if (p.length > 0 && !p.find((x) => x.id === selectedProvider)) {
@@ -71,7 +75,7 @@ export default function CheckoutScreen() {
         recipient_name: [customer.first_name, customer.last_name].filter(Boolean).join(' '),
       }));
     }
-  }, [cart?.currency_code, customer]);
+  }, [shop_display_currency, customer]);
 
   const validAddress =
     address.recipient_name && address.phone && address.street && address.city && address.country_code;
@@ -90,17 +94,18 @@ export default function CheckoutScreen() {
     setPlacing(true);
     setError(null);
     try {
+      // TODO(SP-B): Phase 7 — create server-side Medusa cart here, then complete it
       // If "manual" → just complete the cart; otherwise initiate the redirect flow.
       if (selectedProvider === 'manual') {
-        await completeCart(cartId);
+        await completeCart(cartId ?? '');
         await clearCart();
         router.replace('/order-success');
       } else {
         const result = await initiatePayment({
           provider: selectedProvider,
-          cart_id: cartId,
-          amount_cents: cart?.total ?? 0,
-          currency: (cart?.currency_code ?? 'IQD').toUpperCase(),
+          cart_id: cartId ?? '',
+          amount_cents: subtotalMinor(), // TODO(SP-B): Phase 7 — use server-side cart total
+          currency: (shop_display_currency ?? 'IQD').toUpperCase(),
           customer_email: customer.email,
           customer_phone: address.phone,
           success_url: 'http://localhost:8081/--/payment-success',
@@ -160,17 +165,17 @@ export default function CheckoutScreen() {
         {/* Order summary */}
         <View style={{ backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, gap: spacing.sm }}>
           <Text style={[typography.heading, { color: colors.text }]}>Order summary</Text>
-          {(cart?.items ?? []).map((item: any) => (
-            <View key={item.id} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          {items.map((item) => (
+            <View key={item.variant_id} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={[typography.body, { color: colors.text, flex: 1 }]}>
-                {item.title} × {item.quantity}
+                {item.title} × {item.qty}
               </Text>
-              <PriceText amount={item.total} currencyCode={cart?.currency_code} />
+              <PriceText amount={item.unit_price_minor * item.qty} currencyCode={item.currency_code} />
             </View>
           ))}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.sm }}>
             <Text style={[typography.heading, { color: colors.text }]}>Total</Text>
-            <PriceText amount={cart?.total} currencyCode={cart?.currency_code} />
+            <PriceText amount={subtotalMinor()} currencyCode={shop_display_currency} />
           </View>
         </View>
 
