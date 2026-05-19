@@ -1,3 +1,5 @@
+// DEPRECATED: This flat route is superseded by /order/success/[id] (mobile/app/order/success/[id].tsx).
+// Kept for backwards compatibility. Do not add features here.
 import { View, Text, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppButton } from '@/src/components/AppButton';

@@ -42,6 +42,7 @@ export default function RootLayout() {
         <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
         <Stack.Screen name="checkout" options={{ title: 'Checkout' }} />
         <Stack.Screen name="order-success" options={{ title: 'Order placed', headerBackVisible: false }} />
+        <Stack.Screen name="order/success/[id]" options={{ title: 'Order placed', headerShown: false }} />
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />

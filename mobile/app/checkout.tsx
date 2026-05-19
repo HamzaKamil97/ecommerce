@@ -73,7 +73,7 @@ export default function CheckoutScreen() {
     }
     setSubmitting(true)
     try {
-      await placeCodOrder(token, {
+      const { order_id } = await placeCodOrder(token, {
         shop_slug: cart.shop_slug,
         address_id: selected?.id,
         inline_address: !selected ? inlineAddress : undefined,
@@ -84,7 +84,7 @@ export default function CheckoutScreen() {
         currency_code: cart.shop_display_currency,
       })
       cart.clear()
-      router.replace("/order-success")
+      router.replace({ pathname: "/order/success/[id]", params: { id: order_id } })
     } catch (e: any) {
       setError(e.message)
     } finally {
