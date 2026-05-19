@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StyleSheet,
 } from "react-native"
+import { StatusBar } from "expo-status-bar"
 import { useRouter } from "expo-router"
 import { useCartStore } from "@/src/store/cartStore"
 import {
@@ -20,10 +21,20 @@ import { placeCodOrder } from "@/src/lib/api/orders"
 import { AddressPickerSheet } from "@/src/components/checkout/AddressPickerSheet"
 import { CouponRow } from "@/src/components/cart/CouponRow"
 import { useAuthToken } from "@/src/hooks/useAuthToken"
-import { useTheme } from "@/src/theme/useTheme"
+import { tokens } from "@/src/theme/tokens"
+
+const colors = {
+  background: tokens.colors.bg,
+  surface: tokens.colors.surface,
+  text: tokens.colors.text,
+  textMuted: tokens.colors.textMuted,
+  border: tokens.colors.border,
+  primary: tokens.colors.primary,
+  success: tokens.colors.success,
+  danger: tokens.colors.danger,
+}
 
 export default function CheckoutScreen() {
-  const { colors } = useTheme()
   const router = useRouter()
   const token = useAuthToken()
   const cart = useCartStore()
@@ -99,6 +110,7 @@ export default function CheckoutScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style="dark" />
       <SafeAreaView>
         <View style={[styles.header, { borderColor: colors.border }]}>
           <TouchableOpacity

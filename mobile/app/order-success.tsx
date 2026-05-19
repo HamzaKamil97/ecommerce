@@ -1,17 +1,25 @@
 // DEPRECATED: This flat route is superseded by /order/success/[id] (mobile/app/order/success/[id].tsx).
 // Kept for backwards compatibility. Do not add features here.
 import { View, Text, SafeAreaView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { AppButton } from '@/src/components/AppButton';
 import { SuccessCheckmark } from '@/src/components/SuccessCheckmark';
 import { FadeIn } from '@/src/components/FadeIn';
 import { useTheme } from '@/src/theme/useTheme';
+import { tokens } from '@/src/theme/tokens';
 
 export default function OrderSuccessScreen() {
-  const { colors, spacing, typography } = useTheme();
+  const { spacing, typography } = useTheme();
+  const colors = {
+    background: tokens.colors.bg,
+    text: tokens.colors.text,
+    textMuted: tokens.colors.textMuted,
+  };
   const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style="dark" />
       <View style={{ flex: 1, padding: spacing.xl, justifyContent: 'center', alignItems: 'center', gap: spacing.lg }}>
         <SuccessCheckmark size={120} />
         <FadeIn delay={500}>

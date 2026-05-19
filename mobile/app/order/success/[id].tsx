@@ -1,16 +1,24 @@
 import { useEffect, useRef } from "react"
 import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet, SafeAreaView } from "react-native"
+import { StatusBar } from "expo-status-bar"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useTheme } from "@/src/theme/useTheme"
+import { tokens } from "@/src/theme/tokens"
 import { t } from "@/src/i18n"
 import { useLanguageStore } from "@/src/store/languageStore"
 import { DEMO_ORDERS, findDemoOrder } from "@/src/data/demoOrders"
+
+const colors = {
+  background: tokens.colors.bg,
+  surface: tokens.colors.surface,
+  text: tokens.colors.text,
+  textMuted: tokens.colors.textMuted,
+  primary: tokens.colors.primary,
+}
 
 export default function OrderSuccessScreen() {
   useLanguageStore((s) => s.locale)
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
-  const { colors } = useTheme()
   const scale = useRef(new Animated.Value(0.3)).current
   const opacity = useRef(new Animated.Value(0)).current
 
@@ -30,6 +38,7 @@ export default function OrderSuccessScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style="dark" />
       <View style={{ flex: 1, padding: 24, alignItems: "center" }}>
         <Animated.View style={[
           styles.check,

@@ -1,5 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
+// Two separate Pressables side-by-side: avoids parent Pressable swallowing the
+// filter tap on some Android devices.
 import { tokens } from '@/src/theme/tokens'
 
 interface Props {
@@ -14,17 +16,19 @@ export function SearchBox({
   onFilter,
 }: Props) {
   return (
-    <Pressable onPress={onPress} style={styles.container}>
-      <Text style={styles.icon}>🔍</Text>
-      <Text style={styles.placeholder} numberOfLines={1}>
-        {placeholder}
-      </Text>
+    <View style={styles.container}>
+      <Pressable onPress={onPress} style={styles.searchArea}>
+        <Text style={styles.icon}>🔍</Text>
+        <Text style={styles.placeholder} numberOfLines={1}>
+          {placeholder}
+        </Text>
+      </Pressable>
       {onFilter && (
-        <Pressable onPress={onFilter} style={styles.filterBtn} hitSlop={8}>
+        <Pressable onPress={onFilter} style={styles.filterBtn} hitSlop={12}>
           <Text style={styles.filterIcon}>≡</Text>
         </Pressable>
       )}
-    </Pressable>
+    </View>
   )
 }
 
@@ -35,10 +39,16 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.pill,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: tokens.spacing.md,
-    gap: tokens.spacing.sm,
+    paddingLeft: tokens.spacing.md,
     borderWidth: 1,
     borderColor: tokens.colors.border,
+  },
+  searchArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.sm,
+    height: '100%',
   },
   icon: {
     fontSize: 16,
@@ -49,8 +59,8 @@ const styles = StyleSheet.create({
     color: tokens.colors.textMuted,
   },
   filterBtn: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderLeftWidth: 1,

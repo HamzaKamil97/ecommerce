@@ -16,11 +16,9 @@ export interface ShopRowData {
 interface Props {
   shop: ShopRowData
   onPress: () => void
-  /** Optional quick-add: tapping + on the row. Defaults to onPress (opens shop). */
-  onQuickAdd?: () => void
 }
 
-export function ShopRow({ shop, onPress, onQuickAdd }: Props) {
+export function ShopRow({ shop, onPress }: Props) {
   const isExpress = shop.deliveryMinutes <= 30
 
   return (
@@ -46,14 +44,6 @@ export function ShopRow({ shop, onPress, onQuickAdd }: Props) {
             {shop.isOpen ? 'Open' : 'Closed'}
           </Text>
         </View>
-        <Pressable
-          style={styles.addBtn}
-          hitSlop={8}
-          onPress={(e) => { e.stopPropagation(); (onQuickAdd ?? onPress)() }}
-          accessibilityLabel={`Open ${shop.name}`}
-        >
-          <Text style={styles.addBtnText}>+</Text>
-        </Pressable>
       </View>
     </Pressable>
   )
@@ -115,9 +105,8 @@ const styles = StyleSheet.create({
   },
   right: {
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     height: 72,
-    gap: tokens.spacing.xs,
   },
   statusBadge: {
     borderRadius: tokens.radius.pill,
@@ -129,18 +118,4 @@ const styles = StyleSheet.create({
   statusText: { fontSize: tokens.fontSize.xs, fontWeight: tokens.fontWeight.semibold },
   openText: { color: tokens.colors.success },
   closedText: { color: tokens.colors.danger },
-  addBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: tokens.radius.pill,
-    backgroundColor: tokens.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addBtnText: {
-    fontSize: 18,
-    fontWeight: tokens.fontWeight.bold,
-    color: tokens.colors.white,
-    lineHeight: 22,
-  },
 })

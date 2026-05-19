@@ -1,8 +1,9 @@
 import React from 'react'
-import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native'
+import { SafeAreaView, ScrollView, View, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCartStore } from '@/src/store/cartStore'
+import { useAuthToken } from '@/src/hooks/useAuthToken'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
@@ -30,8 +31,17 @@ export default function HomeScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const itemCount: number = useCartStore((s) => s.itemCount())
+  const token = useAuthToken()
   // Subscribe to locale so home re-renders on language switch
   useLanguageStore((s) => s.locale)
+
+  function onLocationPress() {
+    if (token) {
+      router.push('/addresses' as never)
+    } else {
+      Alert.alert(t('home.signInForAddresses'))
+    }
+  }
 
   const hasActiveBaskets = DEMO_ACTIVE_BASKETS.length > 0
   const featuredShops = DEMO_SHOPS.slice(0, 3)
@@ -47,7 +57,7 @@ export default function HomeScreen() {
           location={t('home.deliverTo', { city: 'Baghdad' })}
           cartCount={itemCount}
           onCart={() => router.push('/(tabs)/cart')}
-          onLocation={() => { /* TODO: open location picker — SP-D */ }}
+          onLocation={onLocationPress}
         />
       </View>
 
@@ -75,10 +85,15 @@ export default function HomeScreen() {
           <CategoriesCarousel
             categories={DEMO_CATEGORIES}
             onSelect={() => router.push('/(tabs)/shops' as any)}
+            onSeeAll={() => router.push('/(tabs)/shops' as any)}
           />
 
           {/* SP-G: AI-framed recommendations row */}
-          <SectionHeader title={t('forYou.title')} actionLabel={null} />
+          <SectionHeader
+            title={t('forYou.title')}
+            actionLabel={t('home.seeAll')}
+            onAction={() => router.push('/(tabs)/shops' as any)}
+          />
           <ForYouCarousel />
 
           {/* InstaShop "Continue shopping" — only renders if baskets exist */}
@@ -96,12 +111,14 @@ export default function HomeScreen() {
           <FeaturedShopsCarousel
             shops={featuredShops}
             onSelect={(s) => router.push(`/shops/${s.slug}`)}
+            onSeeAll={() => router.push('/(tabs)/shops' as any)}
           />
 
           {/* Top deals — same visual pattern as featured shops, image cards */}
           <DealsCarousel
             deals={DEMO_DEALS}
             onSelect={() => router.push('/(tabs)/shops' as any)}
+            onSeeAll={() => router.push('/(tabs)/shops' as any)}
           />
 
           {/* Promo strip */}
@@ -113,7 +130,11 @@ export default function HomeScreen() {
           />
 
           {/* Near you — vertical list */}
-          <SectionHeader title={t('home.shopsNearYou')} actionLabel={t('home.seeAll')} />
+          <SectionHeader
+            title={t('home.shopsNearYou')}
+            actionLabel={t('home.seeAll')}
+            onAction={() => router.push('/(tabs)/shops' as any)}
+          />
           {nearbyShops.map((shop) => (
             <ShopRow
               key={shop.slug}

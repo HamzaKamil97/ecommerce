@@ -17,22 +17,30 @@ interface Props {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 const BANNER_HEIGHT = 190
+const SLIDE_WIDTH = SCREEN_WIDTH - tokens.spacing.lg * 2
 
 export function HeroBanner({ slides, onCta }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
   const scrollRef = useRef<ScrollView>(null)
+  const userInteractedRef = useRef(false)
+  const skipFirstTickRef = useRef(true)
 
   function onScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH)
+    const idx = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH)
     setActiveIndex(idx)
   }
 
   useEffect(() => {
     if (slides.length <= 1) return
     const timer = setInterval(() => {
+      if (skipFirstTickRef.current) {
+        skipFirstTickRef.current = false
+        return
+      }
+      if (userInteractedRef.current) return
       setActiveIndex((prev) => {
         const next = (prev + 1) % slides.length
-        scrollRef.current?.scrollTo({ x: next * SCREEN_WIDTH, animated: true })
+        scrollRef.current?.scrollTo({ x: next * SLIDE_WIDTH, animated: true })
         return next
       })
     }, 5000)
@@ -47,6 +55,9 @@ export function HeroBanner({ slides, onCta }: Props) {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScroll}
+        onScrollBeginDrag={() => { userInteractedRef.current = true }}
+        snapToInterval={SLIDE_WIDTH}
+        decelerationRate="fast"
         style={styles.scroll}
       >
         {slides.map((slide) => (
@@ -64,8 +75,8 @@ export function HeroBanner({ slides, onCta }: Props) {
         ))}
       </ScrollView>
       <View style={styles.dotsRow}>
-        {slides.map((_, i) => (
-          <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
+        {slides.map((s, i) => (
+          <View key={`dot-${s.id}`} style={[styles.dot, i === activeIndex && styles.dotActive]} />
         ))}
       </View>
     </View>

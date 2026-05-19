@@ -90,6 +90,7 @@ export const ar: any = {
   'home.shopsNearYou': 'دكاكين قريبة منك',
   'home.seeAll': 'الكل',
   'home.categories': 'التصنيفات',
+  'home.signInForAddresses': 'سجّل دخولك لإدارة عناوين التوصيل',
 
   // Shop detail (SP-A)
   'shop.searchIn': 'ابحث في {shopName}',

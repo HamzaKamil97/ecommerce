@@ -51,8 +51,7 @@ export default function ProductDetailsScreen() {
         setVerticalData(vf)
       })
       .catch(() => {
-        // fallback: look up in DEMO_PRODUCTS by handle
-        const demo = DEMO_PRODUCTS[id] ?? Object.values(DEMO_PRODUCTS)[0] ?? null
+        const demo = DEMO_PRODUCTS[id] ?? null
         setDemoProduct(demo)
       })
       .finally(() => setLoading(false))

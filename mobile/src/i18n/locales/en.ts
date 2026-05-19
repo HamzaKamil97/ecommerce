@@ -88,6 +88,7 @@ export const en = {
   'home.shopsNearYou': 'Shops near you',
   'home.seeAll': 'See all',
   'home.categories': 'Categories',
+  'home.signInForAddresses': 'Sign in to manage delivery addresses',
 
   // Shop detail (SP-A)
   'shop.searchIn': 'Search in {shopName}',
