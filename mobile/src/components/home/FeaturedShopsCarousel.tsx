@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { SectionHeader } from './SectionHeader'
+import { PromotedPill } from './PromotedPill'
 import { t } from '@/src/i18n'
 
 export interface FeaturedShop {
@@ -14,18 +15,23 @@ export interface FeaturedShop {
   vertical: string
   deliveryMinutes: number
   minOrder: string
+  sponsored?: boolean
 }
 
 interface Props {
   shops: FeaturedShop[]
   onSelect: (shop: FeaturedShop) => void
   onSeeAll?: () => void
+  /** When true, skips rendering the built-in section header (caller renders its own). */
+  hideHeader?: boolean
 }
 
-export function FeaturedShopsCarousel({ shops, onSelect, onSeeAll }: Props) {
+export function FeaturedShopsCarousel({ shops, onSelect, onSeeAll, hideHeader }: Props) {
   return (
     <View>
-      <SectionHeader title={t('home.featuredShops')} actionLabel={t('home.seeAll')} onAction={onSeeAll} />
+      {hideHeader ? null : (
+        <SectionHeader title={t('home.featuredShops')} actionLabel={t('home.seeAll')} onAction={onSeeAll} />
+      )}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -43,6 +49,11 @@ export function FeaturedShopsCarousel({ shops, onSelect, onSeeAll }: Props) {
                   <Text style={styles.expressText}>⚡ Express</Text>
                 </View>
               )}
+              {shop.sponsored ? (
+                <View style={styles.promotedWrap}>
+                  <PromotedPill size="sm" />
+                </View>
+              ) : null}
             </View>
             <View style={styles.cardBody}>
               <Text style={styles.shopName} numberOfLines={1}>{shop.name}</Text>
@@ -112,6 +123,11 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.xs,
     fontWeight: tokens.fontWeight.bold,
     color: tokens.colors.white,
+  },
+  promotedWrap: {
+    position: 'absolute',
+    bottom: tokens.spacing.sm,
+    left: tokens.spacing.sm,
   },
   cardBody: {
     padding: tokens.spacing.md,

@@ -1,3 +1,7 @@
+// `videoUrl` will be vendor-uploaded once the vendor mobile portal ships.
+// Until then, entries without a videoUrl fall back to imageUrl rendering
+// in ScrollCard. The single demo entry below with a public mp4 is intentional.
+
 export interface ScrollItem {
   id: string
   shopSlug: string
@@ -9,6 +13,7 @@ export interface ScrollItem {
   price: number
   currency: 'iqd' | 'usd'
   imageUrl: string
+  videoUrl?: string
   caption: string
   likes: string
 }
@@ -25,6 +30,7 @@ export const DEMO_SCROLLS: ScrollItem[] = [
     price: 15000,
     currency: 'iqd',
     imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1080',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
     caption: 'Wood-fired in 90 seconds. Crust so good it became a religion.',
     likes: '12.4k',
   },

@@ -192,4 +192,12 @@ export const ar: any = {
   'cart.deliveryNotesPlaceholder': 'مثال: شقة 12، اتركها عند الباب',
   'cart.notes': 'ملاحظات',
   'cart.edit': 'تعديل',
+
+  // SP-1.3 — layout-driven home
+  'promoted.label': 'ممول',
+  'home.orderAgain': 'اطلب مرة أخرى',
+  'home.picksForYou': 'مختاراتك 🔥',
+  'home.trendingNearYou': 'رائج بالقرب منك',
+  'home.popularInBreakfast': 'الأكثر شعبية في الإفطار',
+  'home.inspiredByPast': 'مستوحى من طلباتك السابقة',
 }

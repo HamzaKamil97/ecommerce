@@ -190,6 +190,14 @@ export const en = {
   'cart.deliveryNotesPlaceholder': 'e.g. apartment 12, leave at door',
   'cart.notes': 'Notes',
   'cart.edit': 'Edit',
+
+  // SP-1.3 — layout-driven home
+  'promoted.label': 'Promoted',
+  'home.orderAgain': 'Order again',
+  'home.picksForYou': 'Picks for you 🔥',
+  'home.trendingNearYou': 'Trending near you',
+  'home.popularInBreakfast': 'Most popular in breakfast',
+  'home.inspiredByPast': 'Inspired by your past orders',
 } as const;
 
 export type EnDict = typeof en;

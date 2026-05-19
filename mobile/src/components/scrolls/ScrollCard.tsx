@@ -8,6 +8,7 @@ import {
   Dimensions,
   Share,
 } from 'react-native'
+import { Video, ResizeMode } from 'expo-av'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
@@ -21,6 +22,7 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
 interface Props {
   scroll: ScrollItem
+  isVisible?: boolean
 }
 
 function formatPrice(price: number, currency: 'iqd' | 'usd'): string {
@@ -28,7 +30,7 @@ function formatPrice(price: number, currency: 'iqd' | 'usd'): string {
   return `$${price.toFixed(2)}`
 }
 
-export function ScrollCard({ scroll }: Props) {
+export function ScrollCard({ scroll, isVisible = false }: Props) {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
   const addItem = useCartStore((s) => s.addItem)
@@ -82,7 +84,18 @@ export function ScrollCard({ scroll }: Props) {
   return (
     <View style={styles.container}>
       <Pressable style={styles.imagePress} onPress={onOpenProduct}>
-        <Image source={{ uri: scroll.imageUrl }} style={styles.image} resizeMode="cover" />
+        {scroll.videoUrl ? (
+          <Video
+            source={{ uri: scroll.videoUrl }}
+            style={styles.image}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay={isVisible}
+            isLooping
+            isMuted
+          />
+        ) : (
+          <Image source={{ uri: scroll.imageUrl }} style={styles.image} resizeMode="cover" />
+        )}
         <View style={styles.topGradient} />
         <View style={styles.bottomGradient} />
       </Pressable>
