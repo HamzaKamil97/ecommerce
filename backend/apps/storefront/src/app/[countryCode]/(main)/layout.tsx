@@ -10,6 +10,8 @@ import CartFabWrapper from "@modules/layout/components/cart-fab/wrapper"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
+import { FlyToCartHost } from "@modules/products/components/fly-to-cart/host"
+import CrossShopModalWeb from "@modules/cart/components/cross-shop-modal"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -46,6 +48,8 @@ export default async function PageLayout(props: {
       )}
       {props.children}
       <CartFabWrapper cart={cart} countryCode={params.countryCode} />
+      <FlyToCartHost />
+      <CrossShopModalWeb />
       <Footer />
     </CartProvider>
   )

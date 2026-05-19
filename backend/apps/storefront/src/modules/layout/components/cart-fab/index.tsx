@@ -10,6 +10,7 @@ export default function CartFab({ itemCount, countryCode }: Props) {
   if (itemCount <= 0) return null
   return (
     <Link
+      data-cart-fab
       href={`/${countryCode}/cart`}
       className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-teal-700 text-white flex items-center justify-center shadow-lg hover:bg-teal-800 transition-colors"
       aria-label={`Cart with ${itemCount} items`}
