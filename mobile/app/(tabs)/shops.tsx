@@ -1,137 +1,229 @@
-import { useEffect, useState, useMemo } from 'react';
-import { FlatList, SafeAreaView, ScrollView, Text, View, RefreshControl } from 'react-native';
-import { listApprovedShops, listVerticalTemplates, Shop, VerticalTemplate } from '@/src/api/shops';
-import { ShopCard } from '@/src/components/ShopCard';
-import { EmptyState } from '@/src/components/EmptyState';
-import { CategoryChip } from '@/src/components/CategoryChip';
-import { useTheme } from '@/src/theme/useTheme';
+import React, { useState, useMemo } from 'react'
+import { View, Text, TextInput, ScrollView, SafeAreaView, Pressable, StyleSheet } from 'react-native'
+import { useRouter } from 'expo-router'
+import { tokens } from '@/src/theme/tokens'
+import { FilterChips, ChipDef } from '@/src/components/FilterChips'
+import { ShopRow } from '@/src/components/home/ShopRow'
+import { EmptyState } from '@/src/components/EmptyState'
+import { DEMO_SHOPS } from '@/src/components/home/demo-data'
 
-export default function ShopsScreen() {
-  const { colors, spacing, typography } = useTheme();
-  const [shops, setShops] = useState<Shop[]>([]);
-  const [verticals, setVerticals] = useState<VerticalTemplate[]>([]);
-  const [activeVertical, setActiveVertical] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+const RECENT_SEARCHES = ['Pizza', 'Iced coffee', 'Headphones', 'Fresh milk', 'Electronics']
 
-  const load = async () => {
-    const [s, v] = await Promise.all([
-      listApprovedShops().catch(() => []),
-      listVerticalTemplates().catch(() => []),
-    ]);
-    setShops(s);
-    setVerticals(v);
-  };
+const INITIAL_CHIPS: ChipDef[] = [
+  { id: 'all', label: 'All', active: true },
+  { id: 'food', label: 'Food', active: false },
+  { id: 'grocery', label: 'Grocery', active: false },
+  { id: 'fast-delivery', label: 'Fast delivery', active: false, prefix: '⚡' },
+  { id: 'open', label: 'Open now', active: false },
+]
 
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    load().finally(() => mounted && setLoading(false));
-    return () => {
-      mounted = false;
-    };
-  }, []);
+export default function SearchScreen() {
+  const router = useRouter()
+  const [query, setQuery] = useState('')
+  const [chips, setChips] = useState<ChipDef[]>(INITIAL_CHIPS)
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await load();
-    } finally {
-      setRefreshing(false);
+  const activeChip = chips.find((c) => c.active)?.id ?? 'all'
+
+  function toggleChip(id: string) {
+    setChips((prev) => prev.map((c) => ({ ...c, active: c.id === id })))
+  }
+
+  const filtered = useMemo(() => {
+    let results = DEMO_SHOPS
+    if (query.trim()) {
+      const q = query.toLowerCase()
+      results = results.filter(
+        (s) => s.name.toLowerCase().includes(q) || s.vertical.toLowerCase().includes(q)
+      )
     }
-  };
+    if (activeChip === 'food') results = results.filter((s) => s.vertical === 'Food')
+    if (activeChip === 'grocery') results = results.filter((s) => s.vertical === 'Grocery')
+    if (activeChip === 'fast-delivery') results = results.filter((s) => s.deliveryMinutes <= 30)
+    if (activeChip === 'open') results = results.filter((s) => s.isOpen)
+    return results
+  }, [query, activeChip])
 
-  const filtered = useMemo(
-    () => (activeVertical ? shops.filter((s) => s.vertical === activeVertical) : shops),
-    [shops, activeVertical]
-  );
-
-  // Group by vertical for "rails" view
-  const groupedByVertical = useMemo(() => {
-    const groups = new Map<string, Shop[]>();
-    for (const shop of filtered) {
-      if (!groups.has(shop.vertical)) groups.set(shop.vertical, []);
-      groups.get(shop.vertical)!.push(shop);
-    }
-    return Array.from(groups.entries());
-  }, [filtered]);
+  const hasQuery = query.trim().length > 0
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: spacing.xl }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text} />}
-      >
-        <View style={{ padding: spacing.lg, gap: spacing.sm }}>
-          <Text style={[typography.title, { color: colors.text, fontSize: 28 }]}>Shops</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>
-            Local merchants and trusted brands, all in one place.
-          </Text>
-        </View>
-
-        {verticals.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}
+    <SafeAreaView style={styles.root}>
+      {/* Search input */}
+      <View style={styles.searchHeader}>
+        <Text style={styles.heading}>Search</Text>
+        <View style={styles.searchPill}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Shops, food, categories…"
+            placeholderTextColor={tokens.colors.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {hasQuery && (
+            <Pressable onPress={() => setQuery('')} hitSlop={8} style={styles.clearBtn}>
+              <Text style={styles.clearBtnText}>✕</Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => {}}
+            hitSlop={8}
+            style={styles.filterBtn}
           >
-            <CategoryChip
-              label="All shops"
-              emoji="🌟"
-              selected={activeVertical === null}
-              onPress={() => setActiveVertical(null)}
-            />
-            {verticals
-              .filter((v) => v.vertical !== 'general')
-              .map((v) => (
-                <CategoryChip
-                  key={v.vertical}
-                  label={v.label}
-                  emoji={v.emoji}
-                  selected={activeVertical === v.vertical}
-                  onPress={() => setActiveVertical(activeVertical === v.vertical ? null : v.vertical)}
-                />
+            <Text style={styles.filterIcon}>≡</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Filter chips */}
+      <FilterChips chips={chips} onPress={toggleChip} />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        {!hasQuery && (
+          <>
+            <Text style={styles.sectionLabel}>Recent searches</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recentRow}
+            >
+              {RECENT_SEARCHES.map((term) => (
+                <Pressable
+                  key={term}
+                  onPress={() => setQuery(term)}
+                  style={({ pressed }) => [styles.recentPill, { opacity: pressed ? 0.8 : 1 }]}
+                >
+                  <Text style={styles.recentText}>{term}</Text>
+                </Pressable>
               ))}
-          </ScrollView>
+            </ScrollView>
+
+            <Text style={styles.sectionLabel}>All shops</Text>
+          </>
         )}
 
         {filtered.length === 0 ? (
-          <EmptyState
-            title="No shops yet"
-            subtitle={
-              loading
-                ? 'Loading shops…'
-                : 'When tenants are onboarded, they will appear here. For now, browse products in the Shop tab.'
-            }
-          />
+          <View style={styles.emptyWrapper}>
+            <EmptyState
+              title="No results"
+              subtitle={`No shops found for "${query}"`}
+            />
+          </View>
         ) : (
-          groupedByVertical.map(([vertical, shopList]) => (
-            <View key={vertical} style={{ marginTop: spacing.md }}>
-              <Text
-                style={[
-                  typography.heading,
-                  {
-                    color: colors.text,
-                    paddingHorizontal: spacing.lg,
-                    marginBottom: spacing.sm,
-                    textTransform: 'capitalize',
-                  },
-                ]}
-              >
-                {vertical}
-              </Text>
-              <FlatList
-                horizontal
-                data={shopList}
-                keyExtractor={(s) => s.id}
-                contentContainerStyle={{ paddingHorizontal: spacing.lg }}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <ShopCard shop={item} />}
-              />
-            </View>
+          filtered.map((shop) => (
+            <ShopRow
+              key={shop.slug}
+              shop={shop}
+              onPress={() => router.push(`/shops/${shop.slug}`)}
+            />
           ))
         )}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: tokens.colors.bg,
+  },
+  searchHeader: {
+    paddingHorizontal: tokens.spacing.lg,
+    paddingTop: tokens.spacing.sm,
+    paddingBottom: tokens.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: tokens.colors.border,
+  },
+  heading: {
+    fontSize: tokens.fontSize.xl,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.text,
+    marginBottom: tokens.spacing.sm,
+  },
+  searchPill: {
+    height: 44,
+    backgroundColor: tokens.colors.surface,
+    borderRadius: tokens.radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: tokens.spacing.md,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+    gap: tokens.spacing.sm,
+  },
+  searchIcon: {
+    fontSize: 16,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: tokens.fontSize.base,
+    color: tokens.colors.text,
+    padding: 0,
+  },
+  clearBtn: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: tokens.colors.textSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clearBtnText: {
+    fontSize: 10,
+    color: tokens.colors.white,
+    fontWeight: tokens.fontWeight.bold,
+  },
+  filterBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: tokens.colors.border,
+  },
+  filterIcon: {
+    fontSize: 18,
+    color: tokens.colors.textMuted,
+    fontWeight: '700',
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  sectionLabel: {
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    paddingHorizontal: tokens.spacing.lg,
+    paddingTop: tokens.spacing.lg,
+    paddingBottom: tokens.spacing.sm,
+  },
+  recentRow: {
+    paddingHorizontal: tokens.spacing.lg,
+    gap: tokens.spacing.sm,
+    paddingBottom: tokens.spacing.sm,
+  },
+  recentPill: {
+    paddingHorizontal: tokens.spacing.md,
+    paddingVertical: tokens.spacing.sm,
+    backgroundColor: tokens.colors.surface,
+    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+  },
+  recentText: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.text,
+  },
+  emptyWrapper: {
+    paddingTop: tokens.spacing.xxxl,
+  },
+})
