@@ -33,6 +33,7 @@ export const vendorApi = {
   deleteProduct: (id: string) => vfetch(`/vendor/products/${id}`, { method: 'DELETE' }),
   submitProduct: (id: string) => vfetch(`/vendor/products/${id}/submit`, { method: 'POST' }),
   listOrders: () => vfetch('/vendor/orders'),
+  getOrder: (id: string) => vfetch(`/vendor/orders/${id}`),
   analytics: (days = 30) => vfetch(`/vendor/analytics?days=${days}`),
 
   // Merch categories

@@ -27,7 +27,8 @@ export default function OrdersPage() {
       ) : (
         <div className="grid">
           {orders.map((o) => (
-            <div key={o.id} className="card">
+            <Link key={o.id} href={`/orders/${o.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+            <div className="card" style={{ cursor: 'pointer' }}>
               <div className="row" style={{ justifyContent: 'space-between' }}>
                 <div>
                   <strong>Order #{o.display_id ?? o.id}</strong>
@@ -50,6 +51,7 @@ export default function OrdersPage() {
                 ${((o.total ?? 0) / 100).toFixed(2)}
               </div>
             </div>
+            </Link>
           ))}
         </div>
       )}
