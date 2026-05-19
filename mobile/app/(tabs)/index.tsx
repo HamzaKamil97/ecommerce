@@ -17,6 +17,7 @@ import { PromoStrip } from '@/src/components/home/PromoStrip'
 import { DealsCarousel } from '@/src/components/home/DealsCarousel'
 import { SectionHeader } from '@/src/components/home/SectionHeader'
 import { ShopRow } from '@/src/components/home/ShopRow'
+import { ForYouCarousel } from '@/src/components/home/ForYouCarousel'
 import {
   DEMO_SLIDES,
   DEMO_CATEGORIES,
@@ -75,6 +76,10 @@ export default function HomeScreen() {
             categories={DEMO_CATEGORIES}
             onSelect={() => router.push('/(tabs)/shops' as any)}
           />
+
+          {/* SP-G: AI-framed recommendations row */}
+          <SectionHeader title={t('forYou.title')} actionLabel={null} />
+          <ForYouCarousel />
 
           {/* InstaShop "Continue shopping" — only renders if baskets exist */}
           {hasActiveBaskets && (

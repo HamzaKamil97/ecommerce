@@ -157,6 +157,29 @@ export const en = {
   'orderTimeline.preparing': 'Preparing',
   'orderTimeline.out_for_delivery': 'On the way',
   'orderTimeline.delivered': 'Delivered',
+
+  // SP-G — AI moat: Scrolls / Butler / For-you
+  'tab.scrolls': 'Scrolls',
+  'scrolls.add': 'Add for {price}',
+  'scrolls.like': 'Like',
+  'scrolls.save': 'Save',
+  'scrolls.share': 'Share',
+  'scrolls.added': 'Added to cart',
+  'butler.title': 'Butler',
+  'butler.tagline': "Tell me what you need — I'll find it",
+  'butler.responseTime': 'Average response: ~8 min',
+  'butler.placeholder': 'Describe what you need...',
+  'butler.send': 'Send request',
+  'butler.sent': 'Request sent ✓',
+  'butler.preset.findCheaper': 'Find this cheaper',
+  'butler.preset.itemNotListed': 'Find an item not listed',
+  'butler.preset.compareShops': 'Compare nearby shops',
+  'butler.preset.bundleDeal': 'Build me a bundle',
+  'forYou.title': 'For you ✨',
+  'forYou.add': 'Add',
+  'forYou.badge': 'For you',
+  'forYou.reason.becauseYou': 'Because you ordered from {shop}',
+  'forYou.reason.trendingIn': 'Trending in {vertical}',
 } as const;
 
 export type EnDict = typeof en;
