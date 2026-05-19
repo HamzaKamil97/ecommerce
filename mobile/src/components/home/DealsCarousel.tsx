@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { SectionHeader } from './SectionHeader'
+import { t } from '@/src/i18n'
 
 export interface Deal {
   id: string
@@ -24,10 +25,11 @@ interface Props {
  * pattern. Admin (later) can swap content; visitors see deals just like
  * they see featured shops. Replaces the earlier flat colored boxes.
  */
-export function DealsCarousel({ deals, onSelect, onSeeAll, title = 'Top deals' }: Props) {
+export function DealsCarousel({ deals, onSelect, onSeeAll, title }: Props) {
+  const resolvedTitle = title ?? t('home.topDeals')
   return (
     <View>
-      <SectionHeader title={title} actionLabel="See all" onAction={onSeeAll} />
+      <SectionHeader title={resolvedTitle} actionLabel={t('home.seeAll')} onAction={onSeeAll} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

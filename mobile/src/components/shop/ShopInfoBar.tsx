@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 interface ShopMeta {
   name: string
@@ -52,7 +53,7 @@ export function ShopInfoBar({ shop }: Props) {
             </View>
             <View style={[styles.pill, shop.isOpen ? styles.pillOpen : styles.pillClosed]}>
               <Text style={[styles.pillText, shop.isOpen ? styles.pillOpenText : styles.pillClosedText]}>
-                {shop.isOpen ? 'Open' : 'Closed'}
+                {shop.isOpen ? t('shop.open') : t('shop.closed')}
               </Text>
             </View>
             {express && (

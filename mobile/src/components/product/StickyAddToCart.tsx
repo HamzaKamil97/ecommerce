@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 function formatMinor(amount: number, currencyCode: string): string {
   if (currencyCode.toUpperCase() === 'IQD') {
@@ -50,7 +51,7 @@ export function StickyAddToCart({ quantity, setQuantity, price, currencyCode, on
         ]}
       >
         <Text style={styles.addBtnText}>
-          Add to cart · {formatMinor(price * quantity, currencyCode)}
+          {t('product.addToCart')} · {formatMinor(price * quantity, currencyCode)}
         </Text>
       </Pressable>
     </View>

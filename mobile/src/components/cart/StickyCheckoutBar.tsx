@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 function formatMinor(amount: number, currency: 'iqd' | 'usd'): string {
   if (currency === 'iqd') return `${new Intl.NumberFormat('en-IQ').format(amount)} IQD`
@@ -25,7 +26,7 @@ export function StickyCheckoutBar({ total, currency, onCheckout, disabled }: Pro
           { opacity: disabled ? 0.5 : pressed ? 0.88 : 1 },
         ]}
       >
-        <Text style={styles.btnText}>Checkout</Text>
+        <Text style={styles.btnText}>{t('cart.checkout')}</Text>
         <Text style={styles.btnTotal}>{formatMinor(total, currency)}</Text>
       </Pressable>
     </View>

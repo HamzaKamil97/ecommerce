@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 function formatMinor(amount: number, currency: 'iqd' | 'usd'): string {
   if (currency === 'iqd') return `${new Intl.NumberFormat('en-IQ').format(amount)} IQD`
@@ -25,24 +26,24 @@ export function CartSummary({ subtotal, currency, deliveries }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Order summary</Text>
+      <Text style={styles.heading}>{t('cart.orderSummary')}</Text>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Subtotal</Text>
+        <Text style={styles.label}>{t('cart.subtotal')}</Text>
         <Text style={styles.value}>{formatMinor(subtotal, currency)}</Text>
       </View>
 
       {deliveries.map((d) => (
         <View key={d.shopName} style={styles.row}>
-          <Text style={styles.label}>Delivery · {d.shopName}</Text>
+          <Text style={styles.label}>{t('cart.delivery')} · {d.shopName}</Text>
           <Text style={styles.value}>
-            {d.fee === 0 ? 'Free' : formatMinor(d.fee, d.currency)}
+            {d.fee === 0 ? t('cart.freeDelivery') : formatMinor(d.fee, d.currency)}
           </Text>
         </View>
       ))}
 
       <View style={[styles.row, styles.totalRow]}>
-        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalLabel}>{t('cart.total')}</Text>
         <Text style={styles.totalValue}>{formatMinor(total, currency)}</Text>
       </View>
     </View>

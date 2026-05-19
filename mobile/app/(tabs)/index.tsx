@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCartStore } from '@/src/store/cartStore'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
+import { useLanguageStore } from '@/src/store/languageStore'
 
 import { TopBar } from '@/src/components/home/TopBar'
 import { SearchBox } from '@/src/components/home/SearchBox'
@@ -27,6 +29,8 @@ export default function HomeScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const itemCount: number = useCartStore((s) => s.itemCount())
+  // Subscribe to locale so home re-renders on language switch
+  useLanguageStore((s) => s.locale)
 
   const hasActiveBaskets = DEMO_ACTIVE_BASKETS.length > 0
   const featuredShops = DEMO_SHOPS.slice(0, 3)
@@ -39,7 +43,7 @@ export default function HomeScreen() {
       <View style={[styles.brandBand, { paddingTop: insets.top }]}>
         <TopBar
           tone="light"
-          location="Deliver to · Baghdad"
+          location={t('home.deliverTo', { city: 'Baghdad' })}
           cartCount={itemCount}
           onCart={() => router.push('/(tabs)/cart')}
           onLocation={() => { /* TODO: open location picker — SP-D */ }}
@@ -55,6 +59,7 @@ export default function HomeScreen() {
           {/* Search */}
           <View style={styles.searchWrapper}>
             <SearchBox
+              placeholder={t('home.searchPlaceholder')}
               onPress={() => router.push('/(tabs)/shops' as any)}
               onFilter={() => router.push('/(tabs)/shops' as any)}
             />
@@ -74,7 +79,7 @@ export default function HomeScreen() {
           {/* InstaShop "Continue shopping" — only renders if baskets exist */}
           {hasActiveBaskets && (
             <>
-              <SectionHeader title="Continue shopping" actionLabel={null} />
+              <SectionHeader title={t('home.continueShopping')} actionLabel={null} />
               <ActiveBasketsCarousel
                 baskets={DEMO_ACTIVE_BASKETS}
                 onResume={(b) => router.push(`/shops/${b.shopSlug}`)}
@@ -103,7 +108,7 @@ export default function HomeScreen() {
           />
 
           {/* Near you — vertical list */}
-          <SectionHeader title="Shops near you" actionLabel="See all" />
+          <SectionHeader title={t('home.shopsNearYou')} actionLabel={t('home.seeAll')} />
           {nearbyShops.map((shop) => (
             <ShopRow
               key={shop.slug}

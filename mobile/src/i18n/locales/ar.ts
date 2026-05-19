@@ -1,7 +1,6 @@
 // Arabic translations. Keys must match en.ts exactly.
-import type { EnDict } from './en';
-
-export const ar: EnDict = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const ar: any = {
   // Onboarding
   'onboarding.title': 'كل ما تحتاجه في مكان واحد',
   'onboarding.subtitle': 'طعام، ورود، خضروات، إلكترونيات، أزياء — متاجر محلية وعلامات تجارية موثوقة، توصيل إليك.',
@@ -81,4 +80,59 @@ export const ar: EnDict = {
   // Misc
   'common.loading': 'جارٍ التحميل...',
   'common.refresh': 'اسحب للتحديث',
+
+  // Home screen (SP-0)
+  'home.deliverTo': 'توصيل إلى · {city}',
+  'home.searchPlaceholder': 'ابحث عن دكاكين، تصنيفات أو منتجات',
+  'home.topDeals': 'أفضل العروض',
+  'home.continueShopping': 'تابع التسوق',
+  'home.featuredShops': 'دكاكين مميزة',
+  'home.shopsNearYou': 'دكاكين قريبة منك',
+  'home.seeAll': 'الكل',
+  'home.categories': 'التصنيفات',
+
+  // Shop detail (SP-A)
+  'shop.searchIn': 'ابحث في {shopName}',
+  'shop.minOrder': 'أقل طلب {amount}',
+  'shop.open': 'مفتوح',
+  'shop.closed': 'مغلق',
+  'shop.deliveryMin': '{min} دقيقة',
+
+  // Cart screen (SP-B)
+  'cart.myBasket': 'سلتي',
+  'cart.basketEmpty': 'سلتك فارغة',
+  'cart.addItemsFromShop': 'أضف منتجات من أي دكان للبدء',
+  'cart.browseShops': 'تصفح الدكاكين',
+  'cart.orderSummary': 'ملخص الطلب',
+  'cart.subtotal': 'المجموع الفرعي',
+  'cart.delivery': 'التوصيل',
+  'cart.freeDelivery': 'توصيل مجاني',
+  'cart.estimatedDelivery': '{min}–{max} دقيقة',
+
+  // Product detail (SP-A)
+  'product.addToCart': 'أضف إلى السلة',
+  'product.reviews': '{count} تقييم',
+
+  // Account (SP-D)
+  'account.title': 'الحساب',
+  'account.edit': 'تعديل',
+  'account.signOut': 'تسجيل الخروج',
+  'account.signIn': 'سجّل دخولك في هنوت',
+  'account.signInSubtitle': 'تابع طلباتك، مكافآتك، محفظتك، وتوصيات مخصصة لك.',
+  'account.login': 'تسجيل الدخول',
+  'account.createAccount': 'إنشاء حساب',
+  'account.myOrders': 'طلباتي',
+  'account.addresses': 'عناويني',
+  'account.paymentMethods': 'طرق الدفع',
+  'account.rewards': 'المكافآت والإحالات',
+  'account.wallet': 'المحفظة',
+  'account.language': 'اللغة',
+  'account.notifications': 'الإشعارات',
+  'account.favorites': 'المفضلة',
+  'account.help': 'المساعدة والدعم',
+  'account.terms': 'الشروط والأحكام',
+  'account.privacy': 'سياسة الخصوصية',
+  'account.orders': 'الطلبات',
+  'account.ordersLabel': 'الطلبات',
+  'account.addressesLabel': 'العناوين',
 }

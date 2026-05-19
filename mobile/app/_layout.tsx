@@ -11,6 +11,7 @@ import { useAuthStore } from '@/src/store/authStore';
 import { ONBOARDING_KEY } from './onboarding';
 import { FlyToCartHost } from '@/src/components/cart/FlyToCartHost';
 import { CrossShopModal } from '@/src/components/cart/CrossShopModal';
+import { useLanguageStore } from '@/src/store/languageStore';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -20,13 +21,15 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const initAuth = useAuthStore((s) => s.init);
+  const initLanguage = useLanguageStore((s) => s.init);
 
   useEffect(() => {
     initAuth();
+    initLanguage();
     AsyncStorage.getItem(ONBOARDING_KEY).then((v) => {
       if (!v) router.replace('/onboarding');
     });
-  }, [initAuth, router]);
+  }, [initAuth, initLanguage, router]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

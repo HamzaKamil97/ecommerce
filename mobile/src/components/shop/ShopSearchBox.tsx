@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 interface Props {
   shopName: string
@@ -13,7 +14,7 @@ export function ShopSearchBox({ shopName, onPress }: Props) {
       <Pressable onPress={onPress} style={styles.container}>
         <Text style={styles.icon}>🔍</Text>
         <Text style={styles.placeholder} numberOfLines={1}>
-          Search in {shopName}
+          {t('shop.searchIn', { shopName })}
         </Text>
       </Pressable>
     </View>

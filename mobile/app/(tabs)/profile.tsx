@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, ScrollView, SafeAreaView, Pressable, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useAuthStore } from '@/src/store/authStore'
 import { tokens } from '@/src/theme/tokens'
 import { MenuRow } from '@/src/components/account/MenuRow'
 import { AppButton } from '@/src/components/AppButton'
+import { LanguagePicker } from '@/src/components/LanguagePicker'
+import { useLanguageStore } from '@/src/store/languageStore'
+import { t } from '@/src/i18n'
 
 const APP_VERSION = '1.0.0-beta'
 
@@ -18,6 +21,10 @@ export default function ProfileScreen() {
   const customer = useAuthStore((s) => s.customer)
   const logout = useAuthStore((s) => s.logout)
   const router = useRouter()
+  const locale = useLanguageStore((s) => s.locale)
+  const [langPickerOpen, setLangPickerOpen] = useState(false)
+
+  const langLabel = locale === 'ar' ? 'العربية' : 'English'
 
   return (
     <SafeAreaView style={styles.root}>
@@ -25,7 +32,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Text style={styles.heading}>Account</Text>
+        <Text style={styles.heading}>{t('account.title')}</Text>
 
         {customer ? (
           <>
@@ -47,7 +54,7 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/profile/edit')}
                 style={({ pressed }) => [styles.editProfileBtn, { opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text style={styles.editProfileText}>Edit</Text>
+                <Text style={styles.editProfileText}>{t('account.edit')}</Text>
               </Pressable>
             </View>
 
@@ -55,33 +62,33 @@ export default function ProfileScreen() {
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
                 <Text style={styles.statValue}>0</Text>
-                <Text style={styles.statLabel}>Orders</Text>
+                <Text style={styles.statLabel}>{t('account.ordersLabel')}</Text>
               </View>
               <View style={[styles.statBox, styles.statBoxBorder]}>
                 <Text style={styles.statValue}>0</Text>
-                <Text style={styles.statLabel}>Addresses</Text>
+                <Text style={styles.statLabel}>{t('account.addressesLabel')}</Text>
               </View>
             </View>
 
             {/* Menu */}
             <View style={styles.menuGroup}>
-              <MenuRow icon="📦" label="My orders" onPress={() => router.push('/(tabs)/orders')} />
-              <MenuRow icon="📍" label="Addresses" onPress={() => router.push('/addresses')} />
-              <MenuRow icon="💳" label="Payment methods" onPress={() => {}} />
-              <MenuRow icon="🎁" label="Rewards & referrals" onPress={() => router.push('/loyalty')} />
-              <MenuRow icon="💰" label="Wallet" onPress={() => router.push('/wallet')} />
+              <MenuRow icon="📦" label={t('account.myOrders')} onPress={() => router.push('/(tabs)/orders')} />
+              <MenuRow icon="📍" label={t('account.addresses')} onPress={() => router.push('/addresses')} />
+              <MenuRow icon="💳" label={t('account.paymentMethods')} onPress={() => {}} />
+              <MenuRow icon="🎁" label={t('account.rewards')} onPress={() => router.push('/loyalty')} />
+              <MenuRow icon="💰" label={t('account.wallet')} onPress={() => router.push('/wallet')} />
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
-              <MenuRow icon="🌐" label="Language" value="English" onPress={() => {}} />
-              <MenuRow icon="🔔" label="Notifications" onPress={() => router.push('/notifications')} />
-              <MenuRow icon="❤️" label="Favorites" onPress={() => {}} />
+              <MenuRow icon="🌐" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
+              <MenuRow icon="🔔" label={t('account.notifications')} onPress={() => router.push('/notifications')} />
+              <MenuRow icon="❤️" label={t('account.favorites')} onPress={() => {}} />
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
-              <MenuRow icon="💬" label="Help & support" onPress={() => {}} />
-              <MenuRow icon="📄" label="Terms & conditions" onPress={() => {}} />
-              <MenuRow icon="🔒" label="Privacy policy" onPress={() => {}} />
+              <MenuRow icon="💬" label={t('account.help')} onPress={() => {}} />
+              <MenuRow icon="📄" label={t('account.terms')} onPress={() => {}} />
+              <MenuRow icon="🔒" label={t('account.privacy')} onPress={() => {}} />
             </View>
 
             {/* Sign out */}
@@ -90,7 +97,7 @@ export default function ProfileScreen() {
                 onPress={logout}
                 style={({ pressed }) => [styles.signOutBtn, { opacity: pressed ? 0.8 : 1 }]}
               >
-                <Text style={styles.signOutText}>Sign out</Text>
+                <Text style={styles.signOutText}>{t('account.signOut')}</Text>
               </Pressable>
             </View>
           </>
@@ -100,14 +107,12 @@ export default function ProfileScreen() {
             <View style={styles.avatarCircleGhost}>
               <Text style={styles.avatarTextGhost}>?</Text>
             </View>
-            <Text style={styles.authTitle}>Sign in to Hanoot</Text>
-            <Text style={styles.authSubtitle}>
-              Access your orders, rewards, wallet, and personalized recommendations.
-            </Text>
+            <Text style={styles.authTitle}>{t('account.signIn')}</Text>
+            <Text style={styles.authSubtitle}>{t('account.signInSubtitle')}</Text>
             <View style={styles.authButtons}>
-              <AppButton title="Log in" onPress={() => router.push('/auth/login')} />
+              <AppButton title={t('account.login')} onPress={() => router.push('/auth/login')} />
               <AppButton
-                title="Create account"
+                title={t('account.createAccount')}
                 variant="secondary"
                 onPress={() => router.push('/auth/register')}
               />
@@ -115,9 +120,9 @@ export default function ProfileScreen() {
 
             {/* Guest menu */}
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.xl }]}>
-              <MenuRow icon="💬" label="Help & support" onPress={() => {}} />
-              <MenuRow icon="📄" label="Terms & conditions" onPress={() => {}} />
-              <MenuRow icon="🌐" label="Language" value="English" onPress={() => {}} />
+              <MenuRow icon="💬" label={t('account.help')} onPress={() => {}} />
+              <MenuRow icon="📄" label={t('account.terms')} onPress={() => {}} />
+              <MenuRow icon="🌐" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
             </View>
           </View>
         )}
@@ -125,6 +130,11 @@ export default function ProfileScreen() {
         {/* App version */}
         <Text style={styles.version}>Hanoot v{APP_VERSION}</Text>
       </ScrollView>
+
+      <LanguagePicker
+        visible={langPickerOpen}
+        onClose={() => setLangPickerOpen(false)}
+      />
     </SafeAreaView>
   )
 }

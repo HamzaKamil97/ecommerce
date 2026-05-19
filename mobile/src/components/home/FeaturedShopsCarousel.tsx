@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { SectionHeader } from './SectionHeader'
+import { t } from '@/src/i18n'
 
 export interface FeaturedShop {
   slug: string
@@ -24,7 +25,7 @@ interface Props {
 export function FeaturedShopsCarousel({ shops, onSelect, onSeeAll }: Props) {
   return (
     <View>
-      <SectionHeader title="Featured shops" actionLabel="See all" onAction={onSeeAll} />
+      <SectionHeader title={t('home.featuredShops')} actionLabel={t('home.seeAll')} onAction={onSeeAll} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

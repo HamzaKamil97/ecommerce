@@ -78,6 +78,61 @@ export const en = {
   // Misc
   'common.loading': 'Loading…',
   'common.refresh': 'Pull to refresh',
+
+  // Home screen (SP-0)
+  'home.deliverTo': 'Deliver to · {city}',
+  'home.searchPlaceholder': 'Search for shops, categories or products',
+  'home.topDeals': 'Top deals',
+  'home.continueShopping': 'Continue shopping',
+  'home.featuredShops': 'Featured shops',
+  'home.shopsNearYou': 'Shops near you',
+  'home.seeAll': 'See all',
+  'home.categories': 'Categories',
+
+  // Shop detail (SP-A)
+  'shop.searchIn': 'Search in {shopName}',
+  'shop.minOrder': 'Min {amount}',
+  'shop.open': 'Open',
+  'shop.closed': 'Closed',
+  'shop.deliveryMin': '{min} min',
+
+  // Cart screen (SP-B)
+  'cart.myBasket': 'My Cart',
+  'cart.basketEmpty': 'Your basket is empty',
+  'cart.addItemsFromShop': 'Add items from any shop to get started',
+  'cart.browseShops': 'Browse shops',
+  'cart.orderSummary': 'Order summary',
+  'cart.subtotal': 'Subtotal',
+  'cart.delivery': 'Delivery',
+  'cart.freeDelivery': 'Free delivery',
+  'cart.estimatedDelivery': 'Estimated {min}–{max} min',
+
+  // Product detail (SP-A)
+  'product.addToCart': 'Add to cart',
+  'product.reviews': '{count} reviews',
+
+  // Account (SP-D)
+  'account.title': 'Account',
+  'account.edit': 'Edit',
+  'account.signOut': 'Sign out',
+  'account.signIn': 'Sign in to Hanoot',
+  'account.signInSubtitle': 'Access your orders, rewards, wallet, and personalized recommendations.',
+  'account.login': 'Log in',
+  'account.createAccount': 'Create account',
+  'account.myOrders': 'My orders',
+  'account.addresses': 'Addresses',
+  'account.paymentMethods': 'Payment methods',
+  'account.rewards': 'Rewards & referrals',
+  'account.wallet': 'Wallet',
+  'account.language': 'Language',
+  'account.notifications': 'Notifications',
+  'account.favorites': 'Favorites',
+  'account.help': 'Help & support',
+  'account.terms': 'Terms & conditions',
+  'account.privacy': 'Privacy policy',
+  'account.orders': 'Orders',
+  'account.ordersLabel': 'Orders',
+  'account.addressesLabel': 'Addresses',
 } as const;
 
 export type EnDict = typeof en;
