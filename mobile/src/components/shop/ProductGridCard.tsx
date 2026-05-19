@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { PriceText } from '@/src/components/PriceText'
@@ -14,14 +14,28 @@ interface ProductItem {
 interface Props {
   product: ProductItem
   onPress: () => void
-  onAdd: () => void
+  /** Called with (pageX, pageY, size) of the image centre so caller can trigger fly animation */
+  onAdd: (fromX: number, fromY: number, sourceSize: number) => void
 }
 
 export function ProductGridCard({ product, onPress, onAdd }: Props) {
+  const imageRef = useRef<View>(null)
+
+  function handleAdd(e: any) {
+    e.stopPropagation()
+    if (imageRef.current) {
+      imageRef.current.measureInWindow((x, y, w, h) => {
+        onAdd(x + w / 2, y + h / 2, Math.min(w, h))
+      })
+    } else {
+      onAdd(0, 0, 60)
+    }
+  }
+
   return (
     <Pressable onPress={onPress} style={styles.card}>
       {/* Image */}
-      <View style={styles.imageWrap}>
+      <View style={styles.imageWrap} ref={imageRef}>
         {product.thumbnail ? (
           <Image
             source={{ uri: product.thumbnail }}
@@ -35,7 +49,7 @@ export function ProductGridCard({ product, onPress, onAdd }: Props) {
         )}
         {/* Add button overlapping image bottom-right */}
         <Pressable
-          onPress={(e) => { e.stopPropagation(); onAdd() }}
+          onPress={handleAdd}
           style={styles.addBtn}
           hitSlop={6}
           accessibilityLabel={`Add ${product.title} to cart`}

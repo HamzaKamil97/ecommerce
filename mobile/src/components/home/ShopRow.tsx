@@ -16,9 +16,11 @@ export interface ShopRowData {
 interface Props {
   shop: ShopRowData
   onPress: () => void
+  /** Optional quick-add: tapping + on the row. Defaults to onPress (opens shop). */
+  onQuickAdd?: () => void
 }
 
-export function ShopRow({ shop, onPress }: Props) {
+export function ShopRow({ shop, onPress, onQuickAdd }: Props) {
   const isExpress = shop.deliveryMinutes <= 30
 
   return (
@@ -44,7 +46,12 @@ export function ShopRow({ shop, onPress }: Props) {
             {shop.isOpen ? 'Open' : 'Closed'}
           </Text>
         </View>
-        <Pressable style={styles.addBtn} hitSlop={8}>
+        <Pressable
+          style={styles.addBtn}
+          hitSlop={8}
+          onPress={(e) => { e.stopPropagation(); (onQuickAdd ?? onPress)() }}
+          accessibilityLabel={`Open ${shop.name}`}
+        >
           <Text style={styles.addBtnText}>+</Text>
         </Pressable>
       </View>
