@@ -153,7 +153,35 @@ export const DEMO_SHOPS: DemoShop[] = [
   },
 ]
 
-// Mock active baskets — real state comes in SP-B
+// ── Shop detail data ────────────────────────────────────────────────────────
+// Hardcoded until SP-F adds real shop signals (ratings, delivery, cover images).
+
+export const HERO_COVERS: Record<string, string> = {
+  'hamzas-kitchen': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
+  'freshmart': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
+  'style-hub': 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
+  'techpoint': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
+  'bayti': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
+}
+
+export interface ShopDetailMeta {
+  rating: number
+  ratingCount: number
+  deliveryMinutes: string
+  minOrder: string
+  deliveryFee: string
+  isOpen: boolean
+}
+
+export const SHOP_META: Record<string, ShopDetailMeta> = {
+  'hamzas-kitchen': { rating: 4.8, ratingCount: 312, deliveryMinutes: '25–35', minOrder: '5,000 IQD', deliveryFee: 'Free', isOpen: true },
+  'freshmart': { rating: 4.6, ratingCount: 204, deliveryMinutes: '20–30', minOrder: '10,000 IQD', deliveryFee: 'Free', isOpen: true },
+  'style-hub': { rating: 4.7, ratingCount: 88, deliveryMinutes: '45–60', minOrder: '$15', deliveryFee: '$2', isOpen: true },
+  'techpoint': { rating: 4.9, ratingCount: 156, deliveryMinutes: '60–90', minOrder: '$20', deliveryFee: '$3', isOpen: true },
+  'bayti': { rating: 4.5, ratingCount: 67, deliveryMinutes: '30–45', minOrder: '15,000 IQD', deliveryFee: 'Free', isOpen: true },
+}
+
+// ── Mock active baskets — real state comes in SP-B ───────────────────────────
 export const DEMO_ACTIVE_BASKETS: DemoBasket[] = [
   {
     id: 'basket-1',
