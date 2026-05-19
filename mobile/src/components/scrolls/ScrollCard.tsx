@@ -15,6 +15,7 @@ import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { useCartStore } from '@/src/store/cartStore'
 import type { ScrollItem } from '@/src/data/demoScrolls'
+import { ScrollRailAction } from './ScrollRailAction'
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -97,20 +98,20 @@ export function ScrollCard({ scroll }: Props) {
       </View>
 
       <View style={styles.rightRail} pointerEvents="box-none">
-        <RailAction
+        <ScrollRailAction
           icon={liked ? '❤️' : '🤍'}
           label={t('scrolls.like')}
           subLabel={scroll.likes}
           onPress={onLike}
           active={liked}
         />
-        <RailAction
+        <ScrollRailAction
           icon={saved ? '🔖' : '📑'}
           label={t('scrolls.save')}
           onPress={onSave}
           active={saved}
         />
-        <RailAction icon="↗" label={t('scrolls.share')} onPress={onShare} />
+        <ScrollRailAction icon="↗" label={t('scrolls.share')} onPress={onShare} />
       </View>
 
       <View style={styles.bottomBlock} pointerEvents="box-none">
@@ -127,23 +128,6 @@ export function ScrollCard({ scroll }: Props) {
         </View>
       )}
     </View>
-  )
-}
-
-interface RailActionProps {
-  icon: string
-  label: string
-  subLabel?: string
-  onPress: () => void
-  active?: boolean
-}
-
-function RailAction({ icon, label, subLabel, onPress, active }: RailActionProps) {
-  return (
-    <Pressable onPress={onPress} style={styles.railItem} hitSlop={8}>
-      <Text style={[styles.railIcon, active && styles.railIconActive]}>{icon}</Text>
-      <Text style={styles.railLabel}>{subLabel ?? label}</Text>
-    </Pressable>
   )
 }
 
@@ -226,21 +210,6 @@ const styles = StyleSheet.create({
     bottom: 200,
     alignItems: 'center',
     gap: tokens.spacing.lg,
-  },
-  railItem: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  railIcon: {
-    fontSize: 30,
-  },
-  railIconActive: {
-    transform: [{ scale: 1.1 }],
-  },
-  railLabel: {
-    fontSize: tokens.fontSize.xs,
-    fontWeight: tokens.fontWeight.semibold,
-    color: tokens.colors.white,
   },
   bottomBlock: {
     position: 'absolute',
