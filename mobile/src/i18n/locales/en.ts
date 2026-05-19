@@ -133,6 +133,30 @@ export const en = {
   'account.orders': 'Orders',
   'account.ordersLabel': 'Orders',
   'account.addressesLabel': 'Addresses',
+
+  // Orders (SP-F)
+  'orders.title': 'My Orders',
+  'orders.itemsCount': '{count} items',
+  'orders.arrivingIn': 'Arriving in {eta}',
+  'orders.contactShop': 'Contact shop',
+  'orders.callCourier': 'Call courier',
+  'orders.orderProgress': 'Order progress',
+  'orders.deliveryAddress': 'Delivery address',
+  'orders.payment': 'Payment',
+  'orders.cashOnDelivery': 'Cash on Delivery',
+  'orders.notFound': 'Order not found',
+  'orders.placedRelative.justNow': 'Just now',
+  'orderStatus.placed': 'Placed',
+  'orderStatus.confirmed': 'Confirmed',
+  'orderStatus.preparing': 'Preparing',
+  'orderStatus.out_for_delivery': 'On the way',
+  'orderStatus.delivered': 'Delivered',
+  'orderStatus.cancelled': 'Cancelled',
+  'orderTimeline.placed': 'Order placed',
+  'orderTimeline.confirmed': 'Confirmed by shop',
+  'orderTimeline.preparing': 'Preparing',
+  'orderTimeline.out_for_delivery': 'On the way',
+  'orderTimeline.delivered': 'Delivered',
 } as const;
 
 export type EnDict = typeof en;

@@ -2,8 +2,12 @@ import { useEffect, useRef } from "react"
 import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet, SafeAreaView } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useTheme } from "@/src/theme/useTheme"
+import { t } from "@/src/i18n"
+import { useLanguageStore } from "@/src/store/languageStore"
+import { DEMO_ORDERS, findDemoOrder } from "@/src/data/demoOrders"
 
 export default function OrderSuccessScreen() {
+  useLanguageStore((s) => s.locale)
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const { colors } = useTheme()
@@ -17,7 +21,12 @@ export default function OrderSuccessScreen() {
     ]).start()
   }, [])
 
-  const displayId = (id?.slice(-6) ?? "------").toUpperCase()
+  const matched = findDemoOrder(id) ?? DEMO_ORDERS[0]
+  const displayId = (matched?.displayId ?? id?.slice(-6) ?? "------").toUpperCase()
+  const shopName = matched?.shopName ?? "—"
+  const eta = matched?.eta ?? "25–35 min"
+  const total = matched?.total ?? "—"
+  const targetId = matched?.id ?? id
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -29,15 +38,15 @@ export default function OrderSuccessScreen() {
           <Text style={{ fontSize: 60, color: colors.primary }}>✓</Text>
         </Animated.View>
 
-        <Text style={[styles.title, { color: colors.text }]}>Order placed</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('checkout.success.title')}</Text>
         <Text style={{ fontSize: 14, color: colors.textMuted, marginBottom: 24 }}>
           Order <Text style={[styles.orderCode, { backgroundColor: colors.surface, color: colors.text }]}>#{displayId}</Text>
         </Text>
 
         <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
-          <InfoRow icon="🏪" label="Shop" value="—" colors={colors} />
-          <InfoRow icon="⏱️" label="Arriving in" value="25–35 min" colors={colors} bold />
-          <InfoRow icon="💵" label="Total · Cash on Delivery" value="—" colors={colors} bold />
+          <InfoRow icon="🏪" label="Shop" value={shopName} colors={colors} />
+          <InfoRow icon="⏱️" label={t('orders.arrivingIn', { eta: '' }).replace('{eta}', '').trim() || 'Arriving in'} value={eta} colors={colors} bold />
+          <InfoRow icon="💵" label={t('orders.cashOnDelivery')} value={total} colors={colors} bold />
         </View>
 
         <Text style={{ fontSize: 12, color: colors.textMuted, textAlign: "center", marginTop: 12, lineHeight: 18 }}>
@@ -47,11 +56,14 @@ export default function OrderSuccessScreen() {
         <View style={{ flex: 1 }} />
 
         <View style={{ width: "100%", gap: 10, paddingBottom: 12 }}>
-          <TouchableOpacity onPress={() => router.push("/(tabs)/orders")} style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity
+            onPress={() => router.push(`/orders/${targetId}` as never)}
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+          >
             <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>📍 Track order</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.replace("/(tabs)/shops")} style={styles.secondaryBtn}>
-            <Text style={{ color: colors.primary, fontWeight: "600" }}>← Back to home</Text>
+            <Text style={{ color: colors.primary, fontWeight: "600" }}>{`← ${t('checkout.success.back')}`}</Text>
           </TouchableOpacity>
         </View>
       </View>

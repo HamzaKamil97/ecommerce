@@ -1,55 +1,161 @@
-import { useEffect, useState } from 'react';
-import { FlatList, Text, View, SafeAreaView } from 'react-native';
-import { useTheme } from '@/src/theme/useTheme';
-import { EmptyState } from '@/src/components/EmptyState';
-import { useAuthStore } from '@/src/store/authStore';
-import { listOrders } from '@/src/api/auth';
+import React from 'react'
+import { FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { tokens } from '@/src/theme/tokens'
+import { EmptyState } from '@/src/components/EmptyState'
+import { useAuthStore } from '@/src/store/authStore'
+import { useLanguageStore } from '@/src/store/languageStore'
+import { t } from '@/src/i18n'
+import { DEMO_ORDERS, type DemoOrder } from '@/src/data/demoOrders'
+import { OrderStatusPill } from '@/src/components/orders/OrderStatusPill'
+import { humanizeRelative } from '@/src/utils/relativeTime'
 
 export default function OrdersScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
-  const customer = useAuthStore((s) => s.customer);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!customer) return;
-    setLoading(true);
-    listOrders()
-      .then(setOrders)
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
-  }, [customer]);
+  useLanguageStore((s) => s.locale)
+  const router = useRouter()
+  const customer = useAuthStore((s) => s.customer)
 
   if (!customer) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <EmptyState title="Log in to see your orders" subtitle="Go to Profile → Log in." />
+      <SafeAreaView style={styles.safe}>
+        <EmptyState
+          title={t('orders.loginPrompt.title')}
+          subtitle={t('orders.loginPrompt.subtitle')}
+        />
       </SafeAreaView>
-    );
+    )
   }
 
+  const orders = DEMO_ORDERS
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
+        <Text style={styles.heading}>{t('orders.title')}</Text>
+      </View>
       <FlatList
         data={orders}
         keyExtractor={(o) => o.id}
-        contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+        contentContainerStyle={styles.listContent}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
-          <View
-            style={{
-              backgroundColor: colors.surface,
-              borderRadius: radius.md,
-              padding: spacing.md,
-            }}
-          >
-            <Text style={[typography.body, { color: colors.text }]}>Order #{item.display_id ?? item.id}</Text>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>{item.status}</Text>
-          </View>
+          <OrderCard order={item} onPress={() => router.push(`/orders/${item.id}` as never)} />
         )}
         ListEmptyComponent={
-          !loading ? <EmptyState title="No orders yet" subtitle="Your orders will appear here." /> : null
+          <EmptyState
+            title={t('orders.empty.title')}
+            subtitle={t('orders.empty.subtitle')}
+          />
         }
       />
     </SafeAreaView>
-  );
+  )
 }
+
+function OrderCard({ order, onPress }: { order: DemoOrder; onPress: () => void }) {
+  const isDelivered = order.status === 'delivered'
+  const isCancelled = order.status === 'cancelled'
+  const showEta = !isDelivered && !isCancelled && !!order.eta
+
+  return (
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={styles.cardHeader}>
+        <Image source={{ uri: order.shopLogoUrl }} style={styles.logo} resizeMode="cover" />
+        <View style={styles.shopInfo}>
+          <Text style={styles.shopName} numberOfLines={1}>{order.shopName}</Text>
+          <Text style={styles.vertical} numberOfLines={1}>{order.vertical}</Text>
+        </View>
+        <OrderStatusPill status={order.status} />
+      </View>
+
+      <View style={styles.divider} />
+
+      <Text style={styles.summary}>
+        {t('orders.itemsCount', { count: order.items.length })} · {order.total}
+      </Text>
+
+      {showEta && (
+        <Text style={styles.eta}>
+          ⏱ {t('orders.arrivingIn', { eta: order.eta ?? '' })}
+        </Text>
+      )}
+
+      <Text style={styles.placedAt}>{humanizeRelative(order.placed_at)}</Text>
+    </Pressable>
+  )
+}
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: tokens.colors.surface,
+  },
+  header: {
+    paddingHorizontal: tokens.spacing.lg,
+    paddingTop: tokens.spacing.lg,
+    paddingBottom: tokens.spacing.md,
+    backgroundColor: tokens.colors.surface,
+  },
+  heading: {
+    fontSize: tokens.fontSize.xxl,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.text,
+  },
+  listContent: {
+    paddingHorizontal: tokens.spacing.lg,
+    paddingBottom: tokens.spacing.xl,
+  },
+  separator: {
+    height: tokens.spacing.md,
+  },
+  card: {
+    backgroundColor: tokens.colors.bg,
+    borderRadius: tokens.radius.lg,
+    padding: tokens.spacing.lg,
+    gap: tokens.spacing.sm,
+    ...tokens.shadow.card,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.md,
+  },
+  logo: {
+    width: 56,
+    height: 56,
+    borderRadius: tokens.radius.md,
+    backgroundColor: tokens.colors.surface,
+  },
+  shopInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  shopName: {
+    fontSize: tokens.fontSize.md,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.text,
+  },
+  vertical: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.textMuted,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: tokens.colors.border,
+    marginVertical: tokens.spacing.xs,
+  },
+  summary: {
+    fontSize: tokens.fontSize.base,
+    color: tokens.colors.text,
+    fontWeight: tokens.fontWeight.medium,
+  },
+  eta: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.primary,
+    fontWeight: tokens.fontWeight.semibold,
+  },
+  placedAt: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.textMuted,
+  },
+})
