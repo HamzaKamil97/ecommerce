@@ -1,6 +1,7 @@
 import React from 'react'
 import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCartStore } from '@/src/store/cartStore'
 import { tokens } from '@/src/theme/tokens'
 
@@ -11,6 +12,7 @@ import { CategoriesCarousel } from '@/src/components/home/CategoriesCarousel'
 import { ActiveBasketsCarousel } from '@/src/components/home/ActiveBasketsCarousel'
 import { FeaturedShopsCarousel } from '@/src/components/home/FeaturedShopsCarousel'
 import { PromoStrip } from '@/src/components/home/PromoStrip'
+import { PromoCarousel } from '@/src/components/home/PromoCarousel'
 import { SectionHeader } from '@/src/components/home/SectionHeader'
 import { ShopRow } from '@/src/components/home/ShopRow'
 import {
@@ -18,84 +20,113 @@ import {
   DEMO_CATEGORIES,
   DEMO_SHOPS,
   DEMO_ACTIVE_BASKETS,
+  DEMO_PROMOS,
 } from '@/src/components/home/demo-data'
 
 export default function HomeScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const itemCount: number = useCartStore((s) => s.itemCount())
 
   const hasActiveBaskets = DEMO_ACTIVE_BASKETS.length > 0
   const featuredShops = DEMO_SHOPS.slice(0, 3)
   const nearbyShops = DEMO_SHOPS
 
+  const promosWithPress = DEMO_PROMOS.map((p) => ({
+    ...p,
+    onPress: () => router.push('/(tabs)/shops' as any),
+  }))
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <TopBar
-        location="Deliver to · Baghdad"
-        cartCount={itemCount}
-        onCart={() => router.push('/(tabs)/cart')}
-      />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Search */}
-        <View style={styles.searchWrapper}>
-          <SearchBox onPress={() => router.push('/(tabs)/shops' as any)} />
-        </View>
-
-        {/* Hero banner */}
-        <View style={styles.heroBannerWrapper}>
-          <HeroBanner slides={DEMO_SLIDES} onCta={() => {}} />
-        </View>
-
-        {/* Categories */}
-        <CategoriesCarousel
-          categories={DEMO_CATEGORIES}
-          onSelect={(c) => router.push(`/(tabs)/shops` as any)}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: tokens.colors.primary }]}>
+      {/* Teal brand band — extends under status bar */}
+      <View style={[styles.brandBand, { paddingTop: insets.top }]}>
+        <TopBar
+          tone="light"
+          location="Deliver to · Baghdad"
+          cartCount={itemCount}
+          onCart={() => router.push('/(tabs)/cart')}
+          onLocation={() => { /* TODO: open location picker — SP-D */ }}
         />
+      </View>
 
-        {/* InstaShop "Continue shopping" — only renders if baskets exist */}
-        {hasActiveBaskets && (
-          <>
-            <SectionHeader title="Continue shopping" actionLabel={null} />
-            <ActiveBasketsCarousel
-              baskets={DEMO_ACTIVE_BASKETS}
-              onResume={(b) => router.push(`/shops/${b.shopSlug}`)}
+      {/* White body */}
+      <View style={styles.body}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Search */}
+          <View style={styles.searchWrapper}>
+            <SearchBox
+              onPress={() => router.push('/(tabs)/shops' as any)}
+              onFilter={() => router.push('/(tabs)/shops' as any)}
             />
-          </>
-        )}
+          </View>
 
-        {/* Featured shops horizontal carousel */}
-        <FeaturedShopsCarousel
-          shops={featuredShops}
-          onSelect={(s) => router.push(`/shops/${s.slug}`)}
-        />
+          {/* Hero banner */}
+          <View style={styles.heroBannerWrapper}>
+            <HeroBanner slides={DEMO_SLIDES} onCta={() => {}} />
+          </View>
 
-        {/* Promo strip */}
-        <PromoStrip
-          icon="🚚"
-          headline="Free delivery over 25,000 IQD"
-          subtext="Limited time offer for Baghdad"
-          bg="saffron"
-        />
+          {/* Top deals promo carousel */}
+          <SectionHeader title="Top deals" actionLabel={null} />
+          <PromoCarousel promos={promosWithPress} />
 
-        {/* Near you — vertical list */}
-        <SectionHeader title="Shops near you" actionLabel="See all" />
-        {nearbyShops.map((shop) => (
-          <ShopRow
-            key={shop.slug}
-            shop={shop}
-            onPress={() => router.push(`/shops/${shop.slug}`)}
+          {/* Categories */}
+          <CategoriesCarousel
+            categories={DEMO_CATEGORIES}
+            onSelect={() => router.push('/(tabs)/shops' as any)}
           />
-        ))}
-      </ScrollView>
+
+          {/* InstaShop "Continue shopping" — only renders if baskets exist */}
+          {hasActiveBaskets && (
+            <>
+              <SectionHeader title="Continue shopping" actionLabel={null} />
+              <ActiveBasketsCarousel
+                baskets={DEMO_ACTIVE_BASKETS}
+                onResume={(b) => router.push(`/shops/${b.shopSlug}`)}
+              />
+            </>
+          )}
+
+          {/* Featured shops horizontal carousel */}
+          <FeaturedShopsCarousel
+            shops={featuredShops}
+            onSelect={(s) => router.push(`/shops/${s.slug}`)}
+          />
+
+          {/* Promo strip */}
+          <PromoStrip
+            icon="🚚"
+            headline="Free delivery over 25,000 IQD"
+            subtext="Limited time offer for Baghdad"
+            bg="saffron"
+          />
+
+          {/* Near you — vertical list */}
+          <SectionHeader title="Shops near you" actionLabel="See all" />
+          {nearbyShops.map((shop) => (
+            <ShopRow
+              key={shop.slug}
+              shop={shop}
+              onPress={() => router.push(`/shops/${shop.slug}`)}
+            />
+          ))}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   safeArea: {
+    flex: 1,
+  },
+  brandBand: {
+    backgroundColor: tokens.colors.primary,
+  },
+  body: {
     flex: 1,
     backgroundColor: tokens.colors.bg,
   },

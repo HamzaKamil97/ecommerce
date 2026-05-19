@@ -224,6 +224,82 @@ export const DEMO_MERCH_BY_SHOP: Record<string, MerchCategory[]> = {
   ],
 }
 
+// ── Demo promo cards ─────────────────────────────────────────────────────────
+export interface DemoPromo {
+  id: string
+  title: string
+  subtitle: string
+  discountLabel: string
+  iconUrl?: string
+  bg: 'teal' | 'saffron' | 'red' | 'navy'
+}
+
+export const DEMO_PROMOS: DemoPromo[] = [
+  { id: 'p1', title: 'First Order Bonus', subtitle: '20% off your first 3 orders', discountLabel: '20%', bg: 'saffron' },
+  { id: 'p2', title: 'Free Delivery Week', subtitle: 'On all orders over 25,000 IQD', discountLabel: 'FREE', bg: 'teal' },
+  { id: 'p3', title: 'Buy 1 Get 1 Pizza', subtitle: "Hamza's Kitchen — today only", discountLabel: 'BOGO', bg: 'red' },
+  { id: 'p4', title: 'Tech Sale', subtitle: 'Up to 40% off electronics', discountLabel: '40%', bg: 'navy' },
+]
+
+// ── Demo products ─────────────────────────────────────────────────────────────
+export interface DemoProduct {
+  id: string
+  title: string
+  description: string
+  images: string[]
+  price_minor: number
+  currency: 'iqd' | 'usd'
+  shopSlug: string
+  shopName: string
+  shopLogoUrl: string
+}
+
+export const DEMO_PRODUCTS: Record<string, DemoProduct> = {
+  'hk-margherita-pizza': {
+    id: 'demo-prod-margherita',
+    title: 'Margherita Pizza',
+    description: 'Wood-fired pizza with fresh basil, mozzarella, and San Marzano tomatoes. Cooked at 450°C in 90 seconds.',
+    images: [
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
+      'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800',
+      'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800',
+    ],
+    price_minor: 15000,
+    currency: 'iqd',
+    shopSlug: 'hamzas-kitchen',
+    shopName: "Hamza's Kitchen",
+    shopLogoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200',
+  },
+  'fm-fresh-milk': {
+    id: 'demo-prod-milk',
+    title: 'Fresh Full-Fat Milk 1L',
+    description: 'Locally sourced full-fat cow milk, pasteurised and bottled same-day for maximum freshness.',
+    images: [
+      'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800',
+      'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?w=800',
+    ],
+    price_minor: 3500,
+    currency: 'iqd',
+    shopSlug: 'freshmart',
+    shopName: 'FreshMart',
+    shopLogoUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200',
+  },
+  'tp-wireless-earbuds': {
+    id: 'demo-prod-earbuds',
+    title: 'Pro Wireless Earbuds',
+    description: 'Active noise cancellation, 28-hour battery life, and IPX5 water resistance. Perfect for commutes.',
+    images: [
+      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800',
+      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800',
+    ],
+    price_minor: 45000,
+    currency: 'iqd',
+    shopSlug: 'techpoint',
+    shopName: 'TechPoint',
+    shopLogoUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200',
+  },
+}
+
 // ── Mock active baskets — real state comes in SP-B ───────────────────────────
 export const DEMO_ACTIVE_BASKETS: DemoBasket[] = [
   {

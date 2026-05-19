@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { View, Text, Pressable, ScrollView, Image, Dimensions, StyleSheet, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 
@@ -26,6 +26,18 @@ export function HeroBanner({ slides, onCta }: Props) {
     const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH)
     setActiveIndex(idx)
   }
+
+  useEffect(() => {
+    if (slides.length <= 1) return
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % slides.length
+        scrollRef.current?.scrollTo({ x: next * SCREEN_WIDTH, animated: true })
+        return next
+      })
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [slides.length])
 
   return (
     <View style={styles.wrapper}>

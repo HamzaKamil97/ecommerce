@@ -5,21 +5,39 @@ import { tokens } from '@/src/theme/tokens'
 interface Props {
   location?: string
   cartCount?: number
+  tone?: 'light' | 'dark'
   onCart: () => void
+  onLocation?: () => void
   onNotifications?: () => void
 }
 
-export function TopBar({ location = 'Deliver to · Baghdad', cartCount = 0, onCart, onNotifications }: Props) {
+export function TopBar({
+  location = 'Deliver to · Baghdad',
+  cartCount = 0,
+  tone = 'dark',
+  onCart,
+  onLocation,
+  onNotifications,
+}: Props) {
+  const textColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
+  const iconColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
+
   return (
     <View style={styles.container}>
-      <View style={styles.locationRow}>
-        <Text style={styles.pin}>📍</Text>
-        <Text style={styles.locationText} numberOfLines={1}>{location}</Text>
-      </View>
+      <Pressable
+        onPress={onLocation}
+        style={({ pressed }) => [styles.locationRow, { opacity: pressed ? 0.75 : 1 }]}
+      >
+        <Text style={[styles.pin, { color: iconColor }]}>📍</Text>
+        <Text style={[styles.locationText, { color: textColor }]} numberOfLines={1}>
+          {location}
+        </Text>
+        <Text style={[styles.chevron, { color: textColor }]}>▾</Text>
+      </Pressable>
       <View style={styles.actions}>
         {onNotifications && (
           <Pressable onPress={onNotifications} style={styles.iconBtn} hitSlop={8}>
-            <Text style={styles.iconEmoji}>🔔</Text>
+            <Text style={[styles.iconEmoji, { color: iconColor }]}>🔔</Text>
           </Pressable>
         )}
         <Pressable onPress={onCart} style={styles.iconBtn} hitSlop={8}>
@@ -38,13 +56,10 @@ export function TopBar({ location = 'Deliver to · Baghdad', cartCount = 0, onCa
 const styles = StyleSheet.create({
   container: {
     height: 56,
-    backgroundColor: tokens.colors.bg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: tokens.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: tokens.colors.border,
   },
   locationRow: {
     flexDirection: 'row',
@@ -58,8 +73,11 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: tokens.fontSize.base,
     fontWeight: tokens.fontWeight.semibold,
-    color: tokens.colors.text,
     flex: 1,
+  },
+  chevron: {
+    fontSize: 14,
+    marginLeft: tokens.spacing.xs,
   },
   actions: {
     flexDirection: 'row',
