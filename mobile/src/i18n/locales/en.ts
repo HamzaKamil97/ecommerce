@@ -99,6 +99,7 @@ export const en = {
   'shop.open': 'Open',
   'shop.closed': 'Closed',
   'shop.deliveryMin': '{min} min',
+  'shop.reviewsCount': '({count})',
 
   // Cart screen (SP-B)
   'cart.myBasket': 'My Cart',
@@ -240,6 +241,10 @@ export const en = {
   'common.apply': 'Apply',
   'common.share': 'Share',
   'common.required': 'Required',
+  'common.remove': 'Remove',
+  'common.retry': 'Retry',
+  'common.close': 'Close',
+  'common.continue': 'Continue',
 
   // Shops (search) screen
   'shops.searchHeading': 'Search',
@@ -419,6 +424,42 @@ export const en = {
   // SP-A6 — Preview pills on AI surfaces
   'preview.label': 'Preview',
   'preview.aiDisclaimer': 'AI personalization — Preview mode',
+
+  // SP-A7 — Round-4 phone-test bundle
+  'auth.register.errorTitle': 'Could not create account',
+  'auth.login.errorTitle': 'Could not sign in',
+  'auth.validation.emailRequired': 'Email is required',
+  'auth.validation.emailInvalid': 'Enter a valid email',
+  'auth.validation.passwordRequired': 'Password is required',
+  'auth.validation.passwordShort': 'Password must be at least 6 characters',
+  'auth.validation.firstNameRequired': 'First name is required',
+  'auth.validation.lastNameRequired': 'Last name is required',
+  'auth.showPassword': 'Show password',
+  'auth.hidePassword': 'Hide password',
+  'auth.forgotPassword': 'Forgot password?',
+  'shop.searchPlaceholder': 'Search in this shop',
+  'shop.searchClear': 'Clear search',
+  'shop.noResults': 'No items match your search',
+  'shop.deliveryFee': 'Delivery {amount}',
+  'shop.freeDelivery': 'Free delivery',
+  'shop.proPill': 'Pro',
+  'shop.moreInfo': 'More info',
+  'checkout.haveCoupon': 'Have a coupon?',
+  'checkout.couponPlaceholder': 'Coupon code',
+  'checkout.couponApply': 'Apply',
+  'checkout.couponRemove': 'Remove',
+  'checkout.couponInvalid': 'Code invalid',
+  'checkout.couponNetworkError': 'Network error',
+  'category.food': 'Food',
+  'category.grocery': 'Grocery',
+  'category.fashion': 'Fashion',
+  'category.electronics': 'Electronics',
+  'category.home': 'Home',
+  'vertical.food': 'Food',
+  'vertical.grocery': 'Grocery',
+  'vertical.fashion': 'Fashion',
+  'vertical.electronics': 'Electronics',
+  'vertical.home': 'Home',
 } as const;
 
 export type EnDict = typeof en;

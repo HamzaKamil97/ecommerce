@@ -19,8 +19,7 @@ import { useCartStore } from '@/src/store/cartStore'
 import type { MerchCategory } from '@/src/lib/api/types'
 import { tokens } from '@/src/theme/tokens'
 
-import { ShopHero } from '@/src/components/shop/ShopHero'
-import { ShopInfoBar } from '@/src/components/shop/ShopInfoBar'
+import { ShopHeaderCard } from '@/src/components/shop/ShopHeaderCard'
 import { ShopSearchBox } from '@/src/components/shop/ShopSearchBox'
 import { ProductGridCard } from '@/src/components/shop/ProductGridCard'
 import {
@@ -32,6 +31,8 @@ import {
   type DemoProductCard,
 } from '@/src/components/home/demo-data'
 import { flyToCart } from '@/src/components/cart/FlyToCartHost'
+import { t } from '@/src/i18n'
+import { useLanguageStore } from '@/src/store/languageStore'
 
 // Product from API may include categories; extend locally rather than mutating
 // the shared Product type.
@@ -68,6 +69,7 @@ function useSlug(): string {
 }
 
 export default function ShopDetailScreen() {
+  useLanguageStore((s) => s.locale)
   const slug = useSlug()
   const router = useRouter()
   const itemCount: number = useCartStore((s) => s.itemCount())
@@ -81,6 +83,7 @@ export default function ShopDetailScreen() {
   const [demoProducts, setDemoProducts] = useState<DemoProductCard[]>([])
   const [merch, setMerch] = useState<MerchCategory[]>([])
   const [activeMerch, setActiveMerch] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   // loading starts false when we already have a slug (avoids hydration spinner freeze)
   const [loading, setLoading] = useState(true)
 
@@ -200,14 +203,23 @@ export default function ShopDetailScreen() {
   }
 
   // Filter real products by active merch handle (via categories on the product)
-  const activeProducts: ProductWithCats[] = activeMerch
+  const merchFiltered: ProductWithCats[] = activeMerch
     ? products.filter((p) =>
         p.categories?.some((c) => c.handle === activeMerch)
       )
     : products
 
+  // Apply live in-shop search query
+  const q = searchQuery.trim().toLowerCase()
+  const activeProducts: ProductWithCats[] = q
+    ? merchFiltered.filter((p) => (p.title ?? '').toLowerCase().includes(q))
+    : merchFiltered
+  const filteredDemoProducts: DemoProductCard[] = q
+    ? demoProducts.filter((p) => (p.title ?? '').toLowerCase().includes(q))
+    : demoProducts
+
   // Unified list: prefer real products, fall back to demo
-  const useDemoProducts = activeProducts.length === 0 && demoProducts.length > 0
+  const useDemoProducts = activeProducts.length === 0 && filteredDemoProducts.length > 0
   // shop is guaranteed non-null here (null case returned above)
   const shopName = shop.name
 
@@ -293,28 +305,26 @@ export default function ShopDetailScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView style={styles.scroll} stickyHeaderIndices={[3]}>
-        {/* 1. Hero cover image */}
-        <ShopHero
+        {/* 1+2. Talabat-style header: cover + overlapping info card */}
+        <ShopHeaderCard
           coverUrl={coverUrl}
+          logoUrl={logoUrl}
+          name={shop.name}
+          vertical={shop.vertical ?? emojiForVertical(shop.vertical)}
+          rating={meta.rating}
+          ratingCount={meta.ratingCount}
+          deliveryMinutes={meta.deliveryMinutes}
+          deliveryFee={meta.deliveryFee}
+          minOrder={meta.minOrder}
+          isOpen={meta.isOpen}
           onBack={() => router.back()}
-          onFavorite={() => {}}
-          onShare={() => {}}
-        />
-
-        {/* 2. Shop info bar — overlaps hero via negative marginTop inside component */}
-        <ShopInfoBar
-          shop={{
-            name: shop.name,
-            logoUrl,
-            vertical: shop.vertical ?? emojiForVertical(shop.vertical),
-            ...meta,
-          }}
         />
 
         {/* 3. Search within shop */}
         <ShopSearchBox
           shopName={shop.name}
-          onPress={() => router.push('/(tabs)/shops' as never)}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
 
         {/* 4. Merch tabs — sticky via stickyHeaderIndices={[3]} */}
@@ -332,7 +342,7 @@ export default function ShopDetailScreen() {
         <View style={styles.gridSection}>
           {useDemoProducts ? (
             <FlatList
-              data={demoProducts}
+              data={filteredDemoProducts}
               numColumns={2}
               keyExtractor={(p) => p.id}
               scrollEnabled={false}
@@ -387,10 +397,15 @@ export default function ShopDetailScreen() {
                 )
               }}
             />
+          ) : q ? (
+            <EmptyState
+              title={t('shop.noResults')}
+              subtitle={undefined}
+            />
           ) : (
             <EmptyState
-              title="No products yet"
-              subtitle="This shop hasn't published any products. Check back soon."
+              title={t('shop.empty.title')}
+              subtitle={t('shop.empty.subtitle')}
             />
           )}
         </View>
