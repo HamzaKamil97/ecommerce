@@ -61,6 +61,8 @@ export default function SearchScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
+            numberOfLines={1}
+            multiline={false}
           />
           {hasQuery && (
             <Pressable onPress={() => setQuery('')} hitSlop={8} style={styles.clearBtn}>
@@ -148,7 +150,8 @@ const styles = StyleSheet.create({
     marginBottom: tokens.spacing.sm,
   },
   searchPill: {
-    height: 44,
+    height: 48,
+    maxHeight: 48,
     backgroundColor: tokens.colors.surface,
     borderRadius: tokens.radius.pill,
     flexDirection: 'row',
@@ -157,6 +160,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tokens.colors.border,
     gap: tokens.spacing.sm,
+    overflow: 'hidden',
   },
   searchIcon: {
     fontSize: 16,

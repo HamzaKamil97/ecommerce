@@ -22,6 +22,8 @@ export function TopBar({
 }: Props) {
   const textColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
   const iconColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
+  const cartBg =
+    tone === 'light' ? 'rgba(255,255,255,0.18)' : tokens.colors.surface
 
   return (
     <View style={styles.container}>
@@ -37,12 +39,28 @@ export function TopBar({
       </Pressable>
       <View style={styles.actions}>
         {onNotifications && (
-          <Pressable onPress={onNotifications} style={styles.iconBtn} hitSlop={8}>
+          <Pressable
+            onPress={onNotifications}
+            style={({ pressed }) => [
+              styles.cartPill,
+              { backgroundColor: cartBg },
+              pressed && { opacity: 0.8 },
+            ]}
+            hitSlop={8}
+          >
             <Ionicons name="notifications-outline" size={22} color={iconColor} />
           </Pressable>
         )}
-        <Pressable onPress={onCart} style={styles.iconBtn} hitSlop={8}>
-          <Ionicons name="bag-outline" size={22} color={iconColor} />
+        <Pressable
+          onPress={onCart}
+          style={({ pressed }) => [
+            styles.cartPill,
+            { backgroundColor: cartBg },
+            pressed && { opacity: 0.8 },
+          ]}
+          hitSlop={8}
+        >
+          <Ionicons name="bag-handle-outline" size={22} color={iconColor} />
           {cartCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{cartCount > 99 ? '99+' : String(cartCount)}</Text>
@@ -68,44 +86,37 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: tokens.spacing.xs,
   },
-  pin: {
-    fontSize: 16,
-  },
   locationText: {
     fontSize: tokens.fontSize.base,
     fontWeight: tokens.fontWeight.semibold,
     flex: 1,
-  },
-  chevron: {
-    fontSize: 14,
-    marginLeft: tokens.spacing.xs,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: tokens.spacing.sm,
   },
-  iconBtn: {
-    width: 36,
-    height: 36,
+  cartPill: {
+    width: 40,
+    height: 40,
+    borderRadius: tokens.radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
-  iconEmoji: {
-    fontSize: 22,
-  },
   badge: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    top: -4,
+    right: -4,
     backgroundColor: tokens.colors.accent,
     borderRadius: tokens.radius.pill,
-    minWidth: 16,
-    height: 16,
+    minWidth: 18,
+    height: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: tokens.colors.primary,
   },
   badgeText: {
     fontSize: tokens.fontSize.xs,

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView, ScrollView, View, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,6 +10,7 @@ import { useLanguageStore } from '@/src/store/languageStore'
 
 import { TopBar } from '@/src/components/home/TopBar'
 import { SearchBox } from '@/src/components/home/SearchBox'
+import { FilterSheet } from '@/src/components/home/FilterSheet'
 import { ContentSection } from '@/src/components/home/ContentSection'
 import { DEMO_HOME_LAYOUT } from '@/src/data/homeLayout'
 
@@ -19,6 +20,7 @@ export default function HomeScreen() {
   const itemCount: number = useCartStore((s) => s.itemCount())
   const token = useAuthToken()
   useLanguageStore((s) => s.locale)
+  const [filterOpen, setFilterOpen] = useState(false)
 
   function onLocationPress() {
     if (token) {
@@ -66,7 +68,7 @@ export default function HomeScreen() {
             <SearchBox
               placeholder={t('home.searchPlaceholder')}
               onPress={() => router.push('/(tabs)/shops' as never)}
-              onFilter={() => router.push('/(tabs)/shops' as never)}
+              onFilter={() => setFilterOpen(true)}
             />
           </View>
 
@@ -82,6 +84,8 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
+
+      <FilterSheet visible={filterOpen} onClose={() => setFilterOpen(false)} />
     </SafeAreaView>
   )
 }

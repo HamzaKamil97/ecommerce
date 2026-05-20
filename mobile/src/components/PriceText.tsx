@@ -1,5 +1,5 @@
-import { Text, TextStyle, View } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { Text, TextStyle, View, StyleSheet } from 'react-native';
+import { tokens } from '../theme/tokens';
 
 interface PriceTextProps {
   /** Always in minor units of `currencyCode` (cents for USD, integer for IQD). */
@@ -28,7 +28,6 @@ export function PriceText({
   showSecondary = false,
   style,
 }: PriceTextProps) {
-  const { colors, typography } = useTheme();
   if (amount == null) return null;
   const upper = currencyCode.toUpperCase();
   const primary = upper === 'IQD' ? formatIQD(amount) : formatUSD(amount);
@@ -44,10 +43,21 @@ export function PriceText({
 
   return (
     <View>
-      <Text style={[typography.heading, { color: colors.text }, style]}>{primary}</Text>
-      {secondary && (
-        <Text style={[typography.caption, { color: colors.textMuted }]}>{secondary}</Text>
-      )}
+      <Text style={[styles.primary, style]}>{primary}</Text>
+      {secondary && <Text style={styles.secondary}>{secondary}</Text>}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  primary: {
+    fontSize: tokens.fontSize.xl,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.primary,
+  },
+  secondary: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.textMuted,
+    marginTop: 2,
+  },
+});

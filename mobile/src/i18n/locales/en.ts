@@ -198,6 +198,24 @@ export const en = {
   'home.trendingNearYou': 'Trending near you',
   'home.popularInBreakfast': 'Most popular in breakfast',
   'home.inspiredByPast': 'Inspired by your past orders',
+
+  // SP-1.4 — round-2 phone-test polish
+  'shop.openNow': 'Open now',
+  'shop.closedNow': 'Closed',
+  'home.filters.title': 'Filters',
+  'home.filters.vertical': 'Category',
+  'home.filters.deliveryTime': 'Delivery time',
+  'home.filters.rating': 'Rating',
+  'home.filters.sort': 'Sort by',
+  'home.filters.under30': 'Under 30 min',
+  'home.filters.30to60': '30–60 min',
+  'home.filters.rating4': '4.0+ stars',
+  'home.filters.rating45': '4.5+ stars',
+  'home.filters.sortDistance': 'Distance',
+  'home.filters.sortRating': 'Rating',
+  'home.filters.sortDelivery': 'Delivery time',
+  'home.filters.clear': 'Clear',
+  'home.filters.apply': 'Apply',
 } as const;
 
 export type EnDict = typeof en;

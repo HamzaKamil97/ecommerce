@@ -312,7 +312,10 @@ export default function ShopDetailScreen() {
         />
 
         {/* 3. Search within shop */}
-        <ShopSearchBox shopName={shop.name} onPress={() => {}} />
+        <ShopSearchBox
+          shopName={shop.name}
+          onPress={() => router.push('/(tabs)/shops' as never)}
+        />
 
         {/* 4. Merch tabs — sticky via stickyHeaderIndices={[3]} */}
         {merch.length > 0 ? (

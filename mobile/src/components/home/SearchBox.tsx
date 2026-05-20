@@ -35,7 +35,8 @@ export function SearchBox({
 
 const styles = StyleSheet.create({
   container: {
-    height: 44,
+    height: 48,
+    maxHeight: 48,
     backgroundColor: tokens.colors.surface,
     borderRadius: tokens.radius.pill,
     flexDirection: 'row',
@@ -43,6 +44,7 @@ const styles = StyleSheet.create({
     paddingLeft: tokens.spacing.md,
     borderWidth: 1,
     borderColor: tokens.colors.border,
+    overflow: 'hidden',
   },
   searchArea: {
     flex: 1,

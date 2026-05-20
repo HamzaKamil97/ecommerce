@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 
@@ -11,8 +12,12 @@ interface Props {
 export function ShopSearchBox({ shopName, onPress }: Props) {
   return (
     <View style={styles.wrapper}>
-      <Pressable onPress={onPress} style={styles.container}>
-        <Text style={styles.icon}>🔍</Text>
+      <Pressable
+        onPress={onPress}
+        hitSlop={8}
+        style={({ pressed }) => [styles.container, pressed && { opacity: 0.85 }]}
+      >
+        <Ionicons name="search" size={18} color={tokens.colors.textMuted} />
         <Text style={styles.placeholder} numberOfLines={1}>
           {t('shop.searchIn', { shopName })}
         </Text>
@@ -28,7 +33,8 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.bg,
   },
   container: {
-    height: 44,
+    height: 48,
+    maxHeight: 48,
     backgroundColor: tokens.colors.surface,
     borderRadius: tokens.radius.pill,
     flexDirection: 'row',
@@ -37,9 +43,6 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.sm,
     borderWidth: 1,
     borderColor: tokens.colors.border,
-  },
-  icon: {
-    fontSize: 16,
   },
   placeholder: {
     flex: 1,

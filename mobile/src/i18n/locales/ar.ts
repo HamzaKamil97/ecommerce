@@ -200,4 +200,22 @@ export const ar: any = {
   'home.trendingNearYou': 'رائج بالقرب منك',
   'home.popularInBreakfast': 'الأكثر شعبية في الإفطار',
   'home.inspiredByPast': 'مستوحى من طلباتك السابقة',
+
+  // SP-1.4 — round-2 phone-test polish
+  'shop.openNow': 'مفتوح الآن',
+  'shop.closedNow': 'مغلق',
+  'home.filters.title': 'الفلاتر',
+  'home.filters.vertical': 'الفئة',
+  'home.filters.deliveryTime': 'وقت التوصيل',
+  'home.filters.rating': 'التقييم',
+  'home.filters.sort': 'ترتيب حسب',
+  'home.filters.under30': 'أقل من 30 دقيقة',
+  'home.filters.30to60': '30–60 دقيقة',
+  'home.filters.rating4': '4.0+ نجوم',
+  'home.filters.rating45': '4.5+ نجوم',
+  'home.filters.sortDistance': 'المسافة',
+  'home.filters.sortRating': 'التقييم',
+  'home.filters.sortDelivery': 'وقت التوصيل',
+  'home.filters.clear': 'مسح',
+  'home.filters.apply': 'تطبيق',
 }

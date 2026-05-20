@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 export interface ShopRowData {
   slug: string
@@ -44,9 +45,13 @@ export function ShopRow({ shop, onPress }: Props) {
       </View>
       <View style={styles.right}>
         <View style={[styles.statusBadge, shop.isOpen ? styles.openBadge : styles.closedBadge]}>
-          <View style={[styles.statusDot, { backgroundColor: shop.isOpen ? tokens.colors.success : tokens.colors.danger }]} />
+          <Ionicons
+            name={shop.isOpen ? 'time-outline' : 'close-circle-outline'}
+            size={12}
+            color={shop.isOpen ? tokens.colors.success : tokens.colors.danger}
+          />
           <Text style={[styles.statusText, shop.isOpen ? styles.openText : styles.closedText]}>
-            {shop.isOpen ? 'OPEN' : 'CLOSED'}
+            {shop.isOpen ? t('shop.openNow') : t('shop.closedNow')}
           </Text>
         </View>
       </View>
@@ -123,19 +128,13 @@ const styles = StyleSheet.create({
     gap: 4,
     borderRadius: tokens.radius.pill,
     paddingHorizontal: tokens.spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
   },
-  openBadge: { backgroundColor: tokens.colors.success + '22' },
-  closedBadge: { backgroundColor: tokens.colors.danger + '18' },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
+  openBadge: { backgroundColor: tokens.colors.success + '15' },
+  closedBadge: { backgroundColor: tokens.colors.danger + '12' },
   statusText: {
-    fontSize: 10,
-    fontWeight: tokens.fontWeight.bold,
-    letterSpacing: 0.4,
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.semibold,
   },
   openText: { color: tokens.colors.success },
   closedText: { color: tokens.colors.danger },
