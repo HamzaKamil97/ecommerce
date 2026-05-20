@@ -14,6 +14,9 @@ export const en = {
   'home.empty.subtitle': 'Try a different search or category.',
 
   // Tabs
+  'tab.home': 'Home',
+  'tab.browse': 'Browse',
+  'tab.me': 'Me',
   'tab.shop': 'Shop',
   'tab.shops': 'Shops',
   'tab.cart': 'Cart',

@@ -16,6 +16,9 @@ export const ar: any = {
   'home.empty.subtitle': 'جرّب بحثًا مختلفًا أو فئة أخرى.',
 
   // Tabs
+  'tab.home': 'الرئيسية',
+  'tab.browse': 'تصفح',
+  'tab.me': 'حسابي',
   'tab.shop': 'تسوّق',
   'tab.shops': 'المتاجر',
   'tab.cart': 'السلة',
