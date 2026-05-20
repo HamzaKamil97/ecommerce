@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react'
 import { View, Text, TextInput, ScrollView, SafeAreaView, Pressable, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
+import { useLanguageStore } from '@/src/store/languageStore'
 import { FilterChips, ChipDef } from '@/src/components/FilterChips'
 import { ShopRow } from '@/src/components/home/ShopRow'
 import { EmptyState } from '@/src/components/EmptyState'
@@ -9,17 +11,19 @@ import { DEMO_SHOPS } from '@/src/components/home/demo-data'
 
 const RECENT_SEARCHES = ['Pizza', 'Iced coffee', 'Headphones', 'Fresh milk', 'Electronics']
 
-const INITIAL_CHIPS: ChipDef[] = [
-  { id: 'all', label: 'All', active: true },
-  { id: 'food', label: 'Food', active: false },
-  { id: 'grocery', label: 'Grocery', active: false },
-  { id: 'fast-delivery', label: 'Fast delivery', active: false, prefix: '⚡' },
-  { id: 'open', label: 'Open now', active: false },
-]
-
 export default function SearchScreen() {
+  useLanguageStore((s) => s.locale)
   const router = useRouter()
   const [query, setQuery] = useState('')
+
+  const INITIAL_CHIPS: ChipDef[] = useMemo(() => [
+    { id: 'all', label: t('shops.chip.all'), active: true },
+    { id: 'food', label: t('shops.chip.food'), active: false },
+    { id: 'grocery', label: t('shops.chip.grocery'), active: false },
+    { id: 'fast-delivery', label: t('shops.chip.fastDelivery'), active: false, prefix: '⚡' },
+    { id: 'open', label: t('shops.chip.openNow'), active: false },
+  ], [])
+
   const [chips, setChips] = useState<ChipDef[]>(INITIAL_CHIPS)
 
   const activeChip = chips.find((c) => c.active)?.id ?? 'all'
@@ -49,12 +53,12 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.root}>
       {/* Search input */}
       <View style={styles.searchHeader}>
-        <Text style={styles.heading}>Search</Text>
+        <Text style={styles.heading}>{t('shops.searchHeading')}</Text>
         <View style={styles.searchPill}>
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="Shops, food, categories…"
+            placeholder={t('shops.searchPlaceholder')}
             placeholderTextColor={tokens.colors.textMuted}
             value={query}
             onChangeText={setQuery}
@@ -89,7 +93,7 @@ export default function SearchScreen() {
       >
         {!hasQuery && (
           <>
-            <Text style={styles.sectionLabel}>Recent searches</Text>
+            <Text style={styles.sectionLabel}>{t('shops.recentSearches')}</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -106,15 +110,15 @@ export default function SearchScreen() {
               ))}
             </ScrollView>
 
-            <Text style={styles.sectionLabel}>All shops</Text>
+            <Text style={styles.sectionLabel}>{t('shops.allShops')}</Text>
           </>
         )}
 
         {filtered.length === 0 ? (
           <View style={styles.emptyWrapper}>
             <EmptyState
-              title="No results"
-              subtitle={`No shops found for "${query}"`}
+              title={t('shops.noResultsTitle')}
+              subtitle={t('shops.noResultsSubtitle', { query })}
             />
           </View>
         ) : (

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { listProductReviews, submitProductReview, ProductReview, ReviewStats } from '@/src/api/reviews';
 import { AppButton } from '@/src/components/AppButton';
@@ -9,6 +11,7 @@ import { EmptyState } from '@/src/components/EmptyState';
 import { StarRating } from '@/src/components/StarRating';
 
 export default function ProductReviewsScreen() {
+  useLanguageStore((s) => s.locale);
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const customer = useAuthStore((s) => s.customer);
   const [reviews, setReviews] = useState<ProductReview[]>([]);
@@ -67,7 +70,7 @@ export default function ProductReviewsScreen() {
               <Text style={{ fontSize: 48, fontWeight: '700', color: tokens.colors.text }}>{stats.average.toFixed(1)}</Text>
               <StarRating value={Math.round(stats.average)} size={20} />
               <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted }}>
-                {stats.count} {stats.count === 1 ? 'review' : 'reviews'}
+                {stats.count} {stats.count === 1 ? t('reviews.reviewSingular') : t('reviews.reviewPlural')}
               </Text>
             </View>
 
@@ -100,17 +103,17 @@ export default function ProductReviewsScreen() {
                   gap: tokens.spacing.md,
                 }}
               >
-                <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Leave a review</Text>
+                <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('reviews.leave')}</Text>
                 <StarRating value={rating} size={28} editable onChange={setRating} />
                 <TextInput
-                  placeholder="Title (optional)"
+                  placeholder={t('reviews.titlePlaceholder')}
                   placeholderTextColor={tokens.colors.textMuted}
                   value={title}
                   onChangeText={setTitle}
                   style={{ backgroundColor: tokens.colors.bg, color: tokens.colors.text, padding: tokens.spacing.md, borderRadius: tokens.radius.md }}
                 />
                 <TextInput
-                  placeholder="Tell others about your experience…"
+                  placeholder={t('reviews.bodyPlaceholder')}
                   placeholderTextColor={tokens.colors.textMuted}
                   value={body}
                   onChangeText={setBody}
@@ -125,14 +128,14 @@ export default function ProductReviewsScreen() {
                     textAlignVertical: 'top',
                   }}
                 />
-                <AppButton title="Submit review" onPress={onSubmit} loading={submitting} disabled={!rating} />
+                <AppButton title={t('reviews.submit')} onPress={onSubmit} loading={submitting} disabled={!rating} />
               </View>
             )}
 
-            <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>All reviews</Text>
+            <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('reviews.all')}</Text>
           </View>
         }
-        ListEmptyComponent={<EmptyState title="No reviews yet" subtitle="Be the first to share your experience." />}
+        ListEmptyComponent={<EmptyState title={t('reviews.empty.title')} subtitle={t('reviews.empty.subtitle')} />}
         renderItem={({ item }) => (
           <View style={{ backgroundColor: tokens.colors.surface, borderRadius: tokens.radius.md, padding: tokens.spacing.md, gap: 4 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -146,7 +149,7 @@ export default function ProductReviewsScreen() {
             )}
             {item.body && <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>{item.body}</Text>}
             {item.is_verified_purchase && (
-              <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.success, marginTop: 2 }}>✓ Verified purchase</Text>
+              <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.success, marginTop: 2 }}>{t('reviews.verified')}</Text>
             )}
             {item.vendor_reply && (
               <View
@@ -157,7 +160,7 @@ export default function ProductReviewsScreen() {
                   borderLeftColor: tokens.colors.primary,
                 }}
               >
-                <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, fontWeight: '600' }}>Shop reply:</Text>
+                <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, fontWeight: '600' }}>{t('reviews.shopReply')}</Text>
                 <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text }}>{item.vendor_reply}</Text>
               </View>
             )}

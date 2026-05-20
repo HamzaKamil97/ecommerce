@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/src/store/authStore';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { t } from '@/src/i18n';
 import { tokens } from '@/src/theme/tokens';
 import { AppButton } from '@/src/components/AppButton';
 
@@ -21,14 +22,14 @@ export default function RegisterScreen() {
 
   const onSubmit = async () => {
     setError(null);
-    if (!firstName.trim()) { setError('First name is required'); return; }
-    if (!email.trim()) { setError('Email is required'); return; }
-    if (!password.trim()) { setError('Password is required'); return; }
+    if (!firstName.trim()) { setError(t('auth.error.firstNameRequired')); return; }
+    if (!email.trim()) { setError(t('auth.error.emailRequired')); return; }
+    if (!password.trim()) { setError(t('auth.error.passwordRequired')); return; }
     try {
       await register({ email, password, first_name: firstName, last_name: lastName, phone: phone || undefined });
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Registration failed');
+      setError(e?.response?.data?.message ?? t('auth.error.registerFailed'));
     }
   };
 
@@ -43,23 +44,23 @@ export default function RegisterScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.md }} keyboardShouldPersistTaps="handled">
-        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>Create account</Text>
+        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>{t('auth.createAccount')}</Text>
         <TextInput
-          placeholder="First name *"
+          placeholder={t('auth.firstName.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           value={firstName}
           onChangeText={setFirstName}
           style={inputStyle}
         />
         <TextInput
-          placeholder="Last name"
+          placeholder={t('auth.lastName.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           value={lastName}
           onChangeText={setLastName}
           style={inputStyle}
         />
         <TextInput
-          placeholder="Email *"
+          placeholder={t('auth.emailRequired.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -68,7 +69,7 @@ export default function RegisterScreen() {
           style={inputStyle}
         />
         <TextInput
-          placeholder="Phone (optional)"
+          placeholder={t('auth.phone.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           keyboardType="phone-pad"
           value={phone}
@@ -76,7 +77,7 @@ export default function RegisterScreen() {
           style={inputStyle}
         />
         <TextInput
-          placeholder="Password *"
+          placeholder={t('auth.passwordRequired.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           secureTextEntry
           value={password}
@@ -84,9 +85,9 @@ export default function RegisterScreen() {
           style={inputStyle}
         />
         {error ? <Text style={{ color: tokens.colors.danger }}>{error}</Text> : null}
-        <AppButton title="Create account" onPress={onSubmit} loading={isLoading} />
+        <AppButton title={t('auth.createAccount')} onPress={onSubmit} loading={isLoading} />
         <AppButton
-          title="Already have an account? Log in"
+          title={t('auth.haveAccount')}
           variant="secondary"
           onPress={() => router.replace('/auth/login')}
         />

@@ -11,6 +11,7 @@ import {
 import { StatusBar } from "expo-status-bar"
 import { useRouter } from "expo-router"
 import { t } from "@/src/i18n"
+import { useLanguageStore } from "@/src/store/languageStore"
 import { useCartStore } from "@/src/store/cartStore"
 import {
   listAddresses,
@@ -36,6 +37,7 @@ const colors = {
 }
 
 export default function CheckoutScreen() {
+  useLanguageStore((s) => s.locale)
   const router = useRouter()
   const token = useAuthToken()
   const cart = useCartStore()
@@ -76,11 +78,11 @@ export default function CheckoutScreen() {
   async function place() {
     setError(null)
     if (!cart.shop_slug) {
-      setError("Cart is empty")
+      setError(t('checkout.cartEmpty'))
       return
     }
     if (!selected && !inlineAddress) {
-      setError("Please add a delivery address")
+      setError(t('checkout.addAddressFirst'))
       return
     }
     setSubmitting(true)
@@ -120,13 +122,13 @@ export default function CheckoutScreen() {
           >
             <Text style={{ fontSize: 20 }}>{"<"}</Text>
           </TouchableOpacity>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>Checkout</Text>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>{t('checkout.title')}</Text>
         </View>
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
         {/* Address */}
-        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>DELIVER TO</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('checkout.deliverTo')}</Text>
         <TouchableOpacity
           onPress={() => setPickerOpen(true)}
           style={[styles.card, { borderColor: colors.border }]}
@@ -134,7 +136,7 @@ export default function CheckoutScreen() {
           {selected ? (
             <View>
               <Text style={{ fontWeight: "700", color: colors.text }}>
-                {selected.label ?? "Address"}
+                {selected.label ?? t('checkout.address.fallback')}
               </Text>
               <Text style={{ color: colors.textMuted, fontSize: 12 }}>
                 {selected.recipient_name ?? ""} · {selected.phone ?? ""}
@@ -148,7 +150,7 @@ export default function CheckoutScreen() {
           ) : inlineAddress ? (
             <View>
               <Text style={{ fontWeight: "700", color: colors.text }}>
-                {inlineAddress.label ?? "Address"}
+                {inlineAddress.label ?? t('checkout.address.fallback')}
               </Text>
               <Text style={{ color: colors.textMuted, fontSize: 12 }}>
                 {inlineAddress.recipient_name} · {inlineAddress.phone}
@@ -161,40 +163,40 @@ export default function CheckoutScreen() {
             </View>
           ) : (
             <Text style={{ color: colors.primary, fontWeight: "600" }}>
-              + Add delivery address
+              {t('checkout.address.add')}
             </Text>
           )}
         </TouchableOpacity>
 
         {/* Delivery instructions */}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 22 }]}>
-          DELIVERY INSTRUCTIONS
+          {t('checkout.deliveryInstructions')}
         </Text>
         <TextInput
           multiline
           value={cart.delivery_notes}
           onChangeText={cart.setDeliveryNotes}
-          placeholder="Blue gate near pharmacy, call when arrived..."
+          placeholder={t('checkout.deliveryInstructions.placeholder')}
           placeholderTextColor={colors.textMuted}
           style={[styles.notesInput, { borderColor: colors.border, color: colors.text }]}
         />
 
         {/* Coupon */}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 22 }]}>
-          COUPON
+          {t('checkout.coupon')}
         </Text>
         <CouponRow />
 
         {/* Payment */}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 22 }]}>
-          PAYMENT
+          {t('checkout.payment')}
         </Text>
         <View style={[styles.paymentCard, { borderColor: colors.border }]}>
           <Text style={{ fontSize: 22 }}>$</Text>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: "700", color: colors.text }}>Cash on Delivery</Text>
+            <Text style={{ fontWeight: "700", color: colors.text }}>{t('checkout.payment.cod')}</Text>
             <Text style={{ color: colors.textMuted, fontSize: 12 }}>
-              Pay the rider on delivery
+              {t('checkout.payment.codSubtitle')}
             </Text>
           </View>
           <View
@@ -213,30 +215,30 @@ export default function CheckoutScreen() {
 
         {/* Summary */}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 22 }]}>
-          SUMMARY
+          {t('checkout.summarySection')}
         </Text>
         <View style={[styles.summaryCard, { backgroundColor: colors.surface }]}>
           <View style={styles.summaryRow}>
             <Text style={{ color: colors.textMuted }}>
-              {cart.items.length} items from {cart.shop_name ?? "the shop"}
+              {t('checkout.summary.itemsFrom', { count: cart.items.length, shop: cart.shop_name ?? t('checkout.summary.theShop') })}
             </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={{ color: colors.textMuted }}>Subtotal</Text>
+            <Text style={{ color: colors.textMuted }}>{t('checkout.summary.subtotal')}</Text>
             <Text style={{ color: colors.text }}>
               {formatMinor(subtotal, cart.shop_display_currency)}
             </Text>
           </View>
           {discount > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={{ color: colors.success }}>Discount</Text>
+              <Text style={{ color: colors.success }}>{t('checkout.summary.discount')}</Text>
               <Text style={{ color: colors.success }}>
                 -{formatMinor(discount, cart.shop_display_currency)}
               </Text>
             </View>
           )}
           <View style={styles.summaryRow}>
-            <Text style={{ color: colors.textMuted }}>Delivery fee</Text>
+            <Text style={{ color: colors.textMuted }}>{t('checkout.summary.deliveryFee')}</Text>
             <Text style={{ color: colors.text }}>
               {formatMinor(deliveryFee, cart.shop_display_currency)}
             </Text>
@@ -252,7 +254,7 @@ export default function CheckoutScreen() {
               },
             ]}
           >
-            <Text style={{ fontWeight: "700", fontSize: 16, color: colors.text }}>Total</Text>
+            <Text style={{ fontWeight: "700", fontSize: 16, color: colors.text }}>{t('checkout.summary.total')}</Text>
             <Text style={{ fontWeight: "700", fontSize: 16, color: colors.text }}>
               {formatMinor(total, cart.shop_display_currency)}
             </Text>
@@ -311,7 +313,7 @@ export default function CheckoutScreen() {
           ]}
         >
           <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>
-            {submitting ? "Placing..." : "Place order"}
+            {submitting ? t('checkout.placing') : t('checkout.place')}
           </Text>
           {!submitting && (
             <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>

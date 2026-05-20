@@ -3,9 +3,12 @@ import { View, Text, TextInput, SafeAreaView, ScrollView, StyleSheet } from 'rea
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/src/store/authStore';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { AppButton } from '@/src/components/AppButton';
 
 export default function EditProfileScreen() {
+  useLanguageStore((s) => s.locale);
   const router = useRouter();
   const customer = useAuthStore((s) => s.customer);
   const updateProfile = useAuthStore((s) => s.updateProfile);
@@ -18,58 +21,58 @@ export default function EditProfileScreen() {
 
   const handleSave = async () => {
     setError(null);
-    if (!firstName.trim()) { setError('First name is required'); return; }
+    if (!firstName.trim()) { setError(t('profile.edit.firstNameRequired')); return; }
     try {
       await updateProfile({ first_name: firstName, last_name: lastName, phone: phone || undefined });
       router.back();
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Failed to update profile');
+      setError(e?.response?.data?.message ?? t('profile.edit.updateError'));
     }
   };
 
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <Text style={styles.sectionLabel}>Personal info</Text>
+        <Text style={styles.sectionLabel}>{t('profile.edit.section')}</Text>
 
         <View style={styles.fieldWrapper}>
-          <Text style={styles.fieldLabel}>First name *</Text>
+          <Text style={styles.fieldLabel}>{t('profile.edit.firstName')}</Text>
           <TextInput
             value={firstName}
             onChangeText={setFirstName}
-            placeholder="First name"
+            placeholder={t('profile.edit.firstNamePlaceholder')}
             placeholderTextColor={tokens.colors.textSubtle}
             style={styles.input}
           />
         </View>
 
         <View style={styles.fieldWrapper}>
-          <Text style={styles.fieldLabel}>Last name</Text>
+          <Text style={styles.fieldLabel}>{t('profile.edit.lastName')}</Text>
           <TextInput
             value={lastName}
             onChangeText={setLastName}
-            placeholder="Last name"
+            placeholder={t('profile.edit.lastNamePlaceholder')}
             placeholderTextColor={tokens.colors.textSubtle}
             style={styles.input}
           />
         </View>
 
         <View style={styles.fieldWrapper}>
-          <Text style={styles.fieldLabel}>Email</Text>
+          <Text style={styles.fieldLabel}>{t('profile.edit.email')}</Text>
           <TextInput
             value={customer?.email ?? ''}
             editable={false}
             style={[styles.input, styles.inputDisabled]}
           />
-          <Text style={styles.hint}>Email cannot be changed here.</Text>
+          <Text style={styles.hint}>{t('profile.edit.emailHint')}</Text>
         </View>
 
         <View style={styles.fieldWrapper}>
-          <Text style={styles.fieldLabel}>Phone</Text>
+          <Text style={styles.fieldLabel}>{t('profile.edit.phone')}</Text>
           <TextInput
             value={phone}
             onChangeText={setPhone}
-            placeholder="+964 7xx xxx xxxx"
+            placeholder={t('profile.edit.phonePlaceholder')}
             placeholderTextColor={tokens.colors.textSubtle}
             keyboardType="phone-pad"
             style={styles.input}
@@ -78,8 +81,8 @@ export default function EditProfileScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <AppButton title="Save changes" onPress={handleSave} loading={isLoading} />
-        <AppButton title="Cancel" variant="secondary" onPress={() => router.back()} />
+        <AppButton title={t('profile.edit.save')} onPress={handleSave} loading={isLoading} />
+        <AppButton title={t('common.cancel')} variant="secondary" onPress={() => router.back()} />
       </ScrollView>
     </SafeAreaView>
   );

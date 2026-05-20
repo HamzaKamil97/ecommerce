@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { FlatList, RefreshControl, SafeAreaView, Text, View, Pressable } from 'react-native';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { listNotifications, markRead, Notification } from '@/src/api/notifications';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function NotificationsScreen() {
+  useLanguageStore((s) => s.locale);
   const customer = useAuthStore((s) => s.customer);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -38,7 +41,7 @@ export default function NotificationsScreen() {
   if (!customer) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
-        <EmptyState title="Log in to see notifications" subtitle="Go to Profile → Log in." />
+        <EmptyState title={t('notifications.loginRequired.title')} subtitle={t('notifications.loginRequired.subtitle')} />
       </SafeAreaView>
     );
   }
@@ -46,10 +49,10 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
       <View style={{ padding: tokens.spacing.lg }}>
-        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>Notifications</Text>
+        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>{t('notifications.title')}</Text>
         {unread > 0 && (
           <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, marginTop: 4 }}>
-            {unread} unread
+            {t('notifications.unread', { count: unread })}
           </Text>
         )}
       </View>
@@ -59,7 +62,7 @@ export default function NotificationsScreen() {
         keyExtractor={(n) => n.id}
         contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.sm }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tokens.colors.text} />}
-        ListEmptyComponent={<EmptyState title="No notifications yet" subtitle="Your order updates and offers will appear here." />}
+        ListEmptyComponent={<EmptyState title={t('notifications.empty.title')} subtitle={t('notifications.empty.subtitle')} />}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => onTap(item)}

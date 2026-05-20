@@ -5,10 +5,13 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import * as addressApi from '@/src/api/addresses';
 import type { Address } from '@/src/api/addresses';
 
 export default function AddressListScreen() {
+  useLanguageStore((s) => s.locale);
   const router = useRouter();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +32,10 @@ export default function AddressListScreen() {
   useFocusEffect(useCallback(() => { setLoading(true); load(); }, [load]));
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete address', 'Remove this address?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('addresses.deleteConfirm.title'), t('addresses.deleteConfirm.message'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete', style: 'destructive', onPress: async () => {
+        text: t('common.delete'), style: 'destructive', onPress: async () => {
           await addressApi.deleteAddress(id);
           setAddresses((prev) => prev.filter((a) => a.id !== id));
         },
@@ -57,15 +60,15 @@ export default function AddressListScreen() {
         {addresses.length === 0 ? (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyIcon}>📍</Text>
-            <Text style={styles.emptyTitle}>No saved addresses</Text>
-            <Text style={styles.emptySubtitle}>Add your first address to speed up checkout.</Text>
+            <Text style={styles.emptyTitle}>{t('addresses.empty.title')}</Text>
+            <Text style={styles.emptySubtitle}>{t('addresses.empty.subtitle')}</Text>
           </View>
         ) : (
           addresses.map((addr) => (
             <View key={addr.id} style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.label}>{addr.label ?? 'Address'}</Text>
-                {addr.is_default ? <Text style={styles.defaultBadge}>Default</Text> : null}
+                <Text style={styles.label}>{addr.label ?? t('addresses.addressFallback')}</Text>
+                {addr.is_default ? <Text style={styles.defaultBadge}>{t('addresses.default')}</Text> : null}
               </View>
               {addr.recipient_name ? <Text style={styles.recipient}>{addr.recipient_name}</Text> : null}
               <Text style={styles.addressText}>
@@ -73,20 +76,20 @@ export default function AddressListScreen() {
               </Text>
               {addr.phone ? <Text style={styles.phone}>{addr.phone}</Text> : null}
               {addr.delivery_instructions ? (
-                <Text style={styles.notes}>Note: {addr.delivery_instructions}</Text>
+                <Text style={styles.notes}>{t('addresses.noteLabel', { note: addr.delivery_instructions })}</Text>
               ) : null}
               <View style={styles.actions}>
                 <Pressable
                   onPress={() => router.push(`/addresses/${addr.id}`)}
                   style={({ pressed }) => [styles.editBtn, { opacity: pressed ? 0.7 : 1 }]}
                 >
-                  <Text style={styles.editBtnText}>Edit</Text>
+                  <Text style={styles.editBtnText}>{t('addresses.edit')}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => handleDelete(addr.id)}
                   style={({ pressed }) => [styles.deleteBtn, { opacity: pressed ? 0.7 : 1 }]}
                 >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
+                  <Text style={styles.deleteBtnText}>{t('addresses.delete')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -97,7 +100,7 @@ export default function AddressListScreen() {
           onPress={() => router.push('/addresses/new')}
           style={({ pressed }) => [styles.addBtn, { opacity: pressed ? 0.8 : 1 }]}
         >
-          <Text style={styles.addBtnText}>+ Add new address</Text>
+          <Text style={styles.addBtnText}>{t('addresses.addNew')}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

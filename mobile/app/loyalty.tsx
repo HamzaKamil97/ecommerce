@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, View, Share, Alert, TextInput } from 'react-native';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { getLoyalty, applyReferralCode, nextTier, tierColor, LoyaltyData } from '@/src/api/loyalty';
 import { AppButton } from '@/src/components/AppButton';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function LoyaltyScreen() {
+  useLanguageStore((s) => s.locale);
   const customer = useAuthStore((s) => s.customer);
   const [data, setData] = useState<LoyaltyData | null>(null);
   const [code, setCode] = useState('');
@@ -23,7 +26,7 @@ export default function LoyaltyScreen() {
   if (!customer) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
-        <EmptyState title="Log in to see your rewards" subtitle="Go to Profile → Log in." />
+        <EmptyState title={t('loyalty.loginRequired.title')} subtitle={t('loyalty.loginRequired.subtitle')} />
       </SafeAreaView>
     );
   }
@@ -31,7 +34,7 @@ export default function LoyaltyScreen() {
   if (!data) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
-        <EmptyState title="Loading…" />
+        <EmptyState title={t('common.loading')} />
       </SafeAreaView>
     );
   }
@@ -42,7 +45,7 @@ export default function LoyaltyScreen() {
   const onShare = async () => {
     if (!data.referral_code) return;
     await Share.share({
-      message: `Join with my code "${data.referral_code}" and get 200 bonus points!`,
+      message: t('loyalty.invite.shareMessage', { code: data.referral_code }),
     });
   };
 
@@ -50,11 +53,11 @@ export default function LoyaltyScreen() {
     if (!code) return;
     try {
       await applyReferralCode(customer.id, code);
-      Alert.alert('Code applied!', 'You received 200 welcome bonus points.');
+      Alert.alert(t('loyalty.code.applied.title'), t('loyalty.code.applied.message'));
       setCode('');
       await load();
     } catch (e: any) {
-      Alert.alert('Code rejected', e?.response?.data?.error ?? e?.message);
+      Alert.alert(t('loyalty.code.rejected.title'), e?.response?.data?.error ?? e?.message);
     }
   };
 
@@ -71,21 +74,21 @@ export default function LoyaltyScreen() {
           }}
         >
           <Text style={{ fontSize: 14, color: '#0B0B0F', opacity: 0.7, textTransform: 'uppercase', letterSpacing: 2 }}>
-            {data.tier} tier
+            {t('loyalty.tierLabel', { tier: data.tier })}
           </Text>
           <Text style={{ fontSize: 48, fontWeight: '700', color: '#0B0B0F', marginTop: 8 }}>
             {data.points.toLocaleString()}
           </Text>
-          <Text style={{ color: '#0B0B0F', opacity: 0.8 }}>points</Text>
+          <Text style={{ color: '#0B0B0F', opacity: 0.8 }}>{t('loyalty.points')}</Text>
         </View>
 
         {/* Progress */}
         {next && (
           <View style={{ gap: tokens.spacing.sm }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text }}>Next tier: {next.tier}</Text>
+              <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text }}>{t('loyalty.nextTier', { tier: next.tier })}</Text>
               <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted }}>
-                {next.threshold - data.points} pts to go
+                {t('loyalty.ptsToGo', { pts: next.threshold - data.points })}
               </Text>
             </View>
             <View
@@ -116,9 +119,9 @@ export default function LoyaltyScreen() {
             gap: tokens.spacing.md,
           }}
         >
-          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Invite friends, earn 500 pts</Text>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('loyalty.invite.title')}</Text>
           <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>
-            Share your code. Friends get 200 bonus points on signup. You get 500 when they place their first order.
+            {t('loyalty.invite.body')}
           </Text>
           <View
             style={{
@@ -133,18 +136,18 @@ export default function LoyaltyScreen() {
             <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text, letterSpacing: 2 }}>
               {data.referral_code ?? '—'}
             </Text>
-            <AppButton title="Share" onPress={onShare} />
+            <AppButton title={t('loyalty.invite.share')} onPress={onShare} />
           </View>
         </View>
 
         {/* Apply a code */}
         <View style={{ gap: tokens.spacing.sm }}>
-          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Got a code?</Text>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('loyalty.code.title')}</Text>
           <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             <TextInput
               value={code}
               onChangeText={(v) => setCode(v.toUpperCase())}
-              placeholder="Enter referral code"
+              placeholder={t('loyalty.code.placeholder')}
               placeholderTextColor={tokens.colors.textMuted}
               autoCapitalize="characters"
               style={{
@@ -155,7 +158,7 @@ export default function LoyaltyScreen() {
                 borderRadius: tokens.radius.md,
               }}
             />
-            <AppButton title="Apply" onPress={onApply} disabled={!code} />
+            <AppButton title={t('loyalty.code.apply')} onPress={onApply} disabled={!code} />
           </View>
         </View>
 
@@ -168,11 +171,11 @@ export default function LoyaltyScreen() {
             gap: tokens.spacing.sm,
           }}
         >
-          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>How you earn</Text>
-          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 10 points per $1 spent</Text>
-          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 200 bonus points when you join via a friend's code</Text>
-          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 500 points when a friend you referred places their first order</Text>
-          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• Tier bumps: 1k = silver, 5k = gold, 20k = platinum</Text>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('loyalty.earn.title')}</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>{t('loyalty.earn.rule1')}</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>{t('loyalty.earn.rule2')}</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>{t('loyalty.earn.rule3')}</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>{t('loyalty.earn.rule4')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

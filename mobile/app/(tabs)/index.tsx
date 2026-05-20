@@ -12,6 +12,7 @@ import { TopBar } from '@/src/components/home/TopBar'
 import { SearchBox } from '@/src/components/home/SearchBox'
 import { FilterSheet } from '@/src/components/home/FilterSheet'
 import { ContentSection } from '@/src/components/home/ContentSection'
+import { LanguagePicker } from '@/src/components/LanguagePicker'
 import { DEMO_HOME_LAYOUT } from '@/src/data/homeLayout'
 
 export default function HomeScreen() {
@@ -21,6 +22,7 @@ export default function HomeScreen() {
   const token = useAuthToken()
   useLanguageStore((s) => s.locale)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
 
   function onLocationPress() {
     if (token) {
@@ -56,6 +58,7 @@ export default function HomeScreen() {
           cartCount={itemCount}
           onCart={() => router.push('/(tabs)/cart')}
           onLocation={onLocationPress}
+          onLanguage={() => setLangOpen(true)}
         />
       </View>
 
@@ -86,6 +89,7 @@ export default function HomeScreen() {
       </View>
 
       <FilterSheet visible={filterOpen} onClose={() => setFilterOpen(false)} />
+      <LanguagePicker visible={langOpen} onClose={() => setLangOpen(false)} />
     </SafeAreaView>
   )
 }

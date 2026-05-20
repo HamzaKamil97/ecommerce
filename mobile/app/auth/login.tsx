@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/src/store/authStore';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { t } from '@/src/i18n';
 import { tokens } from '@/src/theme/tokens';
 import { AppButton } from '@/src/components/AppButton';
 
@@ -22,7 +23,7 @@ export default function LoginScreen() {
       await login(email, password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Login failed');
+      setError(e?.response?.data?.message ?? t('auth.error.loginFailed'));
     }
   };
 
@@ -37,9 +38,9 @@ export default function LoginScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
       <StatusBar style="dark" />
       <View style={{ padding: tokens.spacing.lg, gap: tokens.spacing.md }}>
-        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>Welcome back</Text>
+        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>{t('auth.welcomeBack')}</Text>
         <TextInput
-          placeholder="Email"
+          placeholder={t('auth.email.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -48,7 +49,7 @@ export default function LoginScreen() {
           style={inputStyle}
         />
         <TextInput
-          placeholder="Password"
+          placeholder={t('auth.password.placeholder')}
           placeholderTextColor={tokens.colors.textMuted}
           secureTextEntry
           value={password}
@@ -56,14 +57,14 @@ export default function LoginScreen() {
           style={inputStyle}
         />
         {error ? <Text style={{ color: tokens.colors.danger }}>{error}</Text> : null}
-        <AppButton title="Log in" onPress={onSubmit} loading={isLoading} />
+        <AppButton title={t('auth.login')} onPress={onSubmit} loading={isLoading} />
         <AppButton
-          title="Need an account? Register"
+          title={t('auth.needAccount')}
           variant="secondary"
           onPress={() => router.replace('/auth/register')}
         />
         <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, textAlign: 'center', marginTop: tokens.spacing.lg }}>
-          Google / Facebook login — coming soon
+          {t('auth.oauthComing')}
         </Text>
       </View>
     </SafeAreaView>

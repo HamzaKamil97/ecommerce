@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, Text, View, TextInput, Alert } from 'react-native';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { getWallet, topupWallet, WalletData } from '@/src/api/wallet';
 import { AppButton } from '@/src/components/AppButton';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function WalletScreen() {
+  useLanguageStore((s) => s.locale);
   const customer = useAuthStore((s) => s.customer);
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [topupAmount, setTopupAmount] = useState('');
@@ -25,7 +28,7 @@ export default function WalletScreen() {
   if (!customer) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
-        <EmptyState title="Log in to use your wallet" subtitle="Go to Profile → Log in." />
+        <EmptyState title={t('wallet.loginRequired.title')} subtitle={t('wallet.loginRequired.subtitle')} />
       </SafeAreaView>
     );
   }
@@ -36,11 +39,11 @@ export default function WalletScreen() {
     setBusy(true);
     try {
       await topupWallet(customer.id, amount);
-      Alert.alert('Top-up successful', `Added $${(amount / 100).toFixed(2)}`);
+      Alert.alert(t('wallet.topup.success.title'), t('wallet.topup.success.message', { amount: (amount / 100).toFixed(2) }));
       setTopupAmount('');
       await load();
     } catch (e: any) {
-      Alert.alert('Top-up failed', e?.message ?? 'Unknown error');
+      Alert.alert(t('wallet.topup.failed.title'), e?.message ?? t('wallet.topup.unknownError'));
     } finally {
       setBusy(false);
     }
@@ -57,19 +60,19 @@ export default function WalletScreen() {
             alignItems: 'center',
           }}
         >
-          <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.white, opacity: 0.8 }}>Wallet balance</Text>
+          <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.white, opacity: 0.8 }}>{t('wallet.balanceLabel')}</Text>
           <Text style={{ color: tokens.colors.white, fontSize: 40, fontWeight: '700', marginTop: 4 }}>
             ${((wallet?.balance_cents ?? 0) / 100).toFixed(2)}
           </Text>
         </View>
 
         <View style={{ gap: tokens.spacing.sm }}>
-          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Top up</Text>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>{t('wallet.topup.title')}</Text>
           <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             <TextInput
               value={topupAmount}
               onChangeText={setTopupAmount}
-              placeholder="Amount in USD"
+              placeholder={t('wallet.topup.placeholder')}
               placeholderTextColor={tokens.colors.textMuted}
               keyboardType="decimal-pad"
               style={{
@@ -80,7 +83,7 @@ export default function WalletScreen() {
                 borderRadius: tokens.radius.md,
               }}
             />
-            <AppButton title="Add" onPress={onTopup} loading={busy} disabled={!topupAmount} />
+            <AppButton title={t('wallet.topup.add')} onPress={onTopup} loading={busy} disabled={!topupAmount} />
           </View>
           <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             {['10', '25', '50', '100'].map((amt) => (
@@ -97,13 +100,13 @@ export default function WalletScreen() {
       </View>
 
       <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text, paddingHorizontal: tokens.spacing.lg, marginTop: tokens.spacing.md }}>
-        Recent transactions
+        {t('wallet.recent')}
       </Text>
       <FlatList
         data={wallet?.transactions ?? []}
-        keyExtractor={(t) => t.id}
+        keyExtractor={(tx) => tx.id}
         contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.sm }}
-        ListEmptyComponent={<EmptyState title="No transactions yet" subtitle="Top up or place an order to see activity." />}
+        ListEmptyComponent={<EmptyState title={t('wallet.empty.title')} subtitle={t('wallet.empty.subtitle')} />}
         renderItem={({ item }) => (
           <View
             style={{

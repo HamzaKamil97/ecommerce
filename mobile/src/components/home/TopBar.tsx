@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
+import { t } from '@/src/i18n'
 
 interface Props {
   location?: string
@@ -10,6 +11,7 @@ interface Props {
   onCart: () => void
   onLocation?: () => void
   onNotifications?: () => void
+  onLanguage?: () => void
 }
 
 export function TopBar({
@@ -19,6 +21,7 @@ export function TopBar({
   onCart,
   onLocation,
   onNotifications,
+  onLanguage,
 }: Props) {
   const textColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
   const iconColor = tone === 'light' ? tokens.colors.white : tokens.colors.text
@@ -38,6 +41,21 @@ export function TopBar({
         <Ionicons name="chevron-down" size={16} color={textColor} />
       </Pressable>
       <View style={styles.actions}>
+        {onLanguage && (
+          <Pressable
+            onPress={onLanguage}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.changeLanguage')}
+            style={({ pressed }) => [
+              styles.langPill,
+              { backgroundColor: cartBg },
+              pressed && { opacity: 0.8 },
+            ]}
+            hitSlop={8}
+          >
+            <Ionicons name="language" size={22} color={tokens.colors.white} />
+          </Pressable>
+        )}
         {onNotifications && (
           <Pressable
             onPress={onNotifications}
@@ -95,6 +113,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: tokens.spacing.sm,
+  },
+  langPill: {
+    width: 36,
+    height: 36,
+    borderRadius: tokens.radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cartPill: {
     width: 40,

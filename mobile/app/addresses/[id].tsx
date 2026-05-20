@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import { tokens } from '@/src/theme/tokens';
+import { t } from '@/src/i18n';
+import { useLanguageStore } from '@/src/store/languageStore';
 import { AppButton } from '@/src/components/AppButton';
 import * as addressApi from '@/src/api/addresses';
 import type { AddressInput } from '@/src/api/addresses';
@@ -24,6 +26,7 @@ const EMPTY: AddressInput = {
 };
 
 export default function AddressFormScreen() {
+  useLanguageStore((s) => s.locale);
   const { id } = useLocalSearchParams<{ id: string }>();
   const isNew = id === 'new';
   const router = useRouter();
@@ -35,7 +38,7 @@ export default function AddressFormScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    navigation.setOptions({ title: isNew ? 'New address' : 'Edit address' });
+    navigation.setOptions({ title: isNew ? t('addresses.form.newTitle') : t('addresses.form.editTitle') });
   }, [isNew, navigation]);
 
   useEffect(() => {
@@ -60,7 +63,7 @@ export default function AddressFormScreen() {
           });
         }
       } catch {
-        setError('Could not load address');
+        setError(t('addresses.form.loadError'));
       } finally {
         setLoading(false);
       }
@@ -72,8 +75,8 @@ export default function AddressFormScreen() {
 
   const handleSave = async () => {
     setError(null);
-    if (!form.street.trim()) { setError('Street is required'); return; }
-    if (!form.city.trim()) { setError('City is required'); return; }
+    if (!form.street.trim()) { setError(t('addresses.form.streetRequired')); return; }
+    if (!form.city.trim()) { setError(t('addresses.form.cityRequired')); return; }
     setSaving(true);
     try {
       const payload: AddressInput = {
@@ -94,7 +97,7 @@ export default function AddressFormScreen() {
       }
       router.replace('/addresses');
     } catch (e: any) {
-      setError(e?.response?.data?.error ?? 'Failed to save address');
+      setError(e?.response?.data?.error ?? t('addresses.form.saveError'));
     } finally {
       setSaving(false);
     }
@@ -111,17 +114,17 @@ export default function AddressFormScreen() {
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <Field label="Label (e.g. Home, Work)" value={form.label as string} onChangeText={(v) => set('label', v)} placeholder="Home" />
-        <Field label="Recipient name" value={form.recipient_name as string} onChangeText={(v) => set('recipient_name', v)} placeholder="Full name" />
-        <Field label="Phone" value={form.phone as string} onChangeText={(v) => set('phone', v)} placeholder="+964 7xx xxx xxxx" keyboardType="phone-pad" />
-        <Field label="Street / Area *" value={form.street} onChangeText={(v) => set('street', v)} placeholder="e.g. Al-Mansour, Strasse 14" />
-        <Field label="Building" value={form.building as string} onChangeText={(v) => set('building', v)} placeholder="Building number or name" />
-        <Field label="Apartment / Floor" value={form.apartment as string} onChangeText={(v) => set('apartment', v)} placeholder="Apt 3B" />
-        <Field label="City *" value={form.city} onChangeText={(v) => set('city', v)} placeholder="Baghdad" />
-        <Field label="Notes for driver" value={form.delivery_instructions as string} onChangeText={(v) => set('delivery_instructions', v)} placeholder="Ring doorbell, leave at reception..." multiline />
+        <Field label={t('addresses.form.label')} value={form.label as string} onChangeText={(v) => set('label', v)} placeholder={t('addresses.form.labelPlaceholder')} />
+        <Field label={t('addresses.form.recipient')} value={form.recipient_name as string} onChangeText={(v) => set('recipient_name', v)} placeholder={t('addresses.form.recipientPlaceholder')} />
+        <Field label={t('addresses.form.phone')} value={form.phone as string} onChangeText={(v) => set('phone', v)} placeholder={t('addresses.form.phonePlaceholder')} keyboardType="phone-pad" />
+        <Field label={t('addresses.form.street')} value={form.street} onChangeText={(v) => set('street', v)} placeholder={t('addresses.form.streetPlaceholder')} />
+        <Field label={t('addresses.form.building')} value={form.building as string} onChangeText={(v) => set('building', v)} placeholder={t('addresses.form.buildingPlaceholder')} />
+        <Field label={t('addresses.form.apartment')} value={form.apartment as string} onChangeText={(v) => set('apartment', v)} placeholder={t('addresses.form.apartmentPlaceholder')} />
+        <Field label={t('addresses.form.city')} value={form.city} onChangeText={(v) => set('city', v)} placeholder={t('addresses.form.cityPlaceholder')} />
+        <Field label={t('addresses.form.instructions')} value={form.delivery_instructions as string} onChangeText={(v) => set('delivery_instructions', v)} placeholder={t('addresses.form.instructionsPlaceholder')} multiline />
 
         <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Set as default address</Text>
+          <Text style={styles.switchLabel}>{t('addresses.form.setDefault')}</Text>
           <Switch
             value={!!form.is_default}
             onValueChange={(v) => set('is_default', v)}
@@ -131,8 +134,8 @@ export default function AddressFormScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <AppButton title={isNew ? 'Save address' : 'Update address'} onPress={handleSave} loading={saving} />
-        <AppButton title="Cancel" variant="secondary" onPress={() => router.back()} />
+        <AppButton title={isNew ? t('addresses.form.saveNew') : t('addresses.form.saveUpdate')} onPress={handleSave} loading={saving} />
+        <AppButton title={t('common.cancel')} variant="secondary" onPress={() => router.back()} />
       </ScrollView>
     </SafeAreaView>
   );
