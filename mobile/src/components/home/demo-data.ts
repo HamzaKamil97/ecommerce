@@ -14,6 +14,7 @@ export interface DemoCategory {
   handle: string
   label: string
   iconUrl: string
+  nameKey?: string
 }
 
 export interface DemoShop {
@@ -66,26 +67,31 @@ export const DEMO_CATEGORIES: DemoCategory[] = [
   {
     handle: 'food',
     label: 'Food',
+    nameKey: 'category.food',
     iconUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
   },
   {
     handle: 'grocery',
     label: 'Grocery',
+    nameKey: 'category.grocery',
     iconUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200',
   },
   {
     handle: 'fashion',
     label: 'Fashion',
+    nameKey: 'category.fashion',
     iconUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200',
   },
   {
     handle: 'electronics',
     label: 'Electronics',
+    nameKey: 'category.electronics',
     iconUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200',
   },
   {
     handle: 'home',
     label: 'Home',
+    nameKey: 'category.home',
     iconUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200',
   },
 ]

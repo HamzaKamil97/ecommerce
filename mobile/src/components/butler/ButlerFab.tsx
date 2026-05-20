@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Pressable, StyleSheet, Animated } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
+import { useChromeStore } from '@/src/store/chromeStore'
 import { ButlerSheet } from './ButlerSheet'
 
 export function ButlerFab() {
+  const hidden = useChromeStore((s) => s.butlerFabHidden)
   const [open, setOpen] = useState(false)
   const scale = useRef(new Animated.Value(1)).current
 
@@ -17,6 +19,8 @@ export function ButlerFab() {
     ])
     pulse.start()
   }, [scale])
+
+  if (hidden) return null
 
   return (
     <>

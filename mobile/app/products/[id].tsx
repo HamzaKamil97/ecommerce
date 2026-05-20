@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from 'react'
 import { ScrollView, View, Text, ActivityIndicator, SafeAreaView, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getProduct, getProductVerticalFields, VerticalFields } from '@/src/api/products'
 import { Product } from '@/src/types/product'
 import { useCartStore } from '@/src/store/cartStore'
 import { DetailsPanel } from '@/src/components/DetailsPanel'
-import { CartFab } from '@/src/components/CartFab'
 import { PriceText } from '@/src/components/PriceText'
 import { fetchLeafSchema } from '@/src/lib/api/taxonomy'
 import type { LeafSchema } from '@/src/lib/api/types'
@@ -17,9 +17,15 @@ import { ShopBadge } from '@/src/components/product/ShopBadge'
 import { StickyAddToCart } from '@/src/components/product/StickyAddToCart'
 import { DEMO_PRODUCTS } from '@/src/components/home/demo-data'
 import { showToast } from '@/src/components/Toast'
+import { useChromeStore } from '@/src/store/chromeStore'
 import { t } from '@/src/i18n'
 
 export default function ProductDetailsScreen() {
+  useEffect(() => {
+    useChromeStore.getState().setButlerFabHidden(true)
+    return () => useChromeStore.getState().setButlerFabHidden(false)
+  }, [])
+
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -175,8 +181,9 @@ export default function ProductDetailsScreen() {
         <Pressable
           onPress={() => router.back()}
           style={[styles.backBtn, { top: insets.top + tokens.spacing.sm }]}
+          accessibilityLabel={t('common.close')}
         >
-          <Text style={styles.backBtnText}>‹</Text>
+          <Ionicons name="arrow-back" size={22} color={tokens.colors.white} />
         </Pressable>
 
         {/* Product header */}
@@ -196,7 +203,10 @@ export default function ProductDetailsScreen() {
             onPress={() => product && router.push(`/reviews/${product.id}`)}
             style={styles.ratingRow}
           >
-            <Text style={styles.ratingText}>⭐ 4.8 · 120 reviews ›</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Ionicons name="star" size={14} color={tokens.colors.accent} />
+              <Text style={styles.ratingText}>4.8 · {t('product.reviews', { count: 120 })} ›</Text>
+            </View>
           </Pressable>
         </View>
 
@@ -229,7 +239,6 @@ export default function ProductDetailsScreen() {
         disabled={adding || displayPrice == null}
       />
 
-      <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
     </View>
   )
 }
@@ -247,12 +256,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-  },
-  backBtnText: {
-    fontSize: 22,
-    color: tokens.colors.white,
-    lineHeight: 28,
-    marginLeft: -2,
   },
   headerSection: {
     padding: tokens.spacing.lg,

@@ -1,27 +1,42 @@
 import React from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, TextInput, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 
 interface Props {
   shopName: string
-  onPress: () => void
+  value: string
+  onChangeText: (s: string) => void
 }
 
-export function ShopSearchBox({ shopName, onPress }: Props) {
+export function ShopSearchBox({ shopName, value, onChangeText }: Props) {
   return (
     <View style={styles.wrapper}>
-      <Pressable
-        onPress={onPress}
-        hitSlop={8}
-        style={({ pressed }) => [styles.container, pressed && { opacity: 0.85 }]}
-      >
+      <View style={styles.container}>
         <Ionicons name="search" size={18} color={tokens.colors.textMuted} />
-        <Text style={styles.placeholder} numberOfLines={1}>
-          {t('shop.searchIn', { shopName })}
-        </Text>
-      </Pressable>
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={t('shop.searchIn', { shopName })}
+          placeholderTextColor={tokens.colors.textMuted}
+          style={styles.input}
+          returnKeyType="search"
+          autoCapitalize="none"
+          autoCorrect={false}
+          numberOfLines={1}
+          multiline={false}
+        />
+        {value.length > 0 ? (
+          <Pressable
+            onPress={() => onChangeText('')}
+            hitSlop={8}
+            accessibilityLabel={t('shop.searchClear')}
+          >
+            <Ionicons name="close-circle" size={18} color={tokens.colors.textMuted} />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   )
 }
@@ -34,7 +49,6 @@ const styles = StyleSheet.create({
   },
   container: {
     height: 48,
-    maxHeight: 48,
     backgroundColor: tokens.colors.surface,
     borderRadius: tokens.radius.pill,
     flexDirection: 'row',
@@ -44,9 +58,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tokens.colors.border,
   },
-  placeholder: {
+  input: {
     flex: 1,
+    height: 46,
     fontSize: tokens.fontSize.base,
-    color: tokens.colors.textMuted,
+    color: tokens.colors.text,
+    padding: 0,
   },
 })

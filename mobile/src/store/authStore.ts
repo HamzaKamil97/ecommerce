@@ -25,26 +25,47 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialized: false,
   init: async () => {
     set({ isLoading: true });
-    const customer = await authApi.me();
-    set({ customer, initialized: true, isLoading: false });
+    try {
+      const customer = await authApi.me();
+      set({ customer, initialized: true });
+    } catch {
+      set({ initialized: true });
+    } finally {
+      set({ isLoading: false });
+    }
   },
   login: async (email, password) => {
     set({ isLoading: true });
-    const customer = await authApi.login(email, password);
-    set({ customer, isLoading: false });
+    try {
+      const customer = await authApi.login(email, password);
+      set({ customer });
+    } finally {
+      set({ isLoading: false });
+    }
   },
   register: async (params) => {
     set({ isLoading: true });
-    const customer = await authApi.register(params);
-    set({ customer, isLoading: false });
+    try {
+      const customer = await authApi.register(params);
+      set({ customer });
+    } finally {
+      set({ isLoading: false });
+    }
   },
   updateProfile: async (params) => {
     set({ isLoading: true });
-    const customer = await authApi.updateMe(params);
-    set({ customer, isLoading: false });
+    try {
+      const customer = await authApi.updateMe(params);
+      set({ customer });
+    } finally {
+      set({ isLoading: false });
+    }
   },
   logout: async () => {
-    await authApi.logout();
-    set({ customer: null });
+    try {
+      await authApi.logout();
+    } finally {
+      set({ customer: null });
+    }
   },
 }));

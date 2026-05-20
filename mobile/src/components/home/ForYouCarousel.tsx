@@ -15,6 +15,18 @@ function formatPrice(price: number, currency: 'iqd' | 'usd'): string {
   return `$${price.toFixed(2)}`
 }
 
+// Map English vertical strings stored in demo data to localized labels.
+function translateVertical(vertical: string): string {
+  const map: Record<string, string> = {
+    Food: t('vertical.food'),
+    Grocery: t('vertical.grocery'),
+    Fashion: t('vertical.fashion'),
+    Electronics: t('vertical.electronics'),
+    Home: t('vertical.home'),
+  }
+  return map[vertical] ?? vertical
+}
+
 export function ForYouCarousel() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
@@ -52,7 +64,7 @@ export function ForYouCarousel() {
         const reason =
           rec.reason.kind === 'because_ordered'
             ? t('forYou.reason.becauseYou', { shop: rec.reason.arg })
-            : t('forYou.reason.trendingIn', { vertical: rec.reason.arg })
+            : t('forYou.reason.trendingIn', { vertical: translateVertical(rec.reason.arg) })
 
         return (
           <Pressable

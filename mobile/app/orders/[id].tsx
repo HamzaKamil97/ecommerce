@@ -7,6 +7,7 @@ import { EmptyState } from '@/src/components/EmptyState'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { findDemoOrder } from '@/src/data/demoOrders'
+import { useChromeStore } from '@/src/store/chromeStore'
 import {
   StatusCard,
   TimelineCard,
@@ -17,6 +18,10 @@ import {
 } from '@/src/components/orders/OrderDetailSections'
 
 export default function OrderDetailScreen() {
+  React.useEffect(() => {
+    useChromeStore.getState().setButlerFabHidden(true)
+    return () => useChromeStore.getState().setButlerFabHidden(false)
+  }, [])
   useLanguageStore((s) => s.locale)
   const { id } = useLocalSearchParams<{ id: string }>()
   const order = findDemoOrder(id)

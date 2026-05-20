@@ -10,6 +10,7 @@ import { useLanguageStore } from '@/src/store/languageStore';
 import { AppButton } from '@/src/components/AppButton';
 import * as addressApi from '@/src/api/addresses';
 import type { AddressInput } from '@/src/api/addresses';
+import { useChromeStore } from '@/src/store/chromeStore';
 
 const EMPTY: AddressInput = {
   label: '',
@@ -26,6 +27,10 @@ const EMPTY: AddressInput = {
 };
 
 export default function AddressFormScreen() {
+  useEffect(() => {
+    useChromeStore.getState().setButlerFabHidden(true);
+    return () => useChromeStore.getState().setButlerFabHidden(false);
+  }, []);
   useLanguageStore((s) => s.locale);
   const { id } = useLocalSearchParams<{ id: string }>();
   const isNew = id === 'new';

@@ -23,6 +23,7 @@ import { placeCodOrder } from "@/src/lib/api/orders"
 import { AddressPickerSheet } from "@/src/components/checkout/AddressPickerSheet"
 import { CouponRow } from "@/src/components/cart/CouponRow"
 import { useAuthToken } from "@/src/hooks/useAuthToken"
+import { useChromeStore } from "@/src/store/chromeStore"
 import { tokens } from "@/src/theme/tokens"
 
 const colors = {
@@ -37,6 +38,10 @@ const colors = {
 }
 
 export default function CheckoutScreen() {
+  useEffect(() => {
+    useChromeStore.getState().setButlerFabHidden(true)
+    return () => useChromeStore.getState().setButlerFabHidden(false)
+  }, [])
   useLanguageStore((s) => s.locale)
   const router = useRouter()
   const token = useAuthToken()

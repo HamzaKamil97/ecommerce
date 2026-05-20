@@ -9,12 +9,17 @@ import { CartSummary } from '@/src/components/cart/CartSummary'
 import { StickyCheckoutBar } from '@/src/components/cart/StickyCheckoutBar'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 
 const DELIVERY_FEE = 2500
 
 export default function CartScreen() {
+  React.useEffect(() => {
+    useChromeStore.getState().setButlerFabHidden(true)
+    return () => useChromeStore.getState().setButlerFabHidden(false)
+  }, [])
+
   const router = useRouter()
-  // Subscribe to locale changes so cart re-renders when language switches
   useLanguageStore((s) => s.locale)
   const items = useCartStore((s) => s.items)
   const shop_name = useCartStore((s) => s.shop_name)

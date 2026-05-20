@@ -2,11 +2,14 @@ import { useState } from "react"
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from "react-native"
 import { useCartStore } from "../../store/cartStore"
 import { tokens } from "../../theme/tokens"
+import { t } from "../../i18n"
+import { useLanguageStore } from "../../store/languageStore"
 
 const BASE = process.env.EXPO_PUBLIC_MEDUSA_BACKEND_URL ?? "http://localhost:9000"
 const PK = process.env.EXPO_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
 
 export function CouponRow() {
+  useLanguageStore((s) => s.locale)
   const [expanded, setExpanded] = useState(false)
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
@@ -61,7 +64,7 @@ export function CouponRow() {
       >
         <Text style={{ color: tokens.colors.primary, fontWeight: "700" }}>✓ {couponCode}</Text>
         <TouchableOpacity onPress={() => setCoupon(null, 0)}>
-          <Text style={{ color: tokens.colors.textMuted }}>Remove</Text>
+          <Text style={{ color: tokens.colors.textMuted }}>{t('common.remove')}</Text>
         </TouchableOpacity>
       </View>
     )
@@ -71,7 +74,7 @@ export function CouponRow() {
     return (
       <TouchableOpacity onPress={() => setExpanded(true)} style={{ padding: 12 }}>
         <Text style={{ color: tokens.colors.primary, fontWeight: "600" }}>
-          Have a coupon code? &rsaquo;
+          {t('checkout.haveCoupon')} &rsaquo;
         </Text>
       </TouchableOpacity>
     )
@@ -83,7 +86,7 @@ export function CouponRow() {
         <TextInput
           value={code}
           onChangeText={setCode}
-          placeholder="Coupon code"
+          placeholder={t('checkout.couponPlaceholder')}
           autoCapitalize="characters"
           placeholderTextColor={tokens.colors.textMuted}
           style={{
@@ -109,7 +112,7 @@ export function CouponRow() {
           {busy ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={{ color: "white", fontWeight: "700" }}>Apply</Text>
+            <Text style={{ color: "white", fontWeight: "700" }}>{t('common.apply')}</Text>
           )}
         </TouchableOpacity>
       </View>
