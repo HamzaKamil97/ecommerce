@@ -13,6 +13,7 @@ import { FlyToCartHost } from '@/src/components/cart/FlyToCartHost';
 import { CrossShopModal } from '@/src/components/cart/CrossShopModal';
 import { ToastHost } from '@/src/components/Toast';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { t } from '@/src/i18n';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -49,6 +50,11 @@ export default function RootLayout() {
         <Stack.Screen name="profile" options={{ headerShown: false }} />
         <Stack.Screen name="order/success/[id]" options={{ title: 'Order placed', headerShown: false }} />
         <Stack.Screen name="orders/[id]" options={{ title: 'Order', headerShown: true }} />
+        <Stack.Screen name="payment-methods" options={{ title: t('comingSoon.paymentMethods.title') }} />
+        <Stack.Screen name="favorites" options={{ title: t('comingSoon.favorites.title') }} />
+        <Stack.Screen name="help" options={{ title: t('comingSoon.help.title') }} />
+        <Stack.Screen name="terms" options={{ title: t('comingSoon.terms.title') }} />
+        <Stack.Screen name="privacy" options={{ title: t('comingSoon.privacy.title') }} />
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />

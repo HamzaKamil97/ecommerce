@@ -17,6 +17,7 @@ import { useLanguageStore } from '@/src/store/languageStore'
 import { useCartStore } from '@/src/store/cartStore'
 import type { ScrollItem } from '@/src/data/demoScrolls'
 import { ScrollRailAction } from './ScrollRailAction'
+import { PreviewPill } from '@/src/components/PreviewPill'
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -101,9 +102,12 @@ export function ScrollCard({ scroll, isVisible = false }: Props) {
       </Pressable>
 
       <View style={styles.topRow} pointerEvents="box-none">
-        <View style={styles.shopBadge}>
-          <Image source={{ uri: scroll.shopLogoUrl }} style={styles.shopLogo} />
-          <Text style={styles.shopName} numberOfLines={1}>{scroll.shopName}</Text>
+        <View style={styles.topLeft}>
+          <View style={styles.shopBadge}>
+            <Image source={{ uri: scroll.shopLogoUrl }} style={styles.shopLogo} />
+            <Text style={styles.shopName} numberOfLines={1}>{scroll.shopName}</Text>
+          </View>
+          <PreviewPill size="sm" tone="white" />
         </View>
         <View style={styles.verticalPill}>
           <Text style={styles.verticalText}>{scroll.vertical}</Text>
@@ -186,6 +190,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: tokens.spacing.sm,
   },
+  topLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.sm,
+    flexShrink: 1,
+    maxWidth: '75%',
+  },
   shopBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -194,7 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: tokens.spacing.sm,
     paddingVertical: 4,
     gap: tokens.spacing.sm,
-    maxWidth: '70%',
+    flexShrink: 1,
   },
   shopLogo: {
     width: 24,

@@ -7,6 +7,8 @@ import { useLanguageStore } from '@/src/store/languageStore'
 import { FilterChips, ChipDef } from '@/src/components/FilterChips'
 import { ShopRow } from '@/src/components/home/ShopRow'
 import { EmptyState } from '@/src/components/EmptyState'
+import { FilterSheet } from '@/src/components/home/FilterSheet'
+import { useFilterStore } from '@/src/store/filterStore'
 import { DEMO_SHOPS } from '@/src/components/home/demo-data'
 
 const RECENT_SEARCHES = ['Pizza', 'Iced coffee', 'Headphones', 'Fresh milk', 'Electronics']
@@ -15,6 +17,12 @@ export default function SearchScreen() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const [filterOpen, setFilterOpen] = useState(false)
+  const fVertical = useFilterStore((s) => s.vertical)
+  const fDelivery = useFilterStore((s) => s.deliveryUnder)
+  const fRating = useFilterStore((s) => s.minRating)
+  const fSort = useFilterStore((s) => s.sortBy)
+  const fActive = (fVertical ? 1 : 0) + (fDelivery !== null ? 1 : 0) + (fRating !== null ? 1 : 0) + (fSort ? 1 : 0)
 
   const INITIAL_CHIPS: ChipDef[] = useMemo(() => [
     { id: 'all', label: t('shops.chip.all'), active: true },
@@ -44,8 +52,15 @@ export default function SearchScreen() {
     if (activeChip === 'grocery') results = results.filter((s) => s.vertical === 'Grocery')
     if (activeChip === 'fast-delivery') results = results.filter((s) => s.deliveryMinutes <= 30)
     if (activeChip === 'open') results = results.filter((s) => s.isOpen)
+    if (fVertical) results = results.filter((s) => s.vertical === fVertical)
+    if (fDelivery !== null) results = results.filter((s) => s.deliveryMinutes <= fDelivery)
+    if (fRating !== null) results = results.filter((s) => s.rating >= fRating)
+    if (fSort === 'rating') results = [...results].sort((a, b) => b.rating - a.rating)
+    else if (fSort === 'deliveryTime' || fSort === 'distance') {
+      results = [...results].sort((a, b) => a.deliveryMinutes - b.deliveryMinutes)
+    }
     return results
-  }, [query, activeChip])
+  }, [query, activeChip, fVertical, fDelivery, fRating, fSort])
 
   const hasQuery = query.trim().length > 0
 
@@ -74,14 +89,17 @@ export default function SearchScreen() {
             </Pressable>
           )}
           <Pressable
-            onPress={() => {}}
+            onPress={() => setFilterOpen(true)}
             hitSlop={8}
             style={styles.filterBtn}
           >
             <Text style={styles.filterIcon}>≡</Text>
+            {fActive > 0 && <View style={styles.filterActiveDot} />}
           </Pressable>
         </View>
       </View>
+
+      <FilterSheet visible={filterOpen} onClose={() => setFilterOpen(false)} />
 
       {/* Filter chips */}
       <FilterChips chips={chips} onPress={toggleChip} />
@@ -171,9 +189,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    height: 46,
     fontSize: tokens.fontSize.base,
     color: tokens.colors.text,
     padding: 0,
+    margin: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   clearBtn: {
     width: 20,
@@ -195,6 +217,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderLeftWidth: 1,
     borderLeftColor: tokens.colors.border,
+    position: 'relative',
+  },
+  filterActiveDot: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: tokens.colors.accent,
   },
   filterIcon: {
     fontSize: 18,

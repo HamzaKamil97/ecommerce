@@ -401,4 +401,22 @@ export const ar: any = {
   'reviews.empty.subtitle': 'كن أول من يشارك تجربته.',
   'reviews.verified': '✓ شراء موثّق',
   'reviews.shopReply': 'رد المتجر:',
+
+  // SP-A4 — Coming Soon placeholders
+  'comingSoon.notifyMe': 'أبلغني عند الجاهزية',
+  'comingSoon.notifyAck': 'سنبلغك عند إطلاق هذه الميزة.',
+  'comingSoon.paymentMethods.title': 'طرق الدفع',
+  'comingSoon.paymentMethods.subtitle': 'البطاقات والمحافظ والدفع عند الاستلام — قريبًا.',
+  'comingSoon.favorites.title': 'المفضلة',
+  'comingSoon.favorites.subtitle': 'احفظ المتاجر والمنتجات للوصول إليها بسرعة.',
+  'comingSoon.help.title': 'المساعدة والدعم',
+  'comingSoon.help.subtitle': 'الأسئلة الشائعة والدردشة معنا ومشاكل الطلبات.',
+  'comingSoon.terms.title': 'الشروط والأحكام',
+  'comingSoon.terms.subtitle': 'شروط الخدمة الخاصة بنا.',
+  'comingSoon.privacy.title': 'سياسة الخصوصية',
+  'comingSoon.privacy.subtitle': 'كيف نتعامل مع بياناتك.',
+
+  // SP-A6 — Preview pills on AI surfaces
+  'preview.label': 'معاينة',
+  'preview.aiDisclaimer': 'تخصيص الذكاء الاصطناعي — معاينة',
 }

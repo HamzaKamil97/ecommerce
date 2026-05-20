@@ -10,10 +10,12 @@ import {
   Platform,
 } from 'react-native'
 import * as Haptics from 'expo-haptics'
+import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { useButlerStore, type ButlerRequestKind } from '@/src/store/butlerStore'
+import { PreviewPill } from '@/src/components/PreviewPill'
 
 interface Props {
   visible: boolean
@@ -22,7 +24,7 @@ interface Props {
 
 interface Preset {
   kind: ButlerRequestKind
-  emoji: string
+  icon: React.ComponentProps<typeof Ionicons>['name']
   labelKey:
     | 'butler.preset.findCheaper'
     | 'butler.preset.itemNotListed'
@@ -31,10 +33,10 @@ interface Preset {
 }
 
 const PRESETS: Preset[] = [
-  { kind: 'find_cheaper', emoji: '💸', labelKey: 'butler.preset.findCheaper' },
-  { kind: 'item_not_listed', emoji: '🔎', labelKey: 'butler.preset.itemNotListed' },
-  { kind: 'compare_shops', emoji: '⚖️', labelKey: 'butler.preset.compareShops' },
-  { kind: 'bundle_deal', emoji: '🎁', labelKey: 'butler.preset.bundleDeal' },
+  { kind: 'find_cheaper', icon: 'pricetag', labelKey: 'butler.preset.findCheaper' },
+  { kind: 'item_not_listed', icon: 'search', labelKey: 'butler.preset.itemNotListed' },
+  { kind: 'compare_shops', icon: 'git-compare', labelKey: 'butler.preset.compareShops' },
+  { kind: 'bundle_deal', icon: 'cube-outline', labelKey: 'butler.preset.bundleDeal' },
 ]
 
 export function ButlerSheet({ visible, onClose }: Props) {
@@ -75,11 +77,17 @@ export function ButlerSheet({ visible, onClose }: Props) {
           <View style={styles.handle} />
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <Text style={styles.brand}>✨ {t('butler.title')}</Text>
+              <View style={styles.brandRow}>
+                <Ionicons name="sparkles" size={20} color={tokens.colors.accent} />
+                <Text style={styles.brand}>{t('butler.title')}</Text>
+              </View>
               <Text style={styles.tagline}>{t('butler.tagline')}</Text>
+              <View style={styles.previewWrap}>
+                <PreviewPill size="sm" />
+              </View>
             </View>
             <Pressable onPress={onClose} hitSlop={8}>
-              <Text style={styles.close}>✕</Text>
+              <Ionicons name="close" size={22} color={tokens.colors.textMuted} />
             </Pressable>
           </View>
 
@@ -90,7 +98,7 @@ export function ButlerSheet({ visible, onClose }: Props) {
                 style={({ pressed }) => [styles.presetCard, pressed && styles.presetPressed]}
                 onPress={() => handlePreset(p)}
               >
-                <Text style={styles.presetEmoji}>{p.emoji}</Text>
+                <Ionicons name={p.icon} size={22} color={tokens.colors.primary} />
                 <Text style={styles.presetLabel}>{t(p.labelKey)}</Text>
               </Pressable>
             ))}
@@ -166,7 +174,12 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
-    gap: 2,
+    gap: 4,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   brand: {
     fontSize: tokens.fontSize.xl,
@@ -177,10 +190,8 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.sm,
     color: tokens.colors.textMuted,
   },
-  close: {
-    fontSize: tokens.fontSize.lg,
-    color: tokens.colors.textMuted,
-    paddingHorizontal: tokens.spacing.sm,
+  previewWrap: {
+    marginTop: tokens.spacing.xs,
   },
   grid: {
     flexDirection: 'row',
@@ -200,9 +211,6 @@ const styles = StyleSheet.create({
   },
   presetPressed: {
     backgroundColor: tokens.colors.surfaceAlt,
-  },
-  presetEmoji: {
-    fontSize: 22,
   },
   presetLabel: {
     fontSize: tokens.fontSize.sm,

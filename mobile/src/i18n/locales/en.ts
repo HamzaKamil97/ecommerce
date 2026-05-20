@@ -401,6 +401,24 @@ export const en = {
   'reviews.empty.subtitle': 'Be the first to share your experience.',
   'reviews.verified': '✓ Verified purchase',
   'reviews.shopReply': 'Shop reply:',
+
+  // SP-A4 — Coming Soon placeholders
+  'comingSoon.notifyMe': 'Notify me when ready',
+  'comingSoon.notifyAck': "We'll notify you when this launches.",
+  'comingSoon.paymentMethods.title': 'Payment methods',
+  'comingSoon.paymentMethods.subtitle': 'Cards, wallets and pay-on-delivery — coming soon.',
+  'comingSoon.favorites.title': 'Favorites',
+  'comingSoon.favorites.subtitle': 'Save shops and products to find them faster.',
+  'comingSoon.help.title': 'Help & support',
+  'comingSoon.help.subtitle': 'FAQ, chat with us and order issues.',
+  'comingSoon.terms.title': 'Terms & conditions',
+  'comingSoon.terms.subtitle': 'Our terms of service.',
+  'comingSoon.privacy.title': 'Privacy policy',
+  'comingSoon.privacy.subtitle': 'How we handle your data.',
+
+  // SP-A6 — Preview pills on AI surfaces
+  'preview.label': 'Preview',
+  'preview.aiDisclaimer': 'AI personalization — Preview mode',
 } as const;
 
 export type EnDict = typeof en;

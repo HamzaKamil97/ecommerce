@@ -11,6 +11,7 @@ import {
   type DemoShop,
 } from '@/src/components/home/demo-data'
 import { DEMO_FOR_YOU } from '@/src/data/demoForYou'
+import { useFilterStore } from '@/src/store/filterStore'
 
 export interface ResolverContext {
   customer: Customer | null
@@ -21,6 +22,28 @@ function applyLimit<T>(items: T[], limit?: number): T[] {
   if (!limit || limit <= 0) return items
   return items.slice(0, limit)
 }
+
+function applyShopFilters(shops: DemoShop[]): DemoShop[] {
+  const f = useFilterStore.getState()
+  let out = shops
+  if (f.vertical) out = out.filter((s) => s.vertical === f.vertical)
+  if (f.minRating !== null) out = out.filter((s) => s.rating >= (f.minRating as number))
+  if (f.deliveryUnder !== null) out = out.filter((s) => s.deliveryMinutes <= (f.deliveryUnder as number))
+  if (f.sortBy === 'rating') {
+    out = [...out].sort((a, b) => b.rating - a.rating)
+  } else if (f.sortBy === 'deliveryTime') {
+    out = [...out].sort((a, b) => a.deliveryMinutes - b.deliveryMinutes)
+  } else if (f.sortBy === 'distance') {
+    out = [...out].sort((a, b) => a.deliveryMinutes - b.deliveryMinutes)
+  }
+  return out
+}
+
+const SHOP_SLOT_TYPES = new Set([
+  'featured_shops_row',
+  'nearby_shops_list',
+  'promoted_shops_slot',
+])
 
 function flattenProducts(): Array<{
   id: string
@@ -114,8 +137,12 @@ export function resolveSlotData(slot: HomeSlot, _ctx: ResolverContext): unknown 
         return applyLimit(DEMO_SLIDES, limit)
       case 'DEMO_CATEGORIES':
         return applyLimit(DEMO_CATEGORIES, limit)
-      case 'DEMO_SHOPS':
-        return applyLimit(DEMO_SHOPS, limit)
+      case 'DEMO_SHOPS': {
+        const filtered = SHOP_SLOT_TYPES.has(slot.type)
+          ? applyShopFilters(DEMO_SHOPS)
+          : DEMO_SHOPS
+        return applyLimit(filtered, limit)
+      }
       case 'DEMO_DEALS':
         return applyLimit(DEMO_DEALS, limit)
       case 'DEMO_FOR_YOU':

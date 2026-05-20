@@ -1,37 +1,42 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Modal, View, Text, Pressable, ScrollView, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
+import { useFilterStore, type SortBy } from '@/src/store/filterStore'
 
 interface Props {
   visible: boolean
   onClose: () => void
-  onApply?: (state: FilterState) => void
 }
 
-export interface FilterState {
+interface LocalState {
   vertical: string | null
-  deliveryTime: string | null
-  rating: string | null
-  sort: string | null
+  deliveryUnder: number | null
+  minRating: number | null
+  sortBy: SortBy
 }
 
-const EMPTY_STATE: FilterState = {
+const EMPTY_STATE: LocalState = {
   vertical: null,
-  deliveryTime: null,
-  rating: null,
-  sort: null,
+  deliveryUnder: null,
+  minRating: null,
+  sortBy: null,
 }
 
-interface ChipGroupProps {
+interface ChipGroupProps<T extends string | number | null> {
   label: string
-  options: { id: string; label: string }[]
-  value: string | null
-  onChange: (id: string | null) => void
+  options: { id: T; label: string }[]
+  value: T
+  onChange: (id: T) => void
 }
 
-function ChipGroup({ label, options, value, onChange }: ChipGroupProps) {
+function ChipGroup<T extends string | number | null>({
+  label,
+  options,
+  value,
+  onChange,
+}: ChipGroupProps<T>) {
   return (
     <View style={styles.group}>
       <Text style={styles.groupLabel}>{label}</Text>
@@ -40,8 +45,8 @@ function ChipGroup({ label, options, value, onChange }: ChipGroupProps) {
           const active = value === opt.id
           return (
             <Pressable
-              key={opt.id}
-              onPress={() => onChange(active ? null : opt.id)}
+              key={String(opt.id)}
+              onPress={() => onChange(active ? (null as T) : opt.id)}
               style={({ pressed }) => [
                 styles.chip,
                 active && styles.chipActive,
@@ -59,44 +64,60 @@ function ChipGroup({ label, options, value, onChange }: ChipGroupProps) {
   )
 }
 
-export function FilterSheet({ visible, onClose, onApply }: Props) {
-  const [state, setState] = useState<FilterState>(EMPTY_STATE)
+export function FilterSheet({ visible, onClose }: Props) {
+  const storedVertical = useFilterStore((s) => s.vertical)
+  const storedDelivery = useFilterStore((s) => s.deliveryUnder)
+  const storedRating = useFilterStore((s) => s.minRating)
+  const storedSort = useFilterStore((s) => s.sortBy)
+  const setAll = useFilterStore((s) => s.setAll)
+  const clearStore = useFilterStore((s) => s.clear)
 
-  function update<K extends keyof FilterState>(key: K, value: FilterState[K]) {
-    setState((prev) => ({ ...prev, [key]: value }))
-  }
+  const [state, setState] = useState<LocalState>(EMPTY_STATE)
+
+  useEffect(() => {
+    if (visible) {
+      setState({
+        vertical: storedVertical,
+        deliveryUnder: storedDelivery,
+        minRating: storedRating,
+        sortBy: storedSort,
+      })
+    }
+  }, [visible, storedVertical, storedDelivery, storedRating, storedSort])
 
   function handleClear() {
     setState(EMPTY_STATE)
-  }
-
-  function handleApply() {
-    onApply?.(state)
+    clearStore()
     onClose()
   }
 
-  const verticals = [
-    { id: 'food', label: 'Food' },
-    { id: 'grocery', label: 'Grocery' },
-    { id: 'fashion', label: 'Fashion' },
-    { id: 'electronics', label: 'Electronics' },
-    { id: 'home', label: 'Home' },
+  function handleApply() {
+    setAll(state)
+    onClose()
+  }
+
+  const verticals: { id: string; label: string }[] = [
+    { id: 'Food', label: 'Food' },
+    { id: 'Grocery', label: 'Grocery' },
+    { id: 'Fashion', label: 'Fashion' },
+    { id: 'Electronics', label: 'Electronics' },
+    { id: 'Home', label: 'Home' },
   ]
 
-  const delivery = [
-    { id: 'under30', label: t('home.filters.under30') },
-    { id: '30to60', label: t('home.filters.30to60') },
+  const delivery: { id: number; label: string }[] = [
+    { id: 30, label: t('home.filters.under30') },
+    { id: 60, label: t('home.filters.30to60') },
   ]
 
-  const ratings = [
-    { id: 'rating4', label: t('home.filters.rating4') },
-    { id: 'rating45', label: t('home.filters.rating45') },
+  const ratings: { id: number; label: string }[] = [
+    { id: 4.0, label: t('home.filters.rating4') },
+    { id: 4.5, label: t('home.filters.rating45') },
   ]
 
-  const sort = [
+  const sort: { id: SortBy; label: string }[] = [
     { id: 'distance', label: t('home.filters.sortDistance') },
     { id: 'rating', label: t('home.filters.sortRating') },
-    { id: 'delivery', label: t('home.filters.sortDelivery') },
+    { id: 'deliveryTime', label: t('home.filters.sortDelivery') },
   ]
 
   return (
@@ -126,25 +147,25 @@ export function FilterSheet({ visible, onClose, onApply }: Props) {
             label={t('home.filters.vertical')}
             options={verticals}
             value={state.vertical}
-            onChange={(v) => update('vertical', v)}
+            onChange={(v) => setState((p) => ({ ...p, vertical: v }))}
           />
           <ChipGroup
             label={t('home.filters.deliveryTime')}
             options={delivery}
-            value={state.deliveryTime}
-            onChange={(v) => update('deliveryTime', v)}
+            value={state.deliveryUnder}
+            onChange={(v) => setState((p) => ({ ...p, deliveryUnder: v }))}
           />
           <ChipGroup
             label={t('home.filters.rating')}
             options={ratings}
-            value={state.rating}
-            onChange={(v) => update('rating', v)}
+            value={state.minRating}
+            onChange={(v) => setState((p) => ({ ...p, minRating: v }))}
           />
           <ChipGroup
             label={t('home.filters.sort')}
             options={sort}
-            value={state.sort}
-            onChange={(v) => update('sort', v)}
+            value={state.sortBy}
+            onChange={(v) => setState((p) => ({ ...p, sortBy: v }))}
           />
         </ScrollView>
 

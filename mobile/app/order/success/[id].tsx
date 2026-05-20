@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { View, Text, TouchableOpacity, Animated, Easing, StyleSheet, SafeAreaView } from "react-native"
 import { StatusBar } from "expo-status-bar"
+import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { tokens } from "@/src/theme/tokens"
 import { t } from "@/src/i18n"
@@ -53,9 +54,9 @@ export default function OrderSuccessScreen() {
         </Text>
 
         <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
-          <InfoRow icon="🏪" label="Shop" value={shopName} colors={colors} />
-          <InfoRow icon="⏱️" label={t('orders.arrivingIn', { eta: '' }).replace('{eta}', '').trim() || 'Arriving in'} value={eta} colors={colors} bold />
-          <InfoRow icon="💵" label={t('orders.cashOnDelivery')} value={total} colors={colors} bold />
+          <InfoRow icon="storefront-outline" label="Shop" value={shopName} colors={colors} />
+          <InfoRow icon="time-outline" label={t('orders.arrivingIn', { eta: '' }).replace('{eta}', '').trim() || 'Arriving in'} value={eta} colors={colors} bold />
+          <InfoRow icon="cash-outline" label={t('orders.cashOnDelivery')} value={total} colors={colors} bold />
         </View>
 
         <Text style={{ fontSize: 12, color: colors.textMuted, textAlign: "center", marginTop: 12, lineHeight: 18 }}>
@@ -67,9 +68,10 @@ export default function OrderSuccessScreen() {
         <View style={{ width: "100%", gap: 10, paddingBottom: 12 }}>
           <TouchableOpacity
             onPress={() => router.push(`/orders/${targetId}` as never)}
-            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+            style={[styles.primaryBtn, { backgroundColor: colors.primary, flexDirection: 'row', gap: 8 }]}
           >
-            <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>📍 Track order</Text>
+            <Ionicons name="location-outline" size={18} color="white" />
+            <Text style={{ color: "white", fontWeight: "700", fontSize: 16 }}>Track order</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.replace("/(tabs)/shops")} style={styles.secondaryBtn}>
             <Text style={{ color: colors.primary, fontWeight: "600" }}>{`← ${t('checkout.success.back')}`}</Text>
@@ -80,11 +82,11 @@ export default function OrderSuccessScreen() {
   )
 }
 
-function InfoRow({ icon, label, value, colors, bold }: { icon: string; label: string; value: string; colors: any; bold?: boolean }) {
+function InfoRow({ icon, label, value, colors, bold }: { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; value: string; colors: any; bold?: boolean }) {
   return (
     <View style={styles.infoRow}>
       <View style={[styles.infoIcon, { backgroundColor: "white" }]}>
-        <Text style={{ fontSize: 16 }}>{icon}</Text>
+        <Ionicons name={icon} size={18} color={colors.primary} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 12, color: colors.textMuted }}>{label}</Text>

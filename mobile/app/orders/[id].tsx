@@ -1,5 +1,6 @@
 import React from 'react'
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { Stack, useLocalSearchParams } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { EmptyState } from '@/src/components/EmptyState'
@@ -37,8 +38,9 @@ export default function OrderDetailScreen() {
 
       {isOutForDelivery && (
         <View style={styles.stickyBanner}>
+          <Ionicons name="bicycle" size={16} color={tokens.colors.primary} />
           <Text style={styles.stickyBannerText}>
-            🛵 {t('orders.arrivingIn', { eta: order.eta ?? '' })}
+            {t('orders.arrivingIn', { eta: order.eta ?? '' })}
           </Text>
         </View>
       )}
@@ -66,6 +68,9 @@ const styles = StyleSheet.create({
     paddingBottom: tokens.spacing.xxl,
   },
   stickyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.sm,
     backgroundColor: tokens.colors.primary + '15',
     paddingHorizontal: tokens.spacing.lg,
     paddingVertical: tokens.spacing.md,

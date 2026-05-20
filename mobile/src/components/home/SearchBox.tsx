@@ -1,9 +1,8 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-// Two separate Pressables side-by-side: avoids parent Pressable swallowing the
-// filter tap on some Android devices.
 import { tokens } from '@/src/theme/tokens'
+import { useFilterStore } from '@/src/store/filterStore'
 
 interface Props {
   placeholder?: string
@@ -16,6 +15,15 @@ export function SearchBox({
   onPress,
   onFilter,
 }: Props) {
+  const activeCount = useFilterStore((s) => {
+    let n = 0
+    if (s.vertical) n++
+    if (s.deliveryUnder !== null) n++
+    if (s.minRating !== null) n++
+    if (s.sortBy) n++
+    return n
+  })
+
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress} style={styles.searchArea}>
@@ -27,6 +35,7 @@ export function SearchBox({
       {onFilter && (
         <Pressable onPress={onFilter} style={styles.filterBtn} hitSlop={12}>
           <Ionicons name="options-outline" size={20} color={tokens.colors.textMuted} />
+          {activeCount > 0 && <View style={styles.activeDot} />}
         </Pressable>
       )}
     </View>
@@ -53,9 +62,6 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.sm,
     height: '100%',
   },
-  icon: {
-    fontSize: 16,
-  },
   placeholder: {
     flex: 1,
     fontSize: tokens.fontSize.base,
@@ -68,10 +74,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderLeftWidth: 1,
     borderLeftColor: tokens.colors.border,
+    position: 'relative',
   },
-  filterIcon: {
-    fontSize: 18,
-    color: tokens.colors.textMuted,
-    fontWeight: '700',
+  activeDot: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: tokens.colors.accent,
   },
 })

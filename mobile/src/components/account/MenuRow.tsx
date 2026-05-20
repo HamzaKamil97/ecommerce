@@ -1,9 +1,10 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 
 interface Props {
-  icon: string
+  icon: React.ComponentProps<typeof Ionicons>['name']
   label: string
   value?: string
   onPress: () => void
@@ -17,7 +18,11 @@ export function MenuRow({ icon, label, value, onPress, danger }: Props) {
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.8 : 1 }]}
     >
       <View style={styles.iconWrap}>
-        <Text style={styles.icon}>{icon}</Text>
+        <Ionicons
+          name={icon}
+          size={20}
+          color={danger ? tokens.colors.danger : tokens.colors.text}
+        />
       </View>
       <Text style={[styles.label, danger && styles.labelDanger]}>{label}</Text>
       {value ? <Text style={styles.value}>{value}</Text> : null}
@@ -44,9 +49,6 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 16,
   },
   label: {
     flex: 1,

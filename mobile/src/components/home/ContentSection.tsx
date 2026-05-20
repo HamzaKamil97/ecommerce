@@ -4,12 +4,14 @@ import { tokens } from '@/src/theme/tokens'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { useAuthStore } from '@/src/store/authStore'
 import { useCartStore } from '@/src/store/cartStore'
+import { useFilterStore } from '@/src/store/filterStore'
 import { localized } from '@/src/i18n/localized'
 import { resolveSlotData, isSlotVisible } from '@/src/data/homeLayoutResolver'
 import type { HomeSlot, GridItem } from '@/src/types/homeLayout'
 import type { DemoShop, HeroSlide, DemoCategory, DemoDeal, DemoBasket } from '@/src/components/home/demo-data'
 
 import { SectionHeader } from './SectionHeader'
+import { PreviewPill } from '@/src/components/PreviewPill'
 import { HeroBanner } from './HeroBanner'
 import { CategoriesCarousel } from './CategoriesCarousel'
 import { FeaturedShopsCarousel } from './FeaturedShopsCarousel'
@@ -47,6 +49,10 @@ export function ContentSection({
   const locale = useLanguageStore((s) => s.locale)
   const customer = useAuthStore((s) => s.customer)
   const cartItems = useCartStore((s) => s.items)
+  useFilterStore((s) => s.vertical)
+  useFilterStore((s) => s.deliveryUnder)
+  useFilterStore((s) => s.minRating)
+  useFilterStore((s) => s.sortBy)
 
   const data = resolveSlotData(slot, { customer, cartItems })
   if (!isSlotVisible(slot, data, { customer, cartItems })) return null
@@ -63,12 +69,14 @@ export function ContentSection({
     onSelectShop(slug)
   }
 
+  const isAiPreview = slot.type === 'picks_for_you_row'
   const header =
     title || actionLabel ? (
       <SectionHeader
         title={title ?? ''}
         actionLabel={actionLabel}
         onAction={actionLabel ? handleSeeAll : undefined}
+        badge={isAiPreview ? <PreviewPill size="sm" /> : undefined}
       />
     ) : null
 

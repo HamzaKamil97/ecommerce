@@ -72,23 +72,23 @@ export default function ProfileScreen() {
 
             {/* Menu */}
             <View style={styles.menuGroup}>
-              <MenuRow icon="📦" label={t('account.myOrders')} onPress={() => router.push('/(tabs)/orders')} />
-              <MenuRow icon="📍" label={t('account.addresses')} onPress={() => router.push('/addresses')} />
-              <MenuRow icon="💳" label={t('account.paymentMethods')} onPress={() => {}} />
-              <MenuRow icon="🎁" label={t('account.rewards')} onPress={() => router.push('/loyalty')} />
-              <MenuRow icon="💰" label={t('account.wallet')} onPress={() => router.push('/wallet')} />
+              <MenuRow icon="receipt-outline" label={t('account.myOrders')} onPress={() => router.push('/(tabs)/orders')} />
+              <MenuRow icon="location-outline" label={t('account.addresses')} onPress={() => router.push('/addresses')} />
+              <MenuRow icon="card-outline" label={t('account.paymentMethods')} onPress={() => router.push('/payment-methods' as never)} />
+              <MenuRow icon="gift-outline" label={t('account.rewards')} onPress={() => router.push('/loyalty')} />
+              <MenuRow icon="wallet-outline" label={t('account.wallet')} onPress={() => router.push('/wallet')} />
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
-              <MenuRow icon="🌐" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
-              <MenuRow icon="🔔" label={t('account.notifications')} onPress={() => router.push('/notifications')} />
-              <MenuRow icon="❤️" label={t('account.favorites')} onPress={() => {}} />
+              <MenuRow icon="language-outline" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
+              <MenuRow icon="notifications-outline" label={t('account.notifications')} onPress={() => router.push('/notifications')} />
+              <MenuRow icon="heart-outline" label={t('account.favorites')} onPress={() => router.push('/favorites' as never)} />
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
-              <MenuRow icon="💬" label={t('account.help')} onPress={() => {}} />
-              <MenuRow icon="📄" label={t('account.terms')} onPress={() => {}} />
-              <MenuRow icon="🔒" label={t('account.privacy')} onPress={() => {}} />
+              <MenuRow icon="chatbubble-ellipses-outline" label={t('account.help')} onPress={() => router.push('/help' as never)} />
+              <MenuRow icon="document-text-outline" label={t('account.terms')} onPress={() => router.push('/terms' as never)} />
+              <MenuRow icon="shield-checkmark-outline" label={t('account.privacy')} onPress={() => router.push('/privacy' as never)} />
             </View>
 
             {/* Sign out */}
@@ -120,9 +120,9 @@ export default function ProfileScreen() {
 
             {/* Guest menu */}
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.xl }]}>
-              <MenuRow icon="💬" label={t('account.help')} onPress={() => {}} />
-              <MenuRow icon="📄" label={t('account.terms')} onPress={() => {}} />
-              <MenuRow icon="🌐" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
+              <MenuRow icon="chatbubble-ellipses-outline" label={t('account.help')} onPress={() => router.push('/help' as never)} />
+              <MenuRow icon="document-text-outline" label={t('account.terms')} onPress={() => router.push('/terms' as never)} />
+              <MenuRow icon="language-outline" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
             </View>
           </View>
         )}

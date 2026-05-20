@@ -1,4 +1,5 @@
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable } from "react-native"
+import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from "expo-router"
 import { useCartStore } from "../../store/cartStore"
 import { tokens } from "../../theme/tokens"
@@ -18,7 +19,7 @@ export function CrossShopModal() {
       <Pressable style={styles.backdrop} onPress={cancelCrossShopAdd}>
         <Pressable style={styles.modal} onPress={() => {}}>
           <View style={styles.emoji}>
-            <Text style={{ fontSize: 28 }}>⚠️</Text>
+            <Ionicons name="alert-circle-outline" size={32} color={tokens.colors.warning} />
           </View>
           <Text style={styles.title}>Start a new basket?</Text>
           <Text style={styles.body}>
