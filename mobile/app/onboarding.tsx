@@ -13,12 +13,11 @@ import Animated, {
 import { useEffect } from 'react';
 import { AppButton } from '@/src/components/AppButton';
 import { FadeIn } from '@/src/components/FadeIn';
-import { useTheme } from '@/src/theme/useTheme';
+import { tokens } from '@/src/theme/tokens';
 
 export const ONBOARDING_KEY = 'app.onboarded';
 
 export default function OnboardingScreen() {
-  const { colors, spacing, typography } = useTheme();
   const router = useRouter();
 
   // Bag emoji floats up-down gently + scales in.
@@ -47,29 +46,26 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ flex: 1, padding: spacing.xl, justifyContent: 'space-between' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: spacing.xl }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
+      <View style={{ flex: 1, padding: tokens.spacing.xl, justifyContent: 'space-between' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: tokens.spacing.xl }}>
           <Animated.Text style={[{ fontSize: 96 }, bagStyle]}>🛍️</Animated.Text>
-          <View style={{ gap: spacing.md, alignItems: 'center' }}>
+          <View style={{ gap: tokens.spacing.md, alignItems: 'center' }}>
             <FadeIn delay={300}>
-              <Text style={[typography.title, { color: colors.text, fontSize: 32, textAlign: 'center' }]}>
+              <Text style={{ fontSize: 32, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text, textAlign: 'center' }}>
                 Everything you need, in one place
               </Text>
             </FadeIn>
             <FadeIn delay={600}>
               <Text
-                style={[
-                  typography.body,
-                  { color: colors.textMuted, textAlign: 'center', lineHeight: 22 },
-                ]}
+                style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted, textAlign: 'center', lineHeight: 22 }}
               >
                 Food, flowers, vegetables, electronics, fashion — local shops and trusted brands, delivered to you.
               </Text>
             </FadeIn>
           </View>
         </View>
-        <FadeIn delay={900} style={{ gap: spacing.md }}>
+        <FadeIn delay={900} style={{ gap: tokens.spacing.md }}>
           <AppButton title="Start shopping" onPress={onContinue} />
         </FadeIn>
       </View>

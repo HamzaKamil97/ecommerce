@@ -1,3 +1,4 @@
+// DEPRECATED: use tokens directly. See SP-A2.
 import { useColorScheme } from 'react-native';
 import { colors } from './colors';
 import { spacing, radius } from './spacing';

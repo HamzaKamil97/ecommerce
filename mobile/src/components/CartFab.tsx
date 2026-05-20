@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native"
-import { useTheme } from "../theme/useTheme"
+import { tokens } from "../theme/tokens"
 
 interface Props {
   itemCount: number
@@ -11,14 +11,13 @@ interface Props {
  * saffron badge. Hidden when itemCount === 0. InstaShop / Talabat pattern.
  */
 export function CartFab({ itemCount, onPress }: Props) {
-  const { colors } = useTheme()
   if (itemCount <= 0) return null
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.wrap}>
-      <View style={[styles.fab, { backgroundColor: colors.primary }]}>
+      <View style={[styles.fab, { backgroundColor: tokens.colors.primary }]}>
         <Text style={styles.icon}>🛒</Text>
-        <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-          <Text style={[styles.badgeText, { color: colors.text }]}>{itemCount}</Text>
+        <View style={[styles.badge, { backgroundColor: tokens.colors.accent }]}>
+          <Text style={[styles.badgeText, { color: tokens.colors.text }]}>{itemCount}</Text>
         </View>
       </View>
     </TouchableOpacity>

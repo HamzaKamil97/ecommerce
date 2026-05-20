@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, View, Share, Alert, TextInput } from 'react-native';
-import { useTheme } from '@/src/theme/useTheme';
+import { tokens } from '@/src/theme/tokens';
 import { useAuthStore } from '@/src/store/authStore';
 import { getLoyalty, applyReferralCode, nextTier, tierColor, LoyaltyData } from '@/src/api/loyalty';
 import { AppButton } from '@/src/components/AppButton';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function LoyaltyScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
   const customer = useAuthStore((s) => s.customer);
   const [data, setData] = useState<LoyaltyData | null>(null);
   const [code, setCode] = useState('');
@@ -23,7 +22,7 @@ export default function LoyaltyScreen() {
 
   if (!customer) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
         <EmptyState title="Log in to see your rewards" subtitle="Go to Profile → Log in." />
       </SafeAreaView>
     );
@@ -31,7 +30,7 @@ export default function LoyaltyScreen() {
 
   if (!data) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
         <EmptyState title="Loading…" />
       </SafeAreaView>
     );
@@ -60,14 +59,14 @@ export default function LoyaltyScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
+      <ScrollView contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.lg }}>
         {/* Hero */}
         <View
           style={{
             backgroundColor: tierColor(data.tier),
-            borderRadius: radius.lg,
-            padding: spacing.xl,
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing.xl,
             alignItems: 'center',
           }}
         >
@@ -82,17 +81,17 @@ export default function LoyaltyScreen() {
 
         {/* Progress */}
         {next && (
-          <View style={{ gap: spacing.sm }}>
+          <View style={{ gap: tokens.spacing.sm }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={[typography.body, { color: colors.text }]}>Next tier: {next.tier}</Text>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
+              <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text }}>Next tier: {next.tier}</Text>
+              <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted }}>
                 {next.threshold - data.points} pts to go
               </Text>
             </View>
             <View
               style={{
                 height: 8,
-                backgroundColor: colors.surface,
+                backgroundColor: tokens.colors.surface,
                 borderRadius: 4,
                 overflow: 'hidden',
               }}
@@ -101,7 +100,7 @@ export default function LoyaltyScreen() {
                 style={{
                   width: `${progress * 100}%`,
                   height: '100%',
-                  backgroundColor: colors.primary,
+                  backgroundColor: tokens.colors.primary,
                 }}
               />
             </View>
@@ -111,27 +110,27 @@ export default function LoyaltyScreen() {
         {/* Refer */}
         <View
           style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.lg,
-            padding: spacing.lg,
-            gap: spacing.md,
+            backgroundColor: tokens.colors.surface,
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing.lg,
+            gap: tokens.spacing.md,
           }}
         >
-          <Text style={[typography.heading, { color: colors.text }]}>Invite friends, earn 500 pts</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Invite friends, earn 500 pts</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>
             Share your code. Friends get 200 bonus points on signup. You get 500 when they place their first order.
           </Text>
           <View
             style={{
-              backgroundColor: colors.background,
-              borderRadius: radius.md,
-              padding: spacing.md,
+              backgroundColor: tokens.colors.bg,
+              borderRadius: tokens.radius.md,
+              padding: tokens.spacing.md,
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
-            <Text style={{ ...typography.heading, color: colors.text, letterSpacing: 2 }}>
+            <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text, letterSpacing: 2 }}>
               {data.referral_code ?? '—'}
             </Text>
             <AppButton title="Share" onPress={onShare} />
@@ -139,21 +138,21 @@ export default function LoyaltyScreen() {
         </View>
 
         {/* Apply a code */}
-        <View style={{ gap: spacing.sm }}>
-          <Text style={[typography.heading, { color: colors.text }]}>Got a code?</Text>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <View style={{ gap: tokens.spacing.sm }}>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Got a code?</Text>
+          <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             <TextInput
               value={code}
               onChangeText={(v) => setCode(v.toUpperCase())}
               placeholder="Enter referral code"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={tokens.colors.textMuted}
               autoCapitalize="characters"
               style={{
                 flex: 1,
-                backgroundColor: colors.surface,
-                color: colors.text,
-                padding: spacing.md,
-                borderRadius: radius.md,
+                backgroundColor: tokens.colors.surface,
+                color: tokens.colors.text,
+                padding: tokens.spacing.md,
+                borderRadius: tokens.radius.md,
               }}
             />
             <AppButton title="Apply" onPress={onApply} disabled={!code} />
@@ -163,17 +162,17 @@ export default function LoyaltyScreen() {
         {/* Earn rules */}
         <View
           style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.lg,
-            padding: spacing.lg,
-            gap: spacing.sm,
+            backgroundColor: tokens.colors.surface,
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing.lg,
+            gap: tokens.spacing.sm,
           }}
         >
-          <Text style={[typography.heading, { color: colors.text }]}>How you earn</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>• 10 points per $1 spent</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>• 200 bonus points when you join via a friend's code</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>• 500 points when a friend you referred places their first order</Text>
-          <Text style={[typography.body, { color: colors.textMuted }]}>• Tier bumps: 1k = silver, 5k = gold, 20k = platinum</Text>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>How you earn</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 10 points per $1 spent</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 200 bonus points when you join via a friend's code</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• 500 points when a friend you referred places their first order</Text>
+          <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted }}>• Tier bumps: 1k = silver, 5k = gold, 20k = platinum</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface Props {
   value: number;             // 0-5
@@ -9,13 +9,12 @@ interface Props {
 }
 
 export function StarRating({ value, size = 20, editable = false, onChange }: Props) {
-  const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map((i) => {
         const filled = i <= value;
         const child = (
-          <Text style={{ fontSize: size, color: filled ? '#F5C518' : colors.border }}>
+          <Text style={{ fontSize: size, color: filled ? '#F5C518' : tokens.colors.border }}>
             {filled ? '★' : '☆'}
           </Text>
         );

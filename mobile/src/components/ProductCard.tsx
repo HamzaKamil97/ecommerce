@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Product } from '../types/product';
 import { PriceText } from './PriceText';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 import { useCartStore } from '../store/cartStore';
 import { useFlyToCart } from '../hooks/useFlyToCart';
 
@@ -23,7 +23,6 @@ interface ProductCardProps {
 
 export function ProductCard({ product, shop }: ProductCardProps) {
   const router = useRouter();
-  const { colors, spacing, radius, typography } = useTheme();
   const addItem = useCartStore((s) => s.addItem);
   const [adding, setAdding] = useState(false);
   const [addedFlash, setAddedFlash] = useState(false);
@@ -103,9 +102,9 @@ export function ProductCard({ product, shop }: ProductCardProps) {
       <AnimatedView
         style={[
           {
-            backgroundColor: colors.surface,
-            borderRadius: radius.lg,
-            padding: spacing.md,
+            backgroundColor: tokens.colors.surface,
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing.md,
           },
           cardAnimStyle,
         ]}
@@ -115,7 +114,7 @@ export function ProductCard({ product, shop }: ProductCardProps) {
             <View ref={imgRef}>
               <Image
                 source={{ uri: product.thumbnail }}
-                style={[styles.image, { borderRadius: radius.md }]}
+                style={[styles.image, { borderRadius: tokens.radius.md }]}
                 resizeMode="cover"
               />
             </View>
@@ -124,8 +123,8 @@ export function ProductCard({ product, shop }: ProductCardProps) {
               style={[
                 styles.image,
                 {
-                  backgroundColor: colors.border,
-                  borderRadius: radius.md,
+                  backgroundColor: tokens.colors.border,
+                  borderRadius: tokens.radius.md,
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
@@ -139,7 +138,7 @@ export function ProductCard({ product, shop }: ProductCardProps) {
               onPress={onQuickAdd}
               disabled={!variant || adding}
               style={{
-                backgroundColor: addedFlash ? colors.success : colors.primary,
+                backgroundColor: addedFlash ? tokens.colors.success : tokens.colors.primary,
                 width: 34,
                 height: 34,
                 borderRadius: 17,
@@ -147,7 +146,7 @@ export function ProductCard({ product, shop }: ProductCardProps) {
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ color: colors.primaryText, fontSize: 18, fontWeight: '700', lineHeight: 20 }}>
+              <Text style={{ color: tokens.colors.white, fontSize: 18, fontWeight: '700', lineHeight: 20 }}>
                 {addedFlash ? '✓' : '+'}
               </Text>
             </Pressable>
@@ -155,7 +154,7 @@ export function ProductCard({ product, shop }: ProductCardProps) {
         </View>
         <Text
           numberOfLines={2}
-          style={[typography.body, { color: colors.text, marginTop: spacing.sm, fontWeight: '500' }]}
+          style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text, marginTop: tokens.spacing.sm, fontWeight: '500' }}
         >
           {product.title}
         </Text>

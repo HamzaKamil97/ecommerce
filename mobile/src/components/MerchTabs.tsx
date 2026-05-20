@@ -1,5 +1,5 @@
 import { ScrollView, TouchableOpacity, Text, View, StyleSheet } from "react-native"
-import { useTheme } from "../theme/useTheme"
+import { tokens } from "../theme/tokens"
 import type { MerchCategory } from "../lib/api/types"
 
 interface Props {
@@ -9,9 +9,8 @@ interface Props {
 }
 
 export function MerchTabs({ categories, activeHandle, onSelect }: Props) {
-  const { colors } = useTheme()
   return (
-    <View style={[styles.wrap, { backgroundColor: colors.background, borderColor: colors.border }]}>
+    <View style={[styles.wrap, { backgroundColor: tokens.colors.bg, borderColor: tokens.colors.border }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {categories.map((c) => {
           const active = c.handle === activeHandle
@@ -21,12 +20,12 @@ export function MerchTabs({ categories, activeHandle, onSelect }: Props) {
               onPress={() => onSelect(c.handle)}
               style={[
                 styles.tab,
-                { backgroundColor: active ? colors.text : colors.surface },
+                { backgroundColor: active ? tokens.colors.text : tokens.colors.surface },
               ]}
             >
               <Text style={[
                 styles.label,
-                { color: active ? "white" : colors.textMuted },
+                { color: active ? tokens.colors.white : tokens.colors.textMuted },
               ]}>
                 {c.name}
               </Text>

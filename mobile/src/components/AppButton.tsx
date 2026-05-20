@@ -1,5 +1,5 @@
 import { Pressable, Text, ActivityIndicator, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface AppButtonProps {
   title: string;
@@ -18,10 +18,9 @@ export function AppButton({
   variant = 'primary',
   style,
 }: AppButtonProps) {
-  const { colors, radius, spacing, typography } = useTheme();
   const isPrimary = variant === 'primary';
-  const bg = isPrimary ? colors.primary : colors.surface;
-  const fg = isPrimary ? colors.primaryText : colors.text;
+  const bg = isPrimary ? tokens.colors.primary : tokens.colors.surface;
+  const fg = isPrimary ? tokens.colors.white : tokens.colors.text;
 
   return (
     <Pressable
@@ -31,21 +30,21 @@ export function AppButton({
         styles.btn,
         {
           backgroundColor: bg,
-          borderRadius: radius.lg,
+          borderRadius: tokens.radius.lg,
           height: isPrimary ? 52 : 44,
-          paddingHorizontal: spacing.lg,
+          paddingHorizontal: tokens.spacing.lg,
           opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
           borderWidth: isPrimary ? 0 : 1,
-          borderColor: colors.border,
+          borderColor: tokens.colors.border,
         },
-        pressed && !disabled && { transform: [{ scale: 0.98 }] },
+        pressed && !disabled ? { transform: [{ scale: 0.98 }] } : null,
         style,
       ]}
     >
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text style={[typography.button, { color: fg }]}>{title}</Text>
+        <Text style={{ fontSize: tokens.fontSize.md, fontWeight: tokens.fontWeight.semibold, color: fg }}>{title}</Text>
       )}
     </Pressable>
   );

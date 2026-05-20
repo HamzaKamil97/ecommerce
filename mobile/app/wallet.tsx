@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, Text, View, TextInput, Alert } from 'react-native';
-import { useTheme } from '@/src/theme/useTheme';
+import { tokens } from '@/src/theme/tokens';
 import { useAuthStore } from '@/src/store/authStore';
 import { getWallet, topupWallet, WalletData } from '@/src/api/wallet';
 import { AppButton } from '@/src/components/AppButton';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function WalletScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
   const customer = useAuthStore((s) => s.customer);
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [topupAmount, setTopupAmount] = useState('');
@@ -25,7 +24,7 @@ export default function WalletScreen() {
 
   if (!customer) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
         <EmptyState title="Log in to use your wallet" subtitle="Go to Profile → Log in." />
       </SafeAreaView>
     );
@@ -48,42 +47,42 @@ export default function WalletScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
+      <View style={{ padding: tokens.spacing.lg, gap: tokens.spacing.lg }}>
         <View
           style={{
-            backgroundColor: colors.primary,
-            borderRadius: radius.lg,
-            padding: spacing.xl,
+            backgroundColor: tokens.colors.primary,
+            borderRadius: tokens.radius.lg,
+            padding: tokens.spacing.xl,
             alignItems: 'center',
           }}
         >
-          <Text style={[typography.caption, { color: colors.primaryText, opacity: 0.8 }]}>Wallet balance</Text>
-          <Text style={{ color: colors.primaryText, fontSize: 40, fontWeight: '700', marginTop: 4 }}>
+          <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.white, opacity: 0.8 }}>Wallet balance</Text>
+          <Text style={{ color: tokens.colors.white, fontSize: 40, fontWeight: '700', marginTop: 4 }}>
             ${((wallet?.balance_cents ?? 0) / 100).toFixed(2)}
           </Text>
         </View>
 
-        <View style={{ gap: spacing.sm }}>
-          <Text style={[typography.heading, { color: colors.text }]}>Top up</Text>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <View style={{ gap: tokens.spacing.sm }}>
+          <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text }}>Top up</Text>
+          <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             <TextInput
               value={topupAmount}
               onChangeText={setTopupAmount}
               placeholder="Amount in USD"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={tokens.colors.textMuted}
               keyboardType="decimal-pad"
               style={{
                 flex: 1,
-                backgroundColor: colors.surface,
-                color: colors.text,
-                padding: spacing.md,
-                borderRadius: radius.md,
+                backgroundColor: tokens.colors.surface,
+                color: tokens.colors.text,
+                padding: tokens.spacing.md,
+                borderRadius: tokens.radius.md,
               }}
             />
             <AppButton title="Add" onPress={onTopup} loading={busy} disabled={!topupAmount} />
           </View>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <View style={{ flexDirection: 'row', gap: tokens.spacing.sm }}>
             {['10', '25', '50', '100'].map((amt) => (
               <AppButton
                 key={amt}
@@ -97,35 +96,35 @@ export default function WalletScreen() {
         </View>
       </View>
 
-      <Text style={[typography.heading, { color: colors.text, paddingHorizontal: spacing.lg, marginTop: spacing.md }]}>
+      <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text, paddingHorizontal: tokens.spacing.lg, marginTop: tokens.spacing.md }}>
         Recent transactions
       </Text>
       <FlatList
         data={wallet?.transactions ?? []}
         keyExtractor={(t) => t.id}
-        contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}
+        contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.sm }}
         ListEmptyComponent={<EmptyState title="No transactions yet" subtitle="Top up or place an order to see activity." />}
         renderItem={({ item }) => (
           <View
             style={{
-              backgroundColor: colors.surface,
-              borderRadius: radius.md,
-              padding: spacing.md,
+              backgroundColor: tokens.colors.surface,
+              borderRadius: tokens.radius.md,
+              padding: tokens.spacing.md,
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
             <View style={{ flex: 1 }}>
-              <Text style={[typography.body, { color: colors.text, fontWeight: '600' }]}>{item.description ?? item.type}</Text>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
+              <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text, fontWeight: '600' }}>{item.description ?? item.type}</Text>
+              <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted }}>
                 {new Date(item.created_at).toLocaleString()}
               </Text>
             </View>
             <Text
               style={{
-                ...typography.body,
-                color: item.amount_cents > 0 ? colors.success : colors.danger,
+                fontSize: tokens.fontSize.base,
+                color: item.amount_cents > 0 ? tokens.colors.success : tokens.colors.danger,
                 fontWeight: '700',
               }}
             >

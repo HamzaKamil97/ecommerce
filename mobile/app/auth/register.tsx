@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { View, TextInput, Text, SafeAreaView, ScrollView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/src/store/authStore';
-import { useTheme } from '@/src/theme/useTheme';
+import { useLanguageStore } from '@/src/store/languageStore';
+import { tokens } from '@/src/theme/tokens';
 import { AppButton } from '@/src/components/AppButton';
 
 export default function RegisterScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
+  useLanguageStore((s) => s.locale);
   const router = useRouter();
   const register = useAuthStore((s) => s.register);
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -31,33 +33,34 @@ export default function RegisterScreen() {
   };
 
   const inputStyle = {
-    backgroundColor: colors.surface,
-    color: colors.text,
-    padding: spacing.md,
-    borderRadius: radius.md,
+    backgroundColor: tokens.colors.surface,
+    color: tokens.colors.text,
+    padding: tokens.spacing.md,
+    borderRadius: tokens.radius.md,
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }} keyboardShouldPersistTaps="handled">
-        <Text style={[typography.title, { color: colors.text }]}>Create account</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
+      <StatusBar style="dark" />
+      <ScrollView contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.md }} keyboardShouldPersistTaps="handled">
+        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>Create account</Text>
         <TextInput
           placeholder="First name *"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           value={firstName}
           onChangeText={setFirstName}
           style={inputStyle}
         />
         <TextInput
           placeholder="Last name"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           value={lastName}
           onChangeText={setLastName}
           style={inputStyle}
         />
         <TextInput
           placeholder="Email *"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
@@ -66,7 +69,7 @@ export default function RegisterScreen() {
         />
         <TextInput
           placeholder="Phone (optional)"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           keyboardType="phone-pad"
           value={phone}
           onChangeText={setPhone}
@@ -74,13 +77,13 @@ export default function RegisterScreen() {
         />
         <TextInput
           placeholder="Password *"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
           style={inputStyle}
         />
-        {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
+        {error ? <Text style={{ color: tokens.colors.danger }}>{error}</Text> : null}
         <AppButton title="Create account" onPress={onSubmit} loading={isLoading} />
         <AppButton
           title="Already have an account? Log in"

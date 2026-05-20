@@ -1,13 +1,12 @@
 import { useState } from "react"
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from "react-native"
 import { useCartStore } from "../../store/cartStore"
-import { useTheme } from "../../theme/useTheme"
+import { tokens } from "../../theme/tokens"
 
 const BASE = process.env.EXPO_PUBLIC_MEDUSA_BACKEND_URL ?? "http://localhost:9000"
 const PK = process.env.EXPO_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
 
 export function CouponRow() {
-  const { colors } = useTheme()
   const [expanded, setExpanded] = useState(false)
   const [code, setCode] = useState("")
   const [busy, setBusy] = useState(false)
@@ -60,9 +59,9 @@ export function CouponRow() {
           borderRadius: 10,
         }}
       >
-        <Text style={{ color: colors.primary, fontWeight: "700" }}>✓ {couponCode}</Text>
+        <Text style={{ color: tokens.colors.primary, fontWeight: "700" }}>✓ {couponCode}</Text>
         <TouchableOpacity onPress={() => setCoupon(null, 0)}>
-          <Text style={{ color: colors.textMuted }}>Remove</Text>
+          <Text style={{ color: tokens.colors.textMuted }}>Remove</Text>
         </TouchableOpacity>
       </View>
     )
@@ -71,7 +70,7 @@ export function CouponRow() {
   if (!expanded) {
     return (
       <TouchableOpacity onPress={() => setExpanded(true)} style={{ padding: 12 }}>
-        <Text style={{ color: colors.primary, fontWeight: "600" }}>
+        <Text style={{ color: tokens.colors.primary, fontWeight: "600" }}>
           Have a coupon code? &rsaquo;
         </Text>
       </TouchableOpacity>
@@ -86,14 +85,14 @@ export function CouponRow() {
           onChangeText={setCode}
           placeholder="Coupon code"
           autoCapitalize="characters"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={tokens.colors.textMuted}
           style={{
             flex: 1,
             padding: 10,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: tokens.colors.border,
             borderRadius: 10,
-            color: colors.text,
+            color: tokens.colors.text,
           }}
         />
         <TouchableOpacity
@@ -102,7 +101,7 @@ export function CouponRow() {
           style={{
             paddingHorizontal: 16,
             justifyContent: "center",
-            backgroundColor: colors.primary,
+            backgroundColor: tokens.colors.primary,
             borderRadius: 10,
             opacity: !code || busy ? 0.5 : 1,
           }}
@@ -115,7 +114,7 @@ export function CouponRow() {
         </TouchableOpacity>
       </View>
       {err && (
-        <Text style={{ color: colors.danger, marginTop: 6, fontSize: 12 }}>{err}</Text>
+        <Text style={{ color: tokens.colors.danger, marginTop: 6, fontSize: 12 }}>{err}</Text>
       )}
     </View>
   )

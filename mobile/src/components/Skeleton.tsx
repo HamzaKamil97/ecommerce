@@ -1,7 +1,7 @@
 import { View, ViewStyle } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface SkeletonProps {
   width?: number | string;
@@ -11,7 +11,6 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ width = '100%', height = 16, borderRadius = 6, style }: SkeletonProps) {
-  const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -26,7 +25,7 @@ export function Skeleton({ width = '100%', height = 16, borderRadius = 6, style 
   return (
     <Animated.View
       style={[
-        { width: width as any, height, borderRadius, backgroundColor: colors.border, opacity },
+        { width: width as any, height, borderRadius, backgroundColor: tokens.colors.border, opacity },
         style,
       ]}
     />
@@ -34,21 +33,20 @@ export function Skeleton({ width = '100%', height = 16, borderRadius = 6, style 
 }
 
 export function ProductCardSkeleton() {
-  const { colors, spacing, radius } = useTheme();
   return (
     <View
       style={{
         flex: 1,
         margin: 6,
-        backgroundColor: colors.surface,
-        borderRadius: radius.lg,
-        padding: spacing.md,
+        backgroundColor: tokens.colors.surface,
+        borderRadius: tokens.radius.lg,
+        padding: tokens.spacing.md,
       }}
     >
-      <Skeleton height={140} borderRadius={radius.md} />
-      <View style={{ height: spacing.sm }} />
+      <Skeleton height={140} borderRadius={tokens.radius.md} />
+      <View style={{ height: tokens.spacing.sm }} />
       <Skeleton width="80%" height={14} />
-      <View style={{ height: spacing.xs }} />
+      <View style={{ height: tokens.spacing.xs }} />
       <Skeleton width="40%" height={16} />
     </View>
   );

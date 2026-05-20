@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from "react-native"
 import { AddressForm } from "./AddressForm"
-import { useTheme } from "../../theme/useTheme"
+import { tokens } from "../../theme/tokens"
 import type { SavedAddress, CreateAddressInput } from "../../lib/api/addresses"
 
 interface Props {
@@ -27,7 +27,6 @@ export function AddressPickerSheet({
   onCreate,
   onClose,
 }: Props) {
-  const { colors } = useTheme()
   const [adding, setAdding] = useState(addresses.length === 0)
   const [submitting, setSubmitting] = useState(false)
 
@@ -43,14 +42,14 @@ export function AddressPickerSheet({
   return (
     <Modal transparent animationType="slide" visible={true} onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.background }]} onPress={() => {}}>
-          <View style={[styles.handleBar, { backgroundColor: colors.border }]} />
+        <Pressable style={[styles.sheet, { backgroundColor: tokens.colors.bg }]} onPress={() => {}}>
+          <View style={[styles.handleBar, { backgroundColor: tokens.colors.border }]} />
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
+            <Text style={[styles.title, { color: tokens.colors.text }]}>
               {adding ? "Add address" : "Choose delivery address"}
             </Text>
             <TouchableOpacity onPress={onClose}>
-              <Text style={{ fontSize: 22, color: colors.textMuted }}>x</Text>
+              <Text style={{ fontSize: 22, color: tokens.colors.textMuted }}>x</Text>
             </TouchableOpacity>
           </View>
 
@@ -68,7 +67,7 @@ export function AddressPickerSheet({
                       style={[
                         styles.row,
                         {
-                          borderColor: isSelected ? colors.primary : colors.border,
+                          borderColor: isSelected ? tokens.colors.primary : tokens.colors.border,
                           backgroundColor: isSelected ? "#ECFDF5" : "transparent",
                         },
                       ]}
@@ -76,12 +75,12 @@ export function AddressPickerSheet({
                       <View
                         style={[
                           styles.radio,
-                          { borderColor: isSelected ? colors.primary : colors.border },
+                          { borderColor: isSelected ? tokens.colors.primary : tokens.colors.border },
                         ]}
                       >
                         {isSelected && (
                           <View
-                            style={[styles.radioDot, { backgroundColor: colors.primary }]}
+                            style={[styles.radioDot, { backgroundColor: tokens.colors.primary }]}
                           />
                         )}
                       </View>
@@ -94,23 +93,23 @@ export function AddressPickerSheet({
                             marginBottom: 2,
                           }}
                         >
-                          <Text style={[styles.addrLabel, { color: colors.text }]}>
+                          <Text style={[styles.addrLabel, { color: tokens.colors.text }]}>
                             {a.label ?? "Address"}
                           </Text>
                           {a.is_default && (
                             <View
-                              style={[styles.defaultPill, { backgroundColor: colors.accent }]}
+                              style={[styles.defaultPill, { backgroundColor: tokens.colors.accent }]}
                             >
-                              <Text style={{ fontSize: 10, fontWeight: "700", color: colors.text }}>
+                              <Text style={{ fontSize: 10, fontWeight: "700", color: tokens.colors.text }}>
                                 DEFAULT
                               </Text>
                             </View>
                           )}
                         </View>
-                        <Text style={[styles.recipient, { color: colors.textMuted }]}>
+                        <Text style={[styles.recipient, { color: tokens.colors.textMuted }]}>
                           {a.recipient_name} · {a.phone}
                         </Text>
-                        <Text style={[styles.full, { color: colors.text }]}>
+                        <Text style={[styles.full, { color: tokens.colors.text }]}>
                           {[a.region, a.street, a.building].filter(Boolean).join(", ")}
                         </Text>
                       </View>
@@ -119,12 +118,12 @@ export function AddressPickerSheet({
                 })}
                 <TouchableOpacity
                   onPress={() => setAdding(true)}
-                  style={[styles.addNew, { borderColor: colors.border }]}
+                  style={[styles.addNew, { borderColor: tokens.colors.border }]}
                 >
-                  <View style={[styles.plusCircle, { backgroundColor: colors.primary }]}>
-                    <Text style={{ color: "white", fontWeight: "700" }}>+</Text>
+                  <View style={[styles.plusCircle, { backgroundColor: tokens.colors.primary }]}>
+                    <Text style={{ color: tokens.colors.white, fontWeight: "700" }}>+</Text>
                   </View>
-                  <Text style={{ color: colors.primary, fontWeight: "600" }}>
+                  <Text style={{ color: tokens.colors.primary, fontWeight: "600" }}>
                     Add new address
                   </Text>
                 </TouchableOpacity>

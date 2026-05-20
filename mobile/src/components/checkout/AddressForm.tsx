@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native"
-import { useTheme } from "../../theme/useTheme"
+import { tokens } from "../../theme/tokens"
 import type { CreateAddressInput } from "../../lib/api/addresses"
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
 const CITIES = ["Baghdad", "Erbil", "Basra", "Mosul", "Najaf", "Karbala", "Sulaymaniyah", "Kirkuk"]
 
 export function AddressForm({ initial, onSubmit, submitting }: Props) {
-  const { colors } = useTheme()
   const [label, setLabel] = useState(initial?.label ?? "Home")
   const [recipientName, setRecipientName] = useState(initial?.recipient_name ?? "")
   const [phone, setPhone] = useState(initial?.phone ?? "")
@@ -57,13 +56,12 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
 
   return (
     <ScrollView style={{ width: "100%" }} contentContainerStyle={styles.form}>
-      <Field label="Label" value={label ?? ""} onChange={setLabel} placeholder="Home" colors={colors} />
+      <Field label="Label" value={label ?? ""} onChange={setLabel} placeholder="Home" />
       <Field
         label="Recipient name *"
         value={recipientName}
         onChange={setRecipientName}
         placeholder="Full name"
-        colors={colors}
       />
       <Field
         label="Phone *"
@@ -71,11 +69,10 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
         onChange={setPhone}
         placeholder="+964 750 xxx xxxx"
         keyboardType="phone-pad"
-        colors={colors}
       />
 
       <View style={styles.chipSection}>
-        <Text style={[styles.label, { color: colors.textMuted }]}>City *</Text>
+        <Text style={[styles.label, { color: tokens.colors.textMuted }]}>City *</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
           {CITIES.map((c) => (
             <TouchableOpacity
@@ -83,11 +80,11 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
               onPress={() => setCity(c)}
               style={[
                 styles.chip,
-                { backgroundColor: city === c ? colors.primary : colors.surface },
+                { backgroundColor: city === c ? tokens.colors.primary : tokens.colors.surface },
               ]}
             >
               <Text
-                style={{ color: city === c ? "white" : colors.text, fontSize: 13, fontWeight: "600" }}
+                style={{ color: city === c ? tokens.colors.white : tokens.colors.text, fontSize: 13, fontWeight: "600" }}
               >
                 {c}
               </Text>
@@ -101,18 +98,16 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
         value={region}
         onChange={setRegion}
         placeholder="Karrada, Mansour, etc."
-        colors={colors}
       />
       <Field
         label="Street / Building *"
         value={street}
         onChange={setStreet}
         placeholder="Street name, building number"
-        colors={colors}
       />
       <View style={styles.row}>
         <View style={{ flex: 1, marginRight: 8 }}>
-          <Field label="Building" value={building} onChange={setBuilding} placeholder="optional" colors={colors} />
+          <Field label="Building" value={building} onChange={setBuilding} placeholder="optional" />
         </View>
         <View style={{ flex: 1, marginLeft: 8 }}>
           <Field
@@ -120,7 +115,6 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
             value={apartment}
             onChange={setApartment}
             placeholder="optional"
-            colors={colors}
           />
         </View>
       </View>
@@ -129,31 +123,30 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
         value={deliveryInstructions}
         onChange={setDeliveryInstructions}
         placeholder="Blue gate near pharmacy, call when arrived, etc."
-        colors={colors}
       />
 
       <TouchableOpacity
         onPress={() => setSave(!save)}
-        style={[styles.toggleRow, { backgroundColor: colors.surface }]}
+        style={[styles.toggleRow, { backgroundColor: tokens.colors.surface }]}
       >
         <View
           style={[
             styles.checkbox,
             {
-              borderColor: colors.primary,
-              backgroundColor: save ? colors.primary : "transparent",
+              borderColor: tokens.colors.primary,
+              backgroundColor: save ? tokens.colors.primary : "transparent",
             },
           ]}
         >
           {save && (
-            <Text style={{ color: "white", fontSize: 13, fontWeight: "700" }}>✓</Text>
+            <Text style={{ color: tokens.colors.white, fontSize: 13, fontWeight: "700" }}>✓</Text>
           )}
         </View>
-        <Text style={{ color: colors.text, fontSize: 13 }}>Save for next time</Text>
+        <Text style={{ color: tokens.colors.text, fontSize: 13 }}>Save for next time</Text>
       </TouchableOpacity>
 
       {error && (
-        <Text style={{ color: colors.danger, marginTop: 8, fontSize: 13 }}>{error}</Text>
+        <Text style={{ color: tokens.colors.danger, marginTop: 8, fontSize: 13 }}>{error}</Text>
       )}
 
       <TouchableOpacity
@@ -161,10 +154,10 @@ export function AddressForm({ initial, onSubmit, submitting }: Props) {
         disabled={submitting}
         style={[
           styles.saveBtn,
-          { backgroundColor: colors.primary, opacity: submitting ? 0.5 : 1 },
+          { backgroundColor: tokens.colors.primary, opacity: submitting ? 0.5 : 1 },
         ]}
       >
-        <Text style={{ color: "white", fontWeight: "700", fontSize: 15 }}>
+        <Text style={{ color: tokens.colors.white, fontWeight: "700", fontSize: 15 }}>
           {submitting ? "Saving..." : "Use this address"}
         </Text>
       </TouchableOpacity>
@@ -178,24 +171,22 @@ function Field({
   onChange,
   placeholder,
   keyboardType,
-  colors,
 }: {
   label: string
   value: string
   onChange: (v: string) => void
   placeholder?: string
   keyboardType?: any
-  colors: any
 }) {
   return (
     <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
+      <Text style={[styles.label, { color: tokens.colors.textMuted }]}>{label}</Text>
       <TextInput
-        style={[styles.input, { borderColor: colors.border, color: colors.text }]}
+        style={[styles.input, { borderColor: tokens.colors.border, color: tokens.colors.text }]}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={tokens.colors.textMuted}
         keyboardType={keyboardType}
       />
     </View>

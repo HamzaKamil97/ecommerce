@@ -1,7 +1,7 @@
 import { Pressable, View, Text, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Shop, emojiForVertical } from '../api/shops';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface ShopCardProps {
   shop: Shop;
@@ -9,9 +9,8 @@ interface ShopCardProps {
 
 export function ShopCard({ shop }: ShopCardProps) {
   const router = useRouter();
-  const { colors, spacing, radius, typography } = useTheme();
   const logo = shop.branding?.logo_url;
-  const primary = shop.branding?.primary_color ?? colors.primary;
+  const primary = shop.branding?.primary_color ?? tokens.colors.primary;
 
   return (
     <Pressable
@@ -19,9 +18,9 @@ export function ShopCard({ shop }: ShopCardProps) {
       style={({ pressed }) => [
         styles.card,
         {
-          backgroundColor: colors.surface,
-          borderRadius: radius.lg,
-          padding: spacing.md,
+          backgroundColor: tokens.colors.surface,
+          borderRadius: tokens.radius.lg,
+          padding: tokens.spacing.md,
           opacity: pressed ? 0.85 : 1,
         },
       ]}
@@ -30,7 +29,7 @@ export function ShopCard({ shop }: ShopCardProps) {
         style={{
           width: '100%',
           aspectRatio: 1.6,
-          borderRadius: radius.md,
+          borderRadius: tokens.radius.md,
           backgroundColor: primary,
           alignItems: 'center',
           justifyContent: 'center',
@@ -44,11 +43,11 @@ export function ShopCard({ shop }: ShopCardProps) {
       </View>
       <Text
         numberOfLines={1}
-        style={[typography.body, { color: colors.text, marginTop: spacing.sm, fontWeight: '600' }]}
+        style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text, marginTop: tokens.spacing.sm, fontWeight: '600' }}
       >
         {shop.name}
       </Text>
-      <Text style={[typography.caption, { color: colors.textMuted, textTransform: 'capitalize' }]}>
+      <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, textTransform: 'capitalize' }}>
         {shop.vertical}
       </Text>
     </Pressable>

@@ -1,5 +1,5 @@
 import { Pressable, Text } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface CategoryChipProps {
   label: string;
@@ -9,25 +9,24 @@ interface CategoryChipProps {
 }
 
 export function CategoryChip({ label, emoji, selected, onPress }: CategoryChipProps) {
-  const { colors, spacing, radius, typography } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        borderRadius: radius.pill,
-        backgroundColor: selected ? colors.primary : colors.surface,
-        marginRight: spacing.sm,
+        paddingHorizontal: tokens.spacing.md,
+        paddingVertical: tokens.spacing.sm,
+        borderRadius: tokens.radius.pill,
+        backgroundColor: selected ? tokens.colors.primary : tokens.colors.surface,
+        marginRight: tokens.spacing.sm,
         opacity: pressed ? 0.7 : 1,
         borderWidth: 1,
-        borderColor: selected ? colors.primary : colors.border,
+        borderColor: selected ? tokens.colors.primary : tokens.colors.border,
       })}
     >
       <Text
         style={{
-          ...typography.body,
-          color: selected ? colors.primaryText : colors.text,
+          fontSize: tokens.fontSize.base,
+          color: selected ? tokens.colors.white : tokens.colors.text,
           fontWeight: '600',
         }}
       >

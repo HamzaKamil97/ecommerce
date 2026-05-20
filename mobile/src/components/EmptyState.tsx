@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface EmptyStateProps {
   title: string;
@@ -7,21 +7,20 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ title, subtitle }: EmptyStateProps) {
-  const { colors, spacing, typography } = useTheme();
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: spacing.xl,
+        padding: tokens.spacing.xl,
       }}
     >
-      <Text style={[typography.heading, { color: colors.text, marginBottom: spacing.sm }]}>
+      <Text style={{ fontSize: tokens.fontSize.lg, fontWeight: tokens.fontWeight.semibold, color: tokens.colors.text, marginBottom: tokens.spacing.sm }}>
         {title}
       </Text>
       {subtitle ? (
-        <Text style={[typography.body, { color: colors.textMuted, textAlign: 'center' }]}>
+        <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted, textAlign: 'center' }}>
           {subtitle}
         </Text>
       ) : null}

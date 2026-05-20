@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { FlatList, RefreshControl, SafeAreaView, Text, View, Pressable } from 'react-native';
-import { useTheme } from '@/src/theme/useTheme';
+import { tokens } from '@/src/theme/tokens';
 import { useAuthStore } from '@/src/store/authStore';
 import { listNotifications, markRead, Notification } from '@/src/api/notifications';
 import { EmptyState } from '@/src/components/EmptyState';
 
 export default function NotificationsScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
   const customer = useAuthStore((s) => s.customer);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -38,18 +37,18 @@ export default function NotificationsScreen() {
 
   if (!customer) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
         <EmptyState title="Log in to see notifications" subtitle="Go to Profile → Log in." />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ padding: spacing.lg }}>
-        <Text style={[typography.title, { color: colors.text }]}>Notifications</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.bg }}>
+      <View style={{ padding: tokens.spacing.lg }}>
+        <Text style={{ fontSize: tokens.fontSize.xxl, fontWeight: tokens.fontWeight.bold, color: tokens.colors.text }}>Notifications</Text>
         {unread > 0 && (
-          <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>
+          <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted, marginTop: 4 }}>
             {unread} unread
           </Text>
         )}
@@ -58,30 +57,30 @@ export default function NotificationsScreen() {
       <FlatList
         data={notifications}
         keyExtractor={(n) => n.id}
-        contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text} />}
+        contentContainerStyle={{ padding: tokens.spacing.lg, gap: tokens.spacing.sm }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tokens.colors.text} />}
         ListEmptyComponent={<EmptyState title="No notifications yet" subtitle="Your order updates and offers will appear here." />}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => onTap(item)}
             style={({ pressed }) => ({
-              backgroundColor: item.read_at ? colors.surface : colors.background,
-              borderRadius: radius.md,
-              padding: spacing.md,
+              backgroundColor: item.read_at ? tokens.colors.surface : tokens.colors.bg,
+              borderRadius: tokens.radius.md,
+              padding: tokens.spacing.md,
               borderWidth: 1,
-              borderColor: item.read_at ? colors.border : colors.primary,
+              borderColor: item.read_at ? tokens.colors.border : tokens.colors.primary,
               opacity: pressed ? 0.85 : 1,
             })}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Text style={[typography.body, { color: colors.text, fontWeight: item.read_at ? '500' : '700' }]}>
+                <Text style={{ fontSize: tokens.fontSize.base, color: tokens.colors.text, fontWeight: item.read_at ? '500' : '700' }}>
                   {item.title}
                 </Text>
-                <Text style={[typography.caption, { color: colors.textMuted }]} numberOfLines={2}>
+                <Text style={{ fontSize: tokens.fontSize.xs, color: tokens.colors.textMuted }} numberOfLines={2}>
                   {item.body}
                 </Text>
-                <Text style={[typography.caption, { color: colors.textMuted, fontSize: 11 }]}>
+                <Text style={{ fontSize: 11, color: tokens.colors.textMuted }}>
                   {new Date(item.created_at).toLocaleString()}
                 </Text>
               </View>
@@ -91,8 +90,8 @@ export default function NotificationsScreen() {
                     width: 8,
                     height: 8,
                     borderRadius: 4,
-                    backgroundColor: colors.primary,
-                    marginLeft: spacing.sm,
+                    backgroundColor: tokens.colors.primary,
+                    marginLeft: tokens.spacing.sm,
                     marginTop: 6,
                   }}
                 />

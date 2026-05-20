@@ -1,5 +1,5 @@
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native"
-import { useTheme } from "../theme/useTheme"
+import { tokens } from "../theme/tokens"
 
 export interface ChipDef {
   id: string
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export function FilterChips({ chips, onPress }: Props) {
-  const { colors } = useTheme()
   return (
     <ScrollView
       horizontal
@@ -29,12 +28,12 @@ export function FilterChips({ chips, onPress }: Props) {
           onPress={() => onPress(c.id)}
           style={[
             styles.chip,
-            { backgroundColor: c.active ? colors.primary : colors.surface },
+            { backgroundColor: c.active ? tokens.colors.primary : tokens.colors.surface },
           ]}
         >
           <Text
             numberOfLines={1}
-            style={[styles.label, { color: c.active ? "white" : colors.textMuted }]}
+            style={[styles.label, { color: c.active ? tokens.colors.white : tokens.colors.textMuted }]}
           >
             {c.prefix ? `${c.prefix} ` : ""}{c.label}{c.hasCaret ? " ▾" : ""}
           </Text>

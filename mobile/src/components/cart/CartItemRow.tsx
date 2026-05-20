@@ -1,12 +1,11 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native"
 import { useRouter } from "expo-router"
 import { useCartStore, CartItem } from "../../store/cartStore"
-import { useTheme } from "../../theme/useTheme"
+import { tokens } from "../../theme/tokens"
 
 interface Props { item: CartItem }
 
 export function CartItemRow({ item }: Props) {
-  const { colors } = useTheme()
   const router = useRouter()
   const incQty = useCartStore((s) => s.incQty)
   const decQty = useCartStore((s) => s.decQty)
@@ -14,32 +13,32 @@ export function CartItemRow({ item }: Props) {
   const lineTotal = item.qty * item.unit_price_minor
 
   return (
-    <View style={[styles.row, { borderColor: colors.border }]}>
+    <View style={[styles.row, { borderColor: tokens.colors.border }]}>
       <TouchableOpacity onPress={() => router.push(`/products/${item.product_handle}`)}>
         {item.thumbnail ? (
           <Image source={{ uri: item.thumbnail }} style={styles.img} />
         ) : (
-          <View style={[styles.img, { backgroundColor: colors.surface }]} />
+          <View style={[styles.img, { backgroundColor: tokens.colors.surface }]} />
         )}
       </TouchableOpacity>
       <View style={styles.body}>
         <TouchableOpacity onPress={() => router.push(`/products/${item.product_handle}`)}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
+          <Text style={[styles.title, { color: tokens.colors.text }]} numberOfLines={2}>{item.title}</Text>
         </TouchableOpacity>
-        <Text style={[styles.unit, { color: colors.textMuted }]}>{formatMinor(item.unit_price_minor, item.currency_code)}</Text>
+        <Text style={[styles.unit, { color: tokens.colors.textMuted }]}>{formatMinor(item.unit_price_minor, item.currency_code)}</Text>
         <View style={styles.actions}>
-          <View style={[styles.stepper, { backgroundColor: colors.surface }]}>
-            <TouchableOpacity onPress={() => decQty(item.variant_id)} style={[styles.stepBtn, { borderColor: colors.border, backgroundColor: "white" }]}>
-              <Text style={[styles.stepBtnText, { color: colors.textMuted }]}>−</Text>
+          <View style={[styles.stepper, { backgroundColor: tokens.colors.surface }]}>
+            <TouchableOpacity onPress={() => decQty(item.variant_id)} style={[styles.stepBtn, { borderColor: tokens.colors.border, backgroundColor: tokens.colors.white }]}>
+              <Text style={[styles.stepBtnText, { color: tokens.colors.textMuted }]}>−</Text>
             </TouchableOpacity>
-            <Text style={[styles.qty, { color: colors.text }]}>{item.qty}</Text>
-            <TouchableOpacity onPress={() => incQty(item.variant_id)} style={[styles.stepBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}>
-              <Text style={[styles.stepBtnText, { color: "white" }]}>+</Text>
+            <Text style={[styles.qty, { color: tokens.colors.text }]}>{item.qty}</Text>
+            <TouchableOpacity onPress={() => incQty(item.variant_id)} style={[styles.stepBtn, { backgroundColor: tokens.colors.primary, borderColor: tokens.colors.primary }]}>
+              <Text style={[styles.stepBtnText, { color: tokens.colors.white }]}>+</Text>
             </TouchableOpacity>
           </View>
-          <Text style={[styles.lineTotal, { color: colors.text }]}>{formatMinor(lineTotal, item.currency_code)}</Text>
+          <Text style={[styles.lineTotal, { color: tokens.colors.text }]}>{formatMinor(lineTotal, item.currency_code)}</Text>
           <TouchableOpacity onPress={() => removeItem(item.variant_id)}>
-            <Text style={[styles.trash, { color: colors.textMuted }]}>🗑</Text>
+            <Text style={[styles.trash, { color: tokens.colors.textMuted }]}>🗑</Text>
           </TouchableOpacity>
         </View>
       </View>

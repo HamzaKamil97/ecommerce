@@ -8,7 +8,7 @@ import Animated, {
   useAnimatedStyle,
   withDelay,
 } from 'react-native-reanimated';
-import { useTheme } from '../theme/useTheme';
+import { tokens } from '../theme/tokens';
 
 interface Props {
   size?: number;
@@ -20,8 +20,7 @@ interface Props {
  * Use on order-success screen, payment success, etc.
  */
 export function SuccessCheckmark({ size = 96, color }: Props) {
-  const { colors } = useTheme();
-  const tick = color ?? colors.success;
+  const tick = color ?? tokens.colors.success;
   const circleScale = useSharedValue(0);
   const checkScale = useSharedValue(0);
   const haloScale = useSharedValue(0);
