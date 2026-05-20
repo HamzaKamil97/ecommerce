@@ -15,10 +15,12 @@ import { tokens } from '@/src/theme/tokens'
 import { ImageCarousel } from '@/src/components/product/ImageCarousel'
 import { ShopBadge } from '@/src/components/product/ShopBadge'
 import { StickyAddToCart } from '@/src/components/product/StickyAddToCart'
-import { DEMO_PRODUCTS } from '@/src/components/home/demo-data'
+import { DEMO_PRODUCTS, DEMO_PRODUCTS_BY_SHOP } from '@/src/components/home/demo-data'
 import { showToast } from '@/src/components/Toast'
 import { useChromeStore } from '@/src/store/chromeStore'
 import { t } from '@/src/i18n'
+import { AddToCartSheet } from '@/src/components/cart/AddToCartSheet'
+import { selectedLabels, type SelectedOptions, type ProductOption } from '@/src/types/productOptions'
 
 export default function ProductDetailsScreen() {
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function ProductDetailsScreen() {
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [quantity, setQuantity] = useState(1)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -165,6 +168,50 @@ export default function ProductDetailsScreen() {
   const displayShopName = demoProduct ? demoProduct.shopName : ((product as any)?.store?.name ?? null)
   const displayShopLogo = demoProduct ? demoProduct.shopLogoUrl : null
   const displayShopSlug = demoProduct ? demoProduct.shopSlug : ((product as any)?.store?.handle ?? null)
+
+  // Resolve options for the demo product via DEMO_PRODUCTS_BY_SHOP lookup.
+  let displayOptions: ProductOption[] | undefined
+  if (demoProduct && id) {
+    const inShop = DEMO_PRODUCTS_BY_SHOP[demoProduct.shopSlug]?.find((p) => p.id === id)
+    displayOptions = inShop?.options
+  }
+  const hasOptions = (displayOptions?.length ?? 0) > 0
+
+  function handleSheetConfirm(params: {
+    quantity: number
+    notes: string
+    selected: SelectedOptions
+    lineTotalMinor: number
+  }) {
+    if (!demoProduct) return
+    const labels = displayOptions ? selectedLabels(displayOptions, params.selected) : []
+    const labelSuffix = labels.length > 0 ? ` · ${labels.join(', ')}` : ''
+    const variantKeyParts = Object.entries(params.selected)
+      .map(([k, v]) => `${k}:${[...v].sort().join('+')}`)
+      .sort()
+      .join('|')
+    const variantId = variantKeyParts
+      ? `${demoProduct.id}-v1-${variantKeyParts}`
+      : `${demoProduct.id}-v1`
+    const unitPriceMinor = Math.round(params.lineTotalMinor / Math.max(1, params.quantity))
+    const shop = { slug: demoProduct.shopSlug, name: demoProduct.shopName, currency: demoProduct.currency }
+    const item = {
+      product_id: demoProduct.id,
+      variant_id: variantId,
+      product_handle: id ?? demoProduct.id,
+      title: `${demoProduct.title}${labelSuffix}`,
+      thumbnail: demoProduct.images[0] ?? null,
+      unit_price_minor: unitPriceMinor,
+      currency_code: demoProduct.currency,
+      metadata: {
+        notes: params.notes || undefined,
+        selected_options: params.selected,
+        option_labels: labels,
+      },
+    }
+    for (let i = 0; i < params.quantity; i++) addItem(shop, item)
+    returnAfterAdd(demoProduct.shopSlug)
+  }
 
   return (
     <View style={styles.flex}>

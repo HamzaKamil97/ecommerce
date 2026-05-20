@@ -460,4 +460,14 @@ export const ar: any = {
   'vertical.fashion': 'الأزياء',
   'vertical.electronics': 'الإلكترونيات',
   'vertical.home': 'المنزل',
+
+  // SP-A8 — add-to-cart sheet + options
+  'cart.addNotesPlaceholder': 'مثلاً: حار جدًا، بدون بصل',
+  'cart.addForPrice': 'أضف بـ {price}',
+  'cart.chooseOptions': 'اختر الخيارات',
+  'cart.optionsRequired': 'الرجاء اختيار {option}',
+  'cart.pickMinMax': 'اختر {min}–{max}',
+  'cart.pickAtLeast': 'اختر على الأقل {min}',
+  'cart.optional': 'اختياري',
+  'cart.required': 'مطلوب',
 }

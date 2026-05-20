@@ -460,6 +460,16 @@ export const en = {
   'vertical.fashion': 'Fashion',
   'vertical.electronics': 'Electronics',
   'vertical.home': 'Home',
+
+  // SP-A8 — add-to-cart sheet + options
+  'cart.addNotesPlaceholder': 'e.g. extra spicy, no onions',
+  'cart.addForPrice': 'Add for {price}',
+  'cart.chooseOptions': 'Choose options',
+  'cart.optionsRequired': 'Please choose {option}',
+  'cart.pickMinMax': 'Pick {min}–{max}',
+  'cart.pickAtLeast': 'Pick at least {min}',
+  'cart.optional': 'Optional',
+  'cart.required': 'Required',
 } as const;
 
 export type EnDict = typeof en;

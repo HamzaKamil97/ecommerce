@@ -3,6 +3,7 @@ import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { PriceText } from '@/src/components/PriceText'
 import { QuantityStepper } from '@/src/components/QuantityStepper'
+import type { ProductOption } from '@/src/types/productOptions'
 
 interface ProductItem {
   id: string
@@ -10,6 +11,7 @@ interface ProductItem {
   thumbnail: string | null
   price_minor: number
   currencyCode: string
+  options?: ProductOption[]
 }
 
 interface Props {
@@ -20,12 +22,30 @@ interface Props {
   qty?: number
   onIncrement?: () => void
   onDecrement?: () => void
+  /** Called when the product has options OR caller forces the sheet path. */
+  onAddWithOptions?: () => void
+  useSheet?: boolean
 }
 
-export function ProductGridCard({ product, onPress, onAdd, qty = 0, onIncrement, onDecrement }: Props) {
+export function ProductGridCard({
+  product,
+  onPress,
+  onAdd,
+  qty = 0,
+  onIncrement,
+  onDecrement,
+  onAddWithOptions,
+  useSheet,
+}: Props) {
   const imageRef = useRef<View>(null)
+  const hasOptions = (product.options?.length ?? 0) > 0
+  const shouldOpenSheet = (useSheet || hasOptions) && !!onAddWithOptions
 
   function fireAdd() {
+    if (shouldOpenSheet) {
+      onAddWithOptions!()
+      return
+    }
     if (imageRef.current) {
       imageRef.current.measureInWindow((x, y, w, h) => {
         onAdd(x + w / 2, y + h / 2, Math.min(w, h))

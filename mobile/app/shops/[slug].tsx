@@ -31,6 +31,8 @@ import {
   type DemoProductCard,
 } from '@/src/components/home/demo-data'
 import { flyToCart } from '@/src/components/cart/FlyToCartHost'
+import { AddToCartSheet } from '@/src/components/cart/AddToCartSheet'
+import { selectedLabels, type SelectedOptions } from '@/src/types/productOptions'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 
@@ -84,6 +86,7 @@ export default function ShopDetailScreen() {
   const [merch, setMerch] = useState<MerchCategory[]>([])
   const [activeMerch, setActiveMerch] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [sheetProduct, setSheetProduct] = useState<DemoProductCard | null>(null)
   // loading starts false when we already have a slug (avoids hydration spinner freeze)
   const [loading, setLoading] = useState(true)
 
@@ -261,6 +264,39 @@ export default function ShopDetailScreen() {
     }
   }
 
+  function handleSheetConfirm(
+    item: DemoProductCard,
+    params: { quantity: number; notes: string; selected: SelectedOptions; lineTotalMinor: number },
+  ) {
+    const labels = item.options ? selectedLabels(item.options, params.selected) : []
+    const labelSuffix = labels.length > 0 ? ` · ${labels.join(', ')}` : ''
+    const variantKeyParts = Object.entries(params.selected)
+      .map(([k, v]) => `${k}:${[...v].sort().join('+')}`)
+      .sort()
+      .join('|')
+    const variantId = variantKeyParts ? `${item.id}-v1-${variantKeyParts}` : `${item.id}-v1`
+    const unitPriceMinor = Math.round(params.lineTotalMinor / Math.max(1, params.quantity))
+    for (let i = 0; i < params.quantity; i++) {
+      addItem(
+        { slug: slug, name: shopName, currency: item.currency },
+        {
+          variant_id: variantId,
+          product_id: item.id,
+          product_handle: item.id,
+          title: `${item.title}${labelSuffix}`,
+          thumbnail: item.thumbnail ?? null,
+          unit_price_minor: unitPriceMinor,
+          currency_code: item.currency,
+          metadata: {
+            notes: params.notes || undefined,
+            selected_options: params.selected,
+            option_labels: labels,
+          },
+        },
+      )
+    }
+  }
+
   function handleRealAdd(item: ProductWithCats, fromX: number, fromY: number, sourceSize: number) {
     const variant = item.variants?.[0]
     if (!variant) return
@@ -358,12 +394,14 @@ export default function ShopDetailScreen() {
                       thumbnail: item.thumbnail,
                       price_minor: item.price_minor,
                       currencyCode: item.currency.toUpperCase(),
+                      options: item.options,
                     }}
                     onPress={() => router.push(`/products/${item.id}`)}
                     onAdd={(fromX, fromY, sourceSize) => handleDemoAdd(item, fromX, fromY, sourceSize)}
                     qty={qty}
                     onIncrement={() => incQty(variantId)}
                     onDecrement={() => decQty(variantId)}
+                    onAddWithOptions={() => setSheetProduct(item)}
                   />
                 )
               }}
@@ -416,6 +454,24 @@ export default function ShopDetailScreen() {
 
       {/* 6. CartFab */}
       <CartFab itemCount={itemCount} onPress={() => router.push('/(tabs)/cart')} />
+
+      {/* 7. Add-to-cart options sheet */}
+      {sheetProduct && (
+        <AddToCartSheet
+          visible={!!sheetProduct}
+          onClose={() => setSheetProduct(null)}
+          product={{
+            id: sheetProduct.id,
+            title: sheetProduct.title,
+            thumbnail: sheetProduct.thumbnail,
+            basePriceMinor: sheetProduct.price_minor,
+            currency: sheetProduct.currency.toUpperCase(),
+            options: sheetProduct.options,
+          }}
+          shop={{ slug: slug, name: shopName, currency: sheetProduct.currency }}
+          onConfirm={(params) => handleSheetConfirm(sheetProduct, params)}
+        />
+      )}
     </SafeAreaView>
   )
 }

@@ -16,6 +16,7 @@ export interface CartItem {
   unit_price_minor: number
   currency_code: "iqd" | "usd"
   qty: number
+  metadata?: Record<string, unknown>
 }
 
 export interface PendingAdd {

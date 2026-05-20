@@ -2,6 +2,8 @@
 // Source of truth: backend/apps/backend/src/scripts/seed-demo-shops.ts
 // Real data (list-all-shops endpoint) deferred to SP-B.
 
+import type { ProductOption } from '@/src/types/productOptions'
+
 export interface HeroSlide {
   id: string
   title: string
@@ -241,6 +243,7 @@ export interface DemoProduct {
   shopSlug: string
   shopName: string
   shopLogoUrl: string
+  options?: ProductOption[]
 }
 
 export const DEMO_PRODUCTS: Record<string, DemoProduct> = {
@@ -465,11 +468,82 @@ export interface DemoProductCard {
   thumbnail: string
   price_minor: number
   currency: 'iqd' | 'usd'
+  options?: ProductOption[]
 }
+
+// ── Example vendor-defined options (multi-industry coverage) ────────────────
+const PIZZA_OPTIONS: ProductOption[] = [
+  {
+    id: 'size',
+    name: 'Size',
+    required: true,
+    type: 'single',
+    choices: [
+      { id: 'm', label: 'Medium', priceDelta: 0, defaultSelected: true },
+      { id: 'l', label: 'Large', priceDelta: 3000 },
+      { id: 'xl', label: 'X-Large', priceDelta: 6000 },
+    ],
+  },
+  {
+    id: 'sauces',
+    name: 'Extra sauces',
+    required: false,
+    type: 'multi',
+    min: 0,
+    max: 3,
+    choices: [
+      { id: 'garlic', label: 'Garlic', priceDelta: 500 },
+      { id: 'cajun', label: 'Cajun', priceDelta: 500 },
+      { id: 'spicy', label: 'Spicy', priceDelta: 500 },
+    ],
+  },
+]
+
+const TSHIRT_OPTIONS: ProductOption[] = [
+  {
+    id: 'size',
+    name: 'Size',
+    required: true,
+    type: 'single',
+    choices: [
+      { id: 's', label: 'S', priceDelta: 0 },
+      { id: 'm', label: 'M', priceDelta: 0 },
+      { id: 'l', label: 'L', priceDelta: 0 },
+      { id: 'xl', label: 'XL', priceDelta: 0 },
+    ],
+  },
+]
+
+const EARBUDS_OPTIONS: ProductOption[] = [
+  {
+    id: 'color',
+    name: 'Color',
+    required: true,
+    type: 'single',
+    choices: [
+      { id: 'black', label: 'Black', priceDelta: 0 },
+      { id: 'white', label: 'White', priceDelta: 0 },
+      { id: 'beige', label: 'Beige', priceDelta: 0 },
+    ],
+  },
+]
+
+const KETTLE_OPTIONS: ProductOption[] = [
+  {
+    id: 'material',
+    name: 'Material',
+    required: true,
+    type: 'single',
+    choices: [
+      { id: 'steel', label: 'Stainless Steel', priceDelta: 0 },
+      { id: 'glass', label: 'Glass', priceDelta: 4000 },
+    ],
+  },
+]
 
 export const DEMO_PRODUCTS_BY_SHOP: Record<string, DemoProductCard[]> = {
   'hamzas-kitchen': [
-    { id: 'hk-margherita-pizza', title: 'Margherita Pizza', thumbnail: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400', price_minor: 15000, currency: 'iqd' },
+    { id: 'hk-margherita-pizza', title: 'Margherita Pizza', thumbnail: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400', price_minor: 15000, currency: 'iqd', options: PIZZA_OPTIONS },
     { id: 'hk-bbq-burger', title: 'BBQ Smash Burger', thumbnail: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400', price_minor: 12000, currency: 'iqd' },
     { id: 'hk-caesar-salad', title: 'Caesar Salad', thumbnail: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400', price_minor: 8000, currency: 'iqd' },
     { id: 'hk-carbonara', title: 'Spaghetti Carbonara', thumbnail: 'https://images.unsplash.com/photo-1627286394628-253e6ddb0aae?w=400', price_minor: 14000, currency: 'iqd' },
@@ -483,15 +557,15 @@ export const DEMO_PRODUCTS_BY_SHOP: Record<string, DemoProductCard[]> = {
     { id: 'fm-yogurt', title: 'Greek Yogurt 500g', thumbnail: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400', price_minor: 4000, currency: 'iqd' },
   ],
   'style-hub': [
-    { id: 'sh-tshirt', title: 'Classic White Tee', thumbnail: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', price_minor: 15000, currency: 'iqd' },
+    { id: 'sh-tshirt', title: 'Classic White Tee', thumbnail: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', price_minor: 15000, currency: 'iqd', options: TSHIRT_OPTIONS },
     { id: 'sh-jeans', title: 'Slim Fit Jeans', thumbnail: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', price_minor: 35000, currency: 'iqd' },
   ],
   'techpoint': [
-    { id: 'tp-wireless-earbuds', title: 'Pro Wireless Earbuds', thumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', price_minor: 45000, currency: 'iqd' },
+    { id: 'tp-wireless-earbuds', title: 'Pro Wireless Earbuds', thumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', price_minor: 45000, currency: 'iqd', options: EARBUDS_OPTIONS },
     { id: 'tp-charger', title: '65W USB-C Charger', thumbnail: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400', price_minor: 18000, currency: 'iqd' },
   ],
   'bayti': [
-    { id: 'by-kettle', title: 'Electric Kettle 1.7L', thumbnail: 'https://images.unsplash.com/photo-1544781887-d2cac94dfad6?w=400', price_minor: 25000, currency: 'iqd' },
+    { id: 'by-kettle', title: 'Electric Kettle 1.7L', thumbnail: 'https://images.unsplash.com/photo-1544781887-d2cac94dfad6?w=400', price_minor: 25000, currency: 'iqd', options: KETTLE_OPTIONS },
     { id: 'by-cushion', title: 'Linen Throw Cushion', thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400', price_minor: 12000, currency: 'iqd' },
   ],
 }
