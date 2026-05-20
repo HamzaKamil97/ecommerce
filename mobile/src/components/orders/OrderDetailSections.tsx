@@ -1,5 +1,6 @@
 import React from 'react'
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
@@ -7,6 +8,8 @@ import type { DemoOrder } from '@/src/data/demoOrders'
 import { OrderTimeline } from './OrderTimeline'
 import { OrderStatusPill } from './OrderStatusPill'
 import { humanizeRelative } from '@/src/utils/relativeTime'
+import { useCartStore } from '@/src/store/cartStore'
+import { showToast } from '@/src/components/Toast'
 
 function Card({ children }: { children: React.ReactNode }) {
   return <View style={styles.card}>{children}</View>
@@ -68,12 +71,85 @@ export function ShopCard({ order }: { order: DemoOrder }) {
       </View>
       <Pressable
         style={styles.secondaryBtn}
-        onPress={() => Alert.alert(t('orders.contactShop'), 'Coming soon')}
+        onPress={() => Alert.alert(t('orders.contactShop'), t('orders.contactShopComingSoon'))}
       >
         <Text style={styles.secondaryBtnText}>{t('orders.contactShop')}</Text>
       </Pressable>
     </Card>
   )
+}
+
+export function OrderActionsCard({ order }: { order: DemoOrder }) {
+  useLanguageStore((s) => s.locale)
+  const router = useRouter()
+  const cart = useCartStore()
+
+  const isDelivered = order.status === 'delivered'
+  const canCancel = order.status === 'placed' || order.status === 'confirmed'
+  if (!isDelivered && !canCancel) return null
+
+  function reorder() {
+    const shop = { slug: order.shopSlug, name: order.shopName, currency: 'iqd' as const }
+    order.items.forEach((it, idx) => {
+      const minor = parsePriceToMinor(it.price)
+      for (let q = 0; q < it.qty; q++) {
+        cart.addItem(shop, {
+          product_id: `${order.id}-${idx}`,
+          variant_id: `${order.id}-${idx}-v`,
+          product_handle: `${order.shopSlug}-${idx}`,
+          title: it.name,
+          thumbnail: it.imageUrl ?? null,
+          unit_price_minor: minor,
+          currency_code: 'iqd',
+        })
+      }
+    })
+    showToast({ message: t('orders.reorderAck') })
+  }
+
+  function rate() {
+    const first = order.items[0]
+    if (!first) return
+    const productId = `${order.id}-0`
+    router.push(`/reviews/${productId}` as never)
+  }
+
+  function cancelOrder() {
+    Alert.alert(t('orders.cancelOrder'), t('orders.cancelConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('orders.cancelOrder'),
+        style: 'destructive',
+        onPress: () => showToast({ message: t('orders.cancelRequested') }),
+      },
+    ])
+  }
+
+  return (
+    <Card>
+      {isDelivered ? (
+        <>
+          <Pressable style={styles.primaryBtn} onPress={reorder}>
+            <Text style={styles.primaryBtnText}>{t('orders.reorder')}</Text>
+          </Pressable>
+          <Pressable style={styles.secondaryBtn} onPress={rate}>
+            <Text style={styles.secondaryBtnText}>{t('orders.rateOrder')}</Text>
+          </Pressable>
+        </>
+      ) : null}
+      {canCancel ? (
+        <Pressable style={styles.dangerBtn} onPress={cancelOrder}>
+          <Text style={styles.dangerBtnText}>{t('orders.cancelOrder')}</Text>
+        </Pressable>
+      ) : null}
+    </Card>
+  )
+}
+
+function parsePriceToMinor(price: string): number {
+  const digits = price.replace(/[^\d]/g, '')
+  if (!digits) return 0
+  return parseInt(digits, 10)
 }
 
 export function ItemsCard({ order }: { order: DemoOrder }) {
@@ -119,12 +195,19 @@ export function DeliveryCard({ order }: { order: DemoOrder }) {
           <View style={styles.divider} />
           <Text style={styles.courierName}>🛵 {order.courier.name}</Text>
           <Text style={styles.courierPhone}>{order.courier.phone}</Text>
-          <Pressable
-            style={styles.secondaryBtn}
-            onPress={() => Alert.alert(t('orders.callCourier'), 'Coming soon')}
-          >
-            <Text style={styles.secondaryBtnText}>{t('orders.callCourier')}</Text>
-          </Pressable>
+          {order.status === 'out_for_delivery' ? (
+            <Pressable
+              style={styles.secondaryBtn}
+              onPress={() => {
+                const tel = `tel:${order.courier?.phone.replace(/\s+/g, '')}`
+                Linking.openURL(tel).catch(() =>
+                  Alert.alert(t('orders.callCourier'), order.courier?.phone ?? ''),
+                )
+              }}
+            >
+              <Text style={styles.secondaryBtnText}>{t('orders.callCourier')}</Text>
+            </Pressable>
+          ) : null}
         </>
       ) : null}
     </Card>
@@ -212,6 +295,30 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: {
     color: tokens.colors.primary,
+    fontWeight: tokens.fontWeight.semibold,
+    fontSize: tokens.fontSize.base,
+  },
+  primaryBtn: {
+    backgroundColor: tokens.colors.primary,
+    borderRadius: tokens.radius.md,
+    paddingVertical: tokens.spacing.md,
+    alignItems: 'center',
+  },
+  primaryBtnText: {
+    color: tokens.colors.white,
+    fontWeight: tokens.fontWeight.bold,
+    fontSize: tokens.fontSize.base,
+  },
+  dangerBtn: {
+    marginTop: tokens.spacing.md,
+    borderWidth: 1,
+    borderColor: tokens.colors.danger,
+    borderRadius: tokens.radius.md,
+    paddingVertical: tokens.spacing.sm,
+    alignItems: 'center',
+  },
+  dangerBtnText: {
+    color: tokens.colors.danger,
     fontWeight: tokens.fontWeight.semibold,
     fontSize: tokens.fontSize.base,
   },

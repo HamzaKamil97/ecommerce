@@ -1,14 +1,16 @@
 import React, { useRef, useState, useCallback } from 'react'
-import { View, FlatList, StyleSheet, Dimensions, StatusBar, type ViewToken } from 'react-native'
+import { View, FlatList, RefreshControl, StyleSheet, Dimensions, StatusBar, type ViewToken } from 'react-native'
 import { ScrollCard } from '@/src/components/scrolls/ScrollCard'
 import { DEMO_SCROLLS, type ScrollItem } from '@/src/data/demoScrolls'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { tokens } from '@/src/theme/tokens'
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 
 export default function ScrollsScreen() {
   useLanguageStore((s) => s.locale)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 70 }).current
 
@@ -19,6 +21,12 @@ export default function ScrollsScreen() {
       }
     },
   ).current
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await new Promise((r) => setTimeout(r, 500))
+    setRefreshing(false)
+  }, [])
 
   const renderItem = useCallback(
     ({ item, index }: { item: ScrollItem; index: number }) => (
@@ -46,6 +54,14 @@ export default function ScrollsScreen() {
           offset: SCREEN_HEIGHT * index,
           index,
         })}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={tokens.colors.white}
+            colors={[tokens.colors.primary]}
+          />
+        }
       />
     </View>
   )

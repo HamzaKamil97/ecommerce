@@ -1,5 +1,5 @@
-import React from 'react'
-import { FlatList, Image, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import { FlatList, Image, Pressable, RefreshControl, SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { EmptyState } from '@/src/components/EmptyState'
@@ -14,6 +14,13 @@ export default function OrdersScreen() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
   const customer = useAuthStore((s) => s.customer)
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function onRefresh() {
+    setRefreshing(true)
+    await new Promise((r) => setTimeout(r, 500))
+    setRefreshing(false)
+  }
 
   if (!customer) {
     return (
@@ -38,6 +45,14 @@ export default function OrdersScreen() {
         keyExtractor={(o) => o.id}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={tokens.colors.primary}
+            colors={[tokens.colors.primary]}
+          />
+        }
         renderItem={({ item }) => (
           <OrderCard order={item} onPress={() => router.push(`/orders/${item.id}` as never)} />
         )}

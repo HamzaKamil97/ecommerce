@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { SafeAreaView, ScrollView, View, StyleSheet, Alert } from 'react-native'
+import { SafeAreaView, ScrollView, View, StyleSheet, Alert, RefreshControl } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCartStore } from '@/src/store/cartStore'
@@ -23,6 +23,13 @@ export default function HomeScreen() {
   useLanguageStore((s) => s.locale)
   const [filterOpen, setFilterOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function onRefresh() {
+    setRefreshing(true)
+    await new Promise((r) => setTimeout(r, 500))
+    setRefreshing(false)
+  }
 
   function onLocationPress() {
     if (token) {
@@ -66,6 +73,14 @@ export default function HomeScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={tokens.colors.primary}
+              colors={[tokens.colors.primary]}
+            />
+          }
         >
           <View style={styles.searchWrapper}>
             <SearchBox

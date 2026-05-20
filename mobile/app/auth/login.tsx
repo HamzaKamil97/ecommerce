@@ -96,7 +96,7 @@ export default function LoginScreen() {
             onPress={() => router.replace('/auth/register')}
           />
 
-          <Pressable onPress={() => {}} style={{ alignSelf: 'center', marginTop: tokens.spacing.sm }}>
+          <Pressable onPress={() => router.push('/auth/forgot' as never)} style={{ alignSelf: 'center', marginTop: tokens.spacing.sm }}>
             <Text style={styles.forgotLink}>{t('auth.forgotPassword')}</Text>
           </Pressable>
 

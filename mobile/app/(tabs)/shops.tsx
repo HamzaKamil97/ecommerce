@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { View, Text, TextInput, ScrollView, SafeAreaView, Pressable, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, SafeAreaView, Pressable, RefreshControl, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
@@ -18,6 +18,13 @@ export default function SearchScreen() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function onRefresh() {
+    setRefreshing(true)
+    await new Promise((r) => setTimeout(r, 500))
+    setRefreshing(false)
+  }
   const fVertical = useFilterStore((s) => s.vertical)
   const fDelivery = useFilterStore((s) => s.deliveryUnder)
   const fRating = useFilterStore((s) => s.minRating)
@@ -108,6 +115,14 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={tokens.colors.primary}
+            colors={[tokens.colors.primary]}
+          />
+        }
       >
         {!hasQuery && (
           <>

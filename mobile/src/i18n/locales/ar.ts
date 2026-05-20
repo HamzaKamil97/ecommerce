@@ -247,6 +247,8 @@ export const ar: any = {
   'common.retry': 'إعادة المحاولة',
   'common.close': 'إغلاق',
   'common.continue': 'متابعة',
+  'common.errorTitle': 'حدث خطأ ما',
+  'common.errorSubtitle': 'اسحب للمحاولة مرة أخرى',
 
   // Shops (search) screen
   'shops.searchHeading': 'البحث',
@@ -470,4 +472,18 @@ export const ar: any = {
   'cart.pickAtLeast': 'اختر على الأقل {min}',
   'cart.optional': 'اختياري',
   'cart.required': 'مطلوب',
+
+  // SP-A9 — remaining audit cleanup
+  'orders.contactShopComingSoon': 'دردشة المتجر قريبًا.',
+  'orders.reorder': 'أعد الطلب',
+  'orders.rateOrder': 'قيّم هذا الطلب',
+  'orders.cancelOrder': 'إلغاء الطلب',
+  'orders.cancelConfirm': 'إلغاء هذا الطلب؟',
+  'orders.cancelRequested': 'تم طلب الإلغاء',
+  'orders.reorderAck': 'أُضيفت العناصر إلى سلتك',
+  'auth.forgotTitle': 'إعادة تعيين كلمة المرور',
+  'auth.forgotHeading': 'نسيت كلمة المرور؟',
+  'auth.forgotSubtitle': 'أدخل بريدك وسنرسل التعليمات.',
+  'auth.forgotSubmit': 'إرسال التعليمات',
+  'auth.forgotAck': 'إذا كان هناك حساب بهذا البريد، أرسلنا تعليمات الإعادة.',
 }

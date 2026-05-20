@@ -15,6 +15,7 @@ import {
   ItemsCard,
   DeliveryCard,
   PaymentCard,
+  OrderActionsCard,
 } from '@/src/components/orders/OrderDetailSections'
 
 export default function OrderDetailScreen() {
@@ -57,6 +58,7 @@ export default function OrderDetailScreen() {
         <ItemsCard order={order} />
         <DeliveryCard order={order} />
         <PaymentCard order={order} />
+        <OrderActionsCard order={order} />
       </ScrollView>
     </SafeAreaView>
   )

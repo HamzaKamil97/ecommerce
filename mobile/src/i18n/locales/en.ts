@@ -245,6 +245,8 @@ export const en = {
   'common.retry': 'Retry',
   'common.close': 'Close',
   'common.continue': 'Continue',
+  'common.errorTitle': 'Something went wrong',
+  'common.errorSubtitle': 'Pull to try again',
 
   // Shops (search) screen
   'shops.searchHeading': 'Search',
@@ -470,6 +472,20 @@ export const en = {
   'cart.pickAtLeast': 'Pick at least {min}',
   'cart.optional': 'Optional',
   'cart.required': 'Required',
+
+  // SP-A9 — remaining audit cleanup
+  'orders.contactShopComingSoon': 'Shop chat is coming soon.',
+  'orders.reorder': 'Reorder',
+  'orders.rateOrder': 'Rate this order',
+  'orders.cancelOrder': 'Cancel order',
+  'orders.cancelConfirm': 'Cancel this order?',
+  'orders.cancelRequested': 'Cancellation requested',
+  'orders.reorderAck': 'Items added to your cart',
+  'auth.forgotTitle': 'Reset password',
+  'auth.forgotHeading': 'Forgot your password?',
+  'auth.forgotSubtitle': 'Enter your email and we will send instructions.',
+  'auth.forgotSubmit': 'Send instructions',
+  'auth.forgotAck': 'If an account exists with this email, we sent reset instructions.',
 } as const;
 
 export type EnDict = typeof en;

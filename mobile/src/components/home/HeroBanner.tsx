@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { View, Text, Pressable, ScrollView, Image, Dimensions, StyleSheet, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { View, Text, Pressable, FlatList, Image, Dimensions, StyleSheet, type ViewToken } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 
 export interface HeroSlide {
@@ -21,26 +21,27 @@ const SLIDE_WIDTH = SCREEN_WIDTH - tokens.spacing.lg * 2
 
 export function HeroBanner({ slides, onCta }: Props) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const scrollRef = useRef<ScrollView>(null)
+  const listRef = useRef<FlatList<HeroSlide>>(null)
   const userInteractedRef = useRef(false)
-  const skipFirstTickRef = useRef(true)
+  const hasMeasuredRef = useRef(false)
 
-  function onScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const idx = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH)
-    setActiveIndex(idx)
-  }
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems.length > 0 && typeof viewableItems[0].index === 'number') {
+        setActiveIndex(viewableItems[0].index)
+      }
+    },
+  ).current
 
   useEffect(() => {
     if (slides.length <= 1) return
     const timer = setInterval(() => {
-      if (skipFirstTickRef.current) {
-        skipFirstTickRef.current = false
-        return
-      }
+      if (!hasMeasuredRef.current) return
       if (userInteractedRef.current) return
       setActiveIndex((prev) => {
         const next = (prev + 1) % slides.length
-        scrollRef.current?.scrollTo({ x: next * SLIDE_WIDTH, animated: true })
+        listRef.current?.scrollToOffset({ offset: next * SLIDE_WIDTH, animated: true })
         return next
       })
     }, 5000)
@@ -48,32 +49,37 @@ export function HeroBanner({ slides, onCta }: Props) {
   }, [slides.length])
 
   return (
-    <View style={styles.wrapper}>
-      <ScrollView
-        ref={scrollRef}
+    <View style={styles.wrapper} onLayout={() => { hasMeasuredRef.current = true }}>
+      <FlatList<HeroSlide>
+        ref={listRef}
+        data={slides}
+        keyExtractor={(s) => s.id}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onScroll}
-        onScrollBeginDrag={() => { userInteractedRef.current = true }}
         snapToInterval={SLIDE_WIDTH}
+        snapToAlignment="start"
         decelerationRate="fast"
+        disableIntervalMomentum
+        getItemLayout={(_, i) => ({ length: SLIDE_WIDTH, offset: SLIDE_WIDTH * i, index: i })}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        onScrollBeginDrag={() => { userInteractedRef.current = true }}
         style={styles.scroll}
-      >
-        {slides.map((slide) => (
-          <View key={slide.id} style={styles.slide}>
-            <Image source={{ uri: slide.imageUrl }} style={styles.image} resizeMode="cover" />
+        renderItem={({ item }) => (
+          <View style={styles.slide}>
+            <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
             <View style={styles.overlay} />
             <View style={styles.content}>
-              <Text style={styles.title}>{slide.title}</Text>
-              <Text style={styles.subtitle}>{slide.subtitle}</Text>
-              <Pressable style={styles.ctaBtn} onPress={() => onCta(slide)}>
-                <Text style={styles.ctaText}>{slide.ctaLabel}</Text>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.subtitle}>{item.subtitle}</Text>
+              <Pressable style={styles.ctaBtn} onPress={() => onCta(item)}>
+                <Text style={styles.ctaText}>{item.ctaLabel}</Text>
               </Pressable>
             </View>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
       <View style={styles.dotsRow}>
         {slides.map((s, i) => (
           <View key={`dot-${s.id}`} style={[styles.dot, i === activeIndex && styles.dotActive]} />
@@ -90,7 +96,7 @@ const styles = StyleSheet.create({
     ...tokens.shadow.card,
   },
   scroll: { height: BANNER_HEIGHT },
-  slide: { width: SCREEN_WIDTH - tokens.spacing.lg * 2, height: BANNER_HEIGHT, position: 'relative' },
+  slide: { width: SLIDE_WIDTH, height: BANNER_HEIGHT, position: 'relative' },
   image: { ...StyleSheet.absoluteFillObject },
   overlay: {
     ...StyleSheet.absoluteFillObject,
