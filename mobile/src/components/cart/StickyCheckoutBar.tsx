@@ -23,10 +23,8 @@ export function StickyCheckoutBar({ total, currency, onCheckout, disabled }: Pro
         disabled={disabled}
         style={({ pressed }) => [
           styles.btn,
-          {
-            opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
-            transform: pressed && !disabled ? [{ scale: 0.98 }] : undefined,
-          },
+          { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+          pressed && !disabled && { transform: [{ scale: 0.98 }] },
         ]}
       >
         <Text style={styles.btnText}>{t('cart.checkout')}</Text>

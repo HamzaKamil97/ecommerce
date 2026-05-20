@@ -35,10 +35,10 @@ export function AppButton({
           height: isPrimary ? 52 : 44,
           paddingHorizontal: spacing.lg,
           opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
-          transform: pressed && !disabled ? [{ scale: 0.98 }] : undefined,
           borderWidth: isPrimary ? 0 : 1,
           borderColor: colors.border,
         },
+        pressed && !disabled && { transform: [{ scale: 0.98 }] },
         style,
       ]}
     >

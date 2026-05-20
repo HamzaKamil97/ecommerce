@@ -47,10 +47,8 @@ export function StickyAddToCart({ quantity, setQuantity, price, currencyCode, on
         disabled={disabled}
         style={({ pressed }) => [
           styles.addBtn,
-          {
-            opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
-            transform: pressed && !disabled ? [{ scale: 0.98 }] : undefined,
-          },
+          { opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+          pressed && !disabled && { transform: [{ scale: 0.98 }] },
         ]}
       >
         <Text style={styles.addBtnText}>
