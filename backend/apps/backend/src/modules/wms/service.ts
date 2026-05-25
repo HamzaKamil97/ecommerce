@@ -1,9 +1,11 @@
 import { MedusaService } from "@medusajs/framework/utils"
 import { StockPool } from "./models/stock-pool.model"
+import { Movement } from "./models/movement.model"
 import { StockSnapshot, WmsServiceInterface } from "./types"
 
 class WmsServiceBase extends MedusaService({
   StockPool,
+  Movement,
 }) {}
 
 export class WmsService extends WmsServiceBase implements WmsServiceInterface {
