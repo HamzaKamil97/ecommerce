@@ -9,9 +9,10 @@ interface Props {
   value?: string
   onPress: () => void
   danger?: boolean
+  badge?: string
 }
 
-export function MenuRow({ icon, label, value, onPress, danger }: Props) {
+export function MenuRow({ icon, label, value, onPress, danger, badge }: Props) {
   return (
     <Pressable
       onPress={onPress}
@@ -25,6 +26,11 @@ export function MenuRow({ icon, label, value, onPress, danger }: Props) {
         />
       </View>
       <Text style={[styles.label, danger && styles.labelDanger]}>{label}</Text>
+      {badge ? (
+        <View style={styles.badgePill}>
+          <Text style={styles.badgeText}>{badge}</Text>
+        </View>
+      ) : null}
       {value ? <Text style={styles.value}>{value}</Text> : null}
       {!danger && <Text style={styles.chevron}>›</Text>}
     </Pressable>
@@ -67,5 +73,18 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 20,
     color: tokens.colors.textMuted,
+  },
+  badgePill: {
+    paddingHorizontal: tokens.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: tokens.radius.pill,
+    backgroundColor: tokens.colors.accentSoft,
+    marginRight: tokens.spacing.xs,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.primaryDark,
+    letterSpacing: 0.3,
   },
 })

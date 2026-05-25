@@ -90,6 +90,14 @@ export default function RootLayout() {
         <Stack.Screen name="games/voice-memo" options={{ title: t('games.voiceMemo.name'), headerShown: true }} />
         <Stack.Screen name="games/prep-along" options={{ title: t('games.prepAlong.name'), headerShown: true }} />
         <Stack.Screen name="games/playlist" options={{ title: t('games.playlist.name'), headerShown: true }} />
+        <Stack.Screen name="group-gift" options={{ title: t('locked.groupGift.title'), headerShown: true }} />
+        <Stack.Screen name="wedding-registry" options={{ title: t('locked.weddingRegistry.title'), headerShown: true }} />
+        <Stack.Screen name="refer" options={{ title: t('locked.refer.title'), headerShown: true }} />
+        <Stack.Screen name="gift-occasions" options={{ title: t('locked.giftOccasions.title'), headerShown: true }} />
+        <Stack.Screen name="family" options={{ title: t('locked.family.title'), headerShown: true }} />
+        <Stack.Screen name="seasonal" options={{ title: t('locked.seasonal.title'), headerShown: true }} />
+        <Stack.Screen name="special" options={{ title: t('locked.special.title'), headerShown: true }} />
+        <Stack.Screen name="concierge" options={{ title: t('locked.concierge.title'), headerShown: true }} />
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />

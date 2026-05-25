@@ -93,6 +93,18 @@ export default function ProfileScreen() {
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
+              <Text style={styles.groupTitle}>{t('locked.menuGroupTitle')}</Text>
+              <MenuRow icon="gift-outline" label={t('locked.groupGift.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/group-gift' as never)} />
+              <MenuRow icon="heart-circle-outline" label={t('locked.weddingRegistry.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/wedding-registry' as never)} />
+              <MenuRow icon="sparkles-outline" label={t('locked.giftOccasions.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/gift-occasions' as never)} />
+              <MenuRow icon="home-outline" label={t('locked.family.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/family' as never)} />
+              <MenuRow icon="leaf-outline" label={t('locked.seasonal.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/seasonal' as never)} />
+              <MenuRow icon="cube-outline" label={t('locked.special.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/special' as never)} />
+              <MenuRow icon="people-circle-outline" label={t('locked.refer.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/refer' as never)} />
+              <MenuRow icon="chatbubbles-outline" label={t('locked.concierge.title')} badge={t('locked.comingSoon')} onPress={() => router.push('/concierge' as never)} />
+            </View>
+
+            <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>
               <MenuRow icon="chatbubble-ellipses-outline" label={t('account.help')} onPress={() => router.push('/help' as never)} />
               <MenuRow icon="document-text-outline" label={t('account.terms')} onPress={() => router.push('/terms' as never)} />
               <MenuRow icon="shield-checkmark-outline" label={t('account.privacy')} onPress={() => router.push('/privacy' as never)} />
@@ -237,6 +249,16 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: tokens.colors.border,
+  },
+  groupTitle: {
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.textMuted,
+    paddingHorizontal: tokens.spacing.lg,
+    paddingTop: tokens.spacing.md,
+    paddingBottom: tokens.spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   signOutWrapper: {
     paddingHorizontal: tokens.spacing.lg,

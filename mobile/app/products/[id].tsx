@@ -233,6 +233,16 @@ export default function ProductDetailsScreen() {
           <Ionicons name="arrow-back" size={22} color={tokens.colors.white} />
         </Pressable>
 
+        {/* Send as gift overlay */}
+        <Pressable
+          onPress={() => router.push('/gift-occasions' as never)}
+          style={[styles.giftHeaderBtn, { top: insets.top + tokens.spacing.sm }]}
+          accessibilityLabel={t('product.sendAsGift')}
+          hitSlop={6}
+        >
+          <Ionicons name="gift-outline" size={20} color={tokens.colors.white} />
+        </Pressable>
+
         {/* Product header */}
         <View style={styles.headerSection}>
           {displayShopName && (
@@ -274,6 +284,16 @@ export default function ProductDetailsScreen() {
             />
           </View>
         )}
+
+        <View style={styles.section}>
+          <Pressable
+            onPress={() => router.push('/gift-occasions' as never)}
+            style={({ pressed }) => [styles.sendAsGiftBtn, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="gift-outline" size={18} color={tokens.colors.primary} />
+            <Text style={styles.sendAsGiftText}>{t('product.sendAsGift')}</Text>
+          </Pressable>
+        </View>
       </ScrollView>
 
       {/* Sticky add-to-cart bar */}
@@ -296,6 +316,17 @@ const styles = StyleSheet.create({
   backBtn: {
     position: 'absolute',
     left: tokens.spacing.lg,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  giftHeaderBtn: {
+    position: 'absolute',
+    right: tokens.spacing.lg,
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -328,5 +359,21 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.base,
     color: tokens.colors.textMuted,
     lineHeight: 22,
+  },
+  sendAsGiftBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacing.xs,
+    paddingVertical: tokens.spacing.sm,
+    borderRadius: tokens.radius.md,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+    backgroundColor: tokens.colors.surface,
+  },
+  sendAsGiftText: {
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.semibold,
+    color: tokens.colors.primary,
   },
 })

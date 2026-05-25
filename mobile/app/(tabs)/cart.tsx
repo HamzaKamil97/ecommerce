@@ -176,6 +176,14 @@ export default function CartScreen() {
         </View>
       </ScrollView>
 
+      <Pressable
+        onPress={() => router.push('/gift-occasions' as never)}
+        style={({ pressed }) => [styles.giftHint, { opacity: pressed ? 0.7 : 1 }]}
+      >
+        <Ionicons name="gift-outline" size={14} color={tokens.colors.primary} />
+        <Text style={styles.giftHintText}>{t('locked.giftOccasions.cartHint')}</Text>
+      </Pressable>
+
       <StickyCheckoutBar
         total={total}
         currency={currency}
@@ -325,5 +333,18 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.base,
     fontWeight: tokens.fontWeight.bold,
     color: tokens.colors.white,
+  },
+  giftHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacing.xs,
+    paddingVertical: tokens.spacing.sm,
+    backgroundColor: tokens.colors.accentSoft,
+  },
+  giftHintText: {
+    fontSize: tokens.fontSize.sm,
+    fontWeight: tokens.fontWeight.semibold,
+    color: tokens.colors.primaryDark,
   },
 })
