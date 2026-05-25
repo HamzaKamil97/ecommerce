@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
+import { useCartStore } from '@/src/store/cartStore'
 
 function formatMinor(amount: number, currency: 'iqd' | 'usd'): string {
   if (currency === 'iqd') return `${new Intl.NumberFormat('en-IQ').format(amount)} IQD`
@@ -16,8 +17,20 @@ interface Props {
 }
 
 export function StickyCheckoutBar({ total, currency, onCheckout, disabled }: Props) {
+  const participants = useCartStore((s) => s.participants) ?? []
+  const others = Math.max(0, participants.length - 1)
+  const shoppingLabel =
+    others === 1
+      ? t('cart.shoppingWithN', { count: others })
+      : others > 1
+      ? t('cart.shoppingWithNPlural', { count: others })
+      : null
+
   return (
     <View style={styles.bar}>
+      {shoppingLabel && (
+        <Text style={styles.shoppingWith}>{shoppingLabel}</Text>
+      )}
       <Pressable
         onPress={onCheckout}
         disabled={disabled}
@@ -35,10 +48,17 @@ export function StickyCheckoutBar({ total, currency, onCheckout, disabled }: Pro
 }
 
 const styles = StyleSheet.create({
+  shoppingWith: {
+    fontSize: tokens.fontSize.xs,
+    color: tokens.colors.textMuted,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
   bar: {
-    height: 80,
+    minHeight: 80,
     paddingHorizontal: tokens.spacing.lg,
     paddingTop: tokens.spacing.sm,
+    paddingBottom: tokens.spacing.sm,
     backgroundColor: tokens.colors.bg,
     borderTopWidth: 1,
     borderTopColor: tokens.colors.border,

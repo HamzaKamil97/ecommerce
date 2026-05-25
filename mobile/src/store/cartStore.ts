@@ -26,6 +26,25 @@ export interface PendingAdd {
   item: CartItem
 }
 
+export interface CartParticipant {
+  id: string
+  name: string
+  avatarColor: string
+  isOwner: boolean
+}
+
+const AVATAR_COLORS = ['#b88a3a', '#8a6a2c', '#2f6a55', '#862a3a', '#3a352d', '#6f6859']
+
+function colorForId(id: string): string {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]
+}
+
+function shortId(): string {
+  return Math.random().toString(36).slice(2, 10)
+}
+
 interface CartState {
   shop_slug: string | null
   shop_name: string | null
@@ -36,6 +55,8 @@ interface CartState {
   coupon_code: string | null
   discount_minor: number
   pending_add: PendingAdd | null
+  participants: CartParticipant[]
+  cart_share_id: string | null
 
   // actions
   addItem: (shop: { slug: string; name: string; currency: "iqd" | "usd" }, item: Omit<CartItem, "qty">) => "added" | "needs_confirm"
@@ -48,6 +69,10 @@ interface CartState {
   setDeliveryNotes: (notes: string) => void
   setCoupon: (code: string | null, discountMinor: number) => void
   clear: () => void
+  ensureSelfParticipant: (name: string) => void
+  addParticipant: (name?: string) => CartParticipant
+  removeParticipant: (id: string) => void
+  getInviteLink: () => string
 
   // selectors
   itemCount: () => number
@@ -58,6 +83,7 @@ export const useCartStore = create<CartState>()(persist((set, get) => ({
   shop_slug: null, shop_name: null, shop_display_currency: "iqd",
   items: [], shop_notes: "", delivery_notes: "",
   coupon_code: null, discount_minor: 0, pending_add: null,
+  participants: [], cart_share_id: null,
 
   addItem: (shop, item) => {
     const state = get()
@@ -101,7 +127,7 @@ export const useCartStore = create<CartState>()(persist((set, get) => ({
   decQty: (variantId) => set((s) => {
     const next = s.items.map((i) => i.variant_id === variantId ? { ...i, qty: Math.max(0, i.qty - 1) } : i).filter((i) => i.qty > 0)
     if (next.length === 0) {
-      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0 }
+      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0, participants: [] }
     }
     return { items: next }
   }),
@@ -109,7 +135,7 @@ export const useCartStore = create<CartState>()(persist((set, get) => ({
   removeItem: (variantId) => set((s) => {
     const next = s.items.filter((i) => i.variant_id !== variantId)
     if (next.length === 0) {
-      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0 }
+      return { items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "", coupon_code: null, discount_minor: 0, participants: [] }
     }
     return { items: next }
   }),
@@ -119,8 +145,41 @@ export const useCartStore = create<CartState>()(persist((set, get) => ({
   setCoupon: (code, discount) => set({ coupon_code: code, discount_minor: discount }),
   clear: () => set({
     items: [], shop_slug: null, shop_name: null, shop_notes: "", delivery_notes: "",
-    coupon_code: null, discount_minor: 0, pending_add: null,
+    coupon_code: null, discount_minor: 0, pending_add: null, participants: [],
   }),
+
+  ensureSelfParticipant: (name) => {
+    const list = get().participants ?? []
+    if (list.some((p) => p.id === 'self')) return
+    const self: CartParticipant = { id: 'self', name, avatarColor: colorForId('self'), isOwner: true }
+    set({ participants: [self, ...list] })
+  },
+
+  addParticipant: (name) => {
+    const id = shortId()
+    const p: CartParticipant = {
+      id,
+      name: name ?? 'Guest',
+      avatarColor: colorForId(id),
+      isOwner: false,
+    }
+    set((s) => ({ participants: [...(s.participants ?? []), p] }))
+    return p
+  },
+
+  removeParticipant: (id) => {
+    if (id === 'self') return
+    set((s) => ({ participants: (s.participants ?? []).filter((p) => p.id !== id) }))
+  },
+
+  getInviteLink: () => {
+    let id = get().cart_share_id
+    if (!id) {
+      id = shortId()
+      set({ cart_share_id: id })
+    }
+    return `hanoot://cart/share/${id}`
+  },
 
   itemCount: () => get().items.reduce((n, i) => n + i.qty, 0),
   subtotalMinor: () => get().items.reduce((n, i) => n + i.qty * i.unit_price_minor, 0),
@@ -136,5 +195,7 @@ export const useCartStore = create<CartState>()(persist((set, get) => ({
     delivery_notes: state.delivery_notes,
     coupon_code: state.coupon_code,
     discount_minor: state.discount_minor,
+    participants: state.participants,
+    cart_share_id: state.cart_share_id,
   }),
 }))

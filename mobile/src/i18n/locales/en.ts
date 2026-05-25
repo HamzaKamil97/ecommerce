@@ -550,6 +550,22 @@ export const en = {
   'pass.notifyEmailPlaceholder': 'Your email',
   'pass.notifyAck': "I'll let you know the moment it's ready ✨",
   'pass.continueBrowsing': 'Continue browsing',
+
+  // A-Re7 — shared cart UI
+  'cart.invite.title': 'Shop together',
+  'cart.invite.subtitle': 'Invite a friend to add to this cart with you',
+  'cart.invite.button': 'Invite',
+  'cart.invite.share': 'Share invite',
+  'cart.invite.copy': 'Copy',
+  'cart.invite.copied': 'Link copied',
+  'cart.invite.shareMessage': '{name} invited you to shop on Hanoot together. Tap to join.',
+  'cart.invite.joinedToast': '{name} joined the cart',
+  'cart.invite.syncSoon': 'Real-time sync launches soon',
+  'cart.participant.owner': 'Owner',
+  'cart.participant.guest': 'Guest',
+  'cart.participant.remove': 'Remove from cart',
+  'cart.shoppingWithN': 'Shopping with {count} other',
+  'cart.shoppingWithNPlural': 'Shopping with {count} others',
 } as const;
 
 export type EnDict = typeof en;

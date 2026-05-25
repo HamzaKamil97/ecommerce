@@ -2,14 +2,17 @@ import React from 'react'
 import { View, Text, ScrollView, Pressable, SafeAreaView, StyleSheet, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { useCartStore } from '@/src/store/cartStore'
+import { useCartStore, type CartParticipant } from '@/src/store/cartStore'
 import { tokens } from '@/src/theme/tokens'
 import { StoreSection } from '@/src/components/cart/StoreSection'
 import { CartSummary } from '@/src/components/cart/CartSummary'
 import { StickyCheckoutBar } from '@/src/components/cart/StickyCheckoutBar'
+import { InviteToCartSheet } from '@/src/components/cart/InviteToCartSheet'
+import { ParticipantSheet } from '@/src/components/cart/ParticipantSheet'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { useChromeStore } from '@/src/store/chromeStore'
+import { useAuthStore } from '@/src/store/authStore'
 
 const DELIVERY_FEE = 2500
 
@@ -35,6 +38,18 @@ export default function CartScreen() {
   const [localDeliveryNotes, setLocalDeliveryNotes] = React.useState(deliveryNotes)
   React.useEffect(() => { setLocalShopNotes(shopNotes) }, [shopNotes])
   React.useEffect(() => { setLocalDeliveryNotes(deliveryNotes) }, [deliveryNotes])
+
+  const participants = useCartStore((s) => s.participants) ?? []
+  const ensureSelfParticipant = useCartStore((s) => s.ensureSelfParticipant)
+  const customer = useAuthStore((s) => s.customer)
+  const [inviteOpen, setInviteOpen] = React.useState(false)
+  const [activeParticipant, setActiveParticipant] = React.useState<CartParticipant | null>(null)
+
+  React.useEffect(() => {
+    if (items.length > 0 && customer?.first_name) {
+      ensureSelfParticipant(customer.first_name)
+    }
+  }, [items.length, customer?.first_name, ensureSelfParticipant])
 
   if (items.length === 0) {
     return (
@@ -77,8 +92,37 @@ export default function CartScreen() {
           <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
             <Text style={styles.backBtnText}>‹</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>{t('cart.myBasket')}</Text>
-          <View style={{ width: 36 }} />
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>{t('cart.myBasket')}</Text>
+            {participants.length > 0 && (
+              <View style={styles.avatarsRow}>
+                {participants.map((p, idx) => (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => setActiveParticipant(p)}
+                    style={[
+                      styles.avatar,
+                      { backgroundColor: p.avatarColor },
+                      idx > 0 && { marginLeft: -8 },
+                    ]}
+                    hitSlop={6}
+                  >
+                    <Text style={styles.avatarLetter}>
+                      {(p.name?.[0] ?? '?').toUpperCase()}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+          <Pressable
+            onPress={() => setInviteOpen(true)}
+            style={({ pressed }) => [styles.inviteBtn, { opacity: pressed ? 0.85 : 1 }]}
+            hitSlop={6}
+          >
+            <Ionicons name="people" size={14} color={tokens.colors.white} />
+            <Text style={styles.inviteBtnText}>{t('cart.invite.button')}</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
 
@@ -137,6 +181,13 @@ export default function CartScreen() {
         currency={currency}
         onCheckout={() => router.push('/checkout')}
       />
+
+      <InviteToCartSheet visible={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <ParticipantSheet
+        visible={activeParticipant !== null}
+        participant={activeParticipant}
+        onClose={() => setActiveParticipant(null)}
+      />
     </View>
   )
 }
@@ -177,6 +228,45 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.lg,
     fontWeight: tokens.fontWeight.bold,
     color: tokens.colors.text,
+  },
+  headerCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacing.sm,
+  },
+  avatarsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: tokens.colors.bg,
+  },
+  avatarLetter: {
+    fontSize: 11,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.white,
+  },
+  inviteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: tokens.spacing.md,
+    paddingVertical: 6,
+    backgroundColor: tokens.colors.primary,
+    borderRadius: tokens.radius.pill,
+  },
+  inviteBtnText: {
+    fontSize: tokens.fontSize.xs,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.white,
   },
   scrollContent: {
     paddingTop: tokens.spacing.lg,

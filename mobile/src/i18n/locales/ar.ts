@@ -550,4 +550,20 @@ export const ar: any = {
   'pass.notifyEmailPlaceholder': 'بريدك الإلكتروني',
   'pass.notifyAck': 'سأخبرك فور أن يكون جاهزًا ✨',
   'pass.continueBrowsing': 'تابع التصفح',
+
+  // A-Re7 — shared cart UI
+  'cart.invite.title': 'تسوّقوا معًا',
+  'cart.invite.subtitle': 'ادعُ صديقًا ليضيف إلى هذه السلة معك',
+  'cart.invite.button': 'دعوة',
+  'cart.invite.share': 'مشاركة الدعوة',
+  'cart.invite.copy': 'نسخ',
+  'cart.invite.copied': 'تم نسخ الرابط',
+  'cart.invite.shareMessage': 'دعاك {name} للتسوق معًا على حانوت. اضغط للانضمام.',
+  'cart.invite.joinedToast': 'انضم {name} إلى السلة',
+  'cart.invite.syncSoon': 'المزامنة الفورية قريبًا',
+  'cart.participant.owner': 'المالك',
+  'cart.participant.guest': 'ضيف',
+  'cart.participant.remove': 'إزالة من السلة',
+  'cart.shoppingWithN': 'تتسوق مع {count} آخر',
+  'cart.shoppingWithNPlural': 'تتسوق مع {count} آخرين',
 }
