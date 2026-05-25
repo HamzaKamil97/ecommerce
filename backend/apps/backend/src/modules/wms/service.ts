@@ -21,6 +21,7 @@ import {
   WmsServiceInterface,
 } from "./types"
 import { WmsInsufficientStockError } from "./errors"
+import { WMS_EVENTS } from "./events"
 
 class WmsServiceBase extends MedusaService({
   StockPool,
@@ -32,6 +33,28 @@ class WmsServiceBase extends MedusaService({
 export class WmsService extends WmsServiceBase implements WmsServiceInterface {
   ping(): string {
     return "wms-ok"
+  }
+
+  /**
+   * Emit a WMS domain event via the EVENT_BUS module (when registered).
+   * No-op when event bus is unavailable (e.g., unit tests). Errors are
+   * swallowed: event delivery must never fail the surrounding business call.
+   * MUST be called only AFTER a successful DB transaction has committed.
+   */
+  private async emitWmsEvent(name: string, data: unknown): Promise<void> {
+    const eventBus: any =
+      (this as any).eventBusModuleService_ ??
+      (this as any).__container__?.["event_bus"]
+    if (!eventBus || typeof eventBus.emit !== "function") return
+    try {
+      await eventBus.emit({ name, data })
+    } catch {
+      try {
+        await eventBus.emit(name, data)
+      } catch {
+        // Silently swallow — events are best-effort, never break the caller.
+      }
+    }
   }
 
   async getStock(vendorId: string, variantId: string): Promise<StockSnapshot> {
@@ -58,7 +81,7 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       throw new Error("PG connection not available in WMS container")
     }
 
-    return await pg.transaction(async (trx: any) => {
+    const result = await pg.transaction(async (trx: any) => {
       // 1) Ensure pool row exists (implicit 0/0 if missing).
       // The unique constraint is a partial unique INDEX with predicate
       // (deleted_at IS NULL), so ON CONFLICT must reference the same predicate.
@@ -131,6 +154,17 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
 
       return { new_on_hand: newOnHand, movement_id: movementId }
     })
+
+    // Emit AFTER commit — never on rollback.
+    await this.emitWmsEvent(WMS_EVENTS.STOCK_DECREMENTED, {
+      vendor_id: input.vendor_id,
+      variant_id: input.variant_id,
+      qty: input.qty,
+      new_on_hand: result.new_on_hand,
+      source_id: input.source_id,
+      actor_id: input.actor_id,
+    })
+    return result
   }
 
   async incrementStock(input: IncrementStockInput): Promise<IncrementStockResult> {
@@ -146,7 +180,7 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       throw new Error("PG connection not available in WMS container")
     }
 
-    return await pg.transaction(async (trx: any) => {
+    const result = await pg.transaction(async (trx: any) => {
       // 1) Ensure pool row exists (implicit 0/0 if missing).
       const newPoolId = `sp_${randomUUID().replace(/-/g, "").slice(0, 16)}`
       await trx.raw(
@@ -196,6 +230,17 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
 
       return { new_on_hand: newOnHand, movement_id: movementId }
     })
+
+    // Emit AFTER commit — never on rollback.
+    await this.emitWmsEvent(WMS_EVENTS.STOCK_INCREMENTED, {
+      vendor_id: input.vendor_id,
+      variant_id: input.variant_id,
+      qty: input.qty,
+      new_on_hand: result.new_on_hand,
+      source_id: input.source_id,
+      actor_id: input.actor_id,
+    })
+    return result
   }
 
   async createReservation(input: CreateReservationInput): Promise<ReservationDTO> {
@@ -212,7 +257,7 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
     }
     const ttl = input.ttl_seconds ?? 900
 
-    return await pg.transaction(async (trx: any) => {
+    const result = await pg.transaction(async (trx: any) => {
       // 1) Ensure pool row exists (implicit 0/0 if missing).
       const newPoolId = `sp_${randomUUID().replace(/-/g, "").slice(0, 16)}`
       await trx.raw(
@@ -300,9 +345,19 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
         variant_id: input.variant_id,
         qty: input.qty,
         expires_at: expiresAt,
-        status: "active",
+        status: "active" as const,
       }
     })
+
+    // Emit AFTER commit — never on rollback.
+    await this.emitWmsEvent(WMS_EVENTS.RESERVATION_CREATED, {
+      reservation_id: result.id,
+      vendor_id: result.vendor_id,
+      variant_id: result.variant_id,
+      qty: result.qty,
+      order_id: result.order_id,
+    })
+    return result
   }
 
   async consumeReservation(input: ConsumeReservationInput): Promise<{ ok: true }> {
@@ -314,7 +369,7 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       throw new Error("PG connection not available in WMS container")
     }
 
-    return await pg.transaction(async (trx: any) => {
+    const meta = await pg.transaction(async (trx: any) => {
       // 1) Lock reservation, ensure it's active
       const rsSel = await trx.raw(
         `SELECT vendor_id, variant_id, qty::numeric AS qty, status
@@ -364,8 +419,17 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
           input.reservation_id, input.actor_id ?? null, input.note ?? null,
         ],
       )
-      return { ok: true as const }
+      return { vendor_id: r.vendor_id as string, variant_id: r.variant_id as string, qty }
     })
+
+    // Emit AFTER commit — never on rollback.
+    await this.emitWmsEvent(WMS_EVENTS.RESERVATION_CONSUMED, {
+      reservation_id: input.reservation_id,
+      vendor_id: meta.vendor_id,
+      variant_id: meta.variant_id,
+      qty: meta.qty,
+    })
+    return { ok: true as const }
   }
 
   async releaseReservation(input: ReleaseReservationInput): Promise<{ ok: true }> {
@@ -377,7 +441,7 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       throw new Error("PG connection not available in WMS container")
     }
 
-    return await pg.transaction(async (trx: any) => {
+    const meta = await pg.transaction(async (trx: any) => {
       const rsSel = await trx.raw(
         `SELECT vendor_id, variant_id, qty::numeric AS qty, status
            FROM wms_reservation
@@ -417,8 +481,17 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
                  ?, NULL, ?, NOW(), NOW())`,
         [movementId, r.vendor_id, r.variant_id, input.reservation_id, input.reason ?? null],
       )
-      return { ok: true as const }
+      return { vendor_id: r.vendor_id as string, variant_id: r.variant_id as string, qty }
     })
+
+    // Emit AFTER commit — never on rollback.
+    await this.emitWmsEvent(WMS_EVENTS.RESERVATION_RELEASED, {
+      reservation_id: input.reservation_id,
+      vendor_id: meta.vendor_id,
+      variant_id: meta.variant_id,
+      qty: meta.qty,
+    })
+    return { ok: true as const }
   }
 
   async expireReservations(): Promise<ExpireReservationsResult> {
@@ -430,7 +503,14 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       throw new Error("PG connection not available in WMS container")
     }
 
-    return await pg.transaction(async (trx: any) => {
+    const expired: Array<{
+      reservation_id: string
+      vendor_id: string
+      variant_id: string
+      qty: number
+    }> = []
+
+    const result = await pg.transaction(async (trx: any) => {
       const sel = await trx.raw(
         `SELECT id, vendor_id, variant_id, qty::numeric AS qty
            FROM wms_reservation
@@ -467,9 +547,22 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
                    ?, NULL, 'auto-expired', NOW(), NOW())`,
           [movementId, row.vendor_id, row.variant_id, row.id],
         )
+
+        expired.push({
+          reservation_id: row.id,
+          vendor_id: row.vendor_id,
+          variant_id: row.variant_id,
+          qty,
+        })
       }
       return { expired_count: rows.length }
     })
+
+    // Emit one event per expired row AFTER commit — never on rollback.
+    for (const payload of expired) {
+      await this.emitWmsEvent(WMS_EVENTS.RESERVATION_EXPIRED, payload)
+    }
+    return result
   }
 
   async upsertShopLocation(input: UpsertShopLocationInput): Promise<{ ok: true }> {
