@@ -30,6 +30,7 @@ export interface DemoShop {
   deliveryMinutes: number
   minOrder: string
   isOpen: boolean
+  isHanootSelect?: boolean
 }
 
 export interface DemoBasket {
@@ -67,34 +68,58 @@ export const DEMO_SLIDES: HeroSlide[] = [
 
 export const DEMO_CATEGORIES: DemoCategory[] = [
   {
-    handle: 'food',
-    label: 'Food',
-    nameKey: 'category.food',
-    iconUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
-  },
-  {
     handle: 'grocery',
     label: 'Grocery',
     nameKey: 'category.grocery',
     iconUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200',
   },
   {
-    handle: 'fashion',
-    label: 'Fashion',
-    nameKey: 'category.fashion',
-    iconUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200',
+    handle: 'pharmacy',
+    label: 'Pharmacy',
+    nameKey: 'category.pharmacy',
+    iconUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=200',
   },
   {
-    handle: 'electronics',
-    label: 'Electronics',
-    nameKey: 'category.electronics',
-    iconUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200',
+    handle: 'bakery',
+    label: 'Bakery',
+    nameKey: 'category.bakery',
+    iconUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200',
+  },
+  {
+    handle: 'restaurants',
+    label: 'Restaurants',
+    nameKey: 'category.restaurants',
+    iconUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
+  },
+  {
+    handle: 'beauty',
+    label: 'Beauty',
+    nameKey: 'category.beauty',
+    iconUrl: 'https://images.unsplash.com/photo-1522335789203-aaae7eb18a40?w=200',
+  },
+  {
+    handle: 'pet',
+    label: 'Pet',
+    nameKey: 'category.pet',
+    iconUrl: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=200',
+  },
+  {
+    handle: 'flowers',
+    label: 'Flowers',
+    nameKey: 'category.flowers',
+    iconUrl: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=200',
   },
   {
     handle: 'home',
     label: 'Home',
     nameKey: 'category.home',
     iconUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200',
+  },
+  {
+    handle: 'gifts',
+    label: 'Gifts',
+    nameKey: 'category.gifts',
+    iconUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=200',
   },
 ]
 
@@ -110,6 +135,7 @@ export const DEMO_SHOPS: DemoShop[] = [
     deliveryMinutes: 25,
     minOrder: '5,000 IQD',
     isOpen: true,
+    isHanootSelect: true,
   },
   {
     slug: 'freshmart',
@@ -122,6 +148,7 @@ export const DEMO_SHOPS: DemoShop[] = [
     deliveryMinutes: 30,
     minOrder: '10,000 IQD',
     isOpen: true,
+    isHanootSelect: true,
   },
   {
     slug: 'style-hub',
@@ -146,6 +173,7 @@ export const DEMO_SHOPS: DemoShop[] = [
     deliveryMinutes: 60,
     minOrder: '$15',
     isOpen: false,
+    isHanootSelect: true,
   },
   {
     slug: 'bayti',

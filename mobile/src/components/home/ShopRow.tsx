@@ -3,6 +3,7 @@ import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
+import { HanootSelectBadge } from '@/src/components/shop/HanootSelectBadge'
 
 export interface ShopRowData {
   slug: string
@@ -13,6 +14,7 @@ export interface ShopRowData {
   deliveryMinutes: number
   minOrder: string
   isOpen: boolean
+  isHanootSelect?: boolean
 }
 
 interface Props {
@@ -29,6 +31,7 @@ export function ShopRow({ shop, onPress }: Props) {
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <Text style={styles.name} numberOfLines={1}>{shop.name}</Text>
+          {shop.isHanootSelect ? <HanootSelectBadge size="sm" /> : null}
           {isExpress && <Text style={styles.expressIcon}>⚡</Text>}
         </View>
         <View style={styles.pillRow}>

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-nati
 import { tokens } from '@/src/theme/tokens'
 import { SectionHeader } from './SectionHeader'
 import { PromotedPill } from './PromotedPill'
+import { HanootSelectBadge } from '@/src/components/shop/HanootSelectBadge'
 import { t } from '@/src/i18n'
 
 export interface FeaturedShop {
@@ -16,6 +17,7 @@ export interface FeaturedShop {
   deliveryMinutes: number
   minOrder: string
   sponsored?: boolean
+  isHanootSelect?: boolean
 }
 
 interface Props {
@@ -44,8 +46,13 @@ export function FeaturedShopsCarousel({ shops, onSelect, onSeeAll, hideHeader }:
               <View style={styles.ratingBadge}>
                 <Text style={styles.ratingText}>⭐ {shop.rating.toFixed(1)}</Text>
               </View>
+              {shop.isHanootSelect ? (
+                <View style={styles.selectWrap}>
+                  <HanootSelectBadge size="sm" />
+                </View>
+              ) : null}
               {shop.deliveryMinutes <= 30 && (
-                <View style={styles.expressBadge}>
+                <View style={[styles.expressBadge, shop.isHanootSelect ? styles.expressBadgeStacked : null]}>
                   <Text style={styles.expressText}>⚡ Express</Text>
                 </View>
               )}
@@ -110,6 +117,11 @@ const styles = StyleSheet.create({
     fontWeight: tokens.fontWeight.semibold,
     color: tokens.colors.text,
   },
+  selectWrap: {
+    position: 'absolute',
+    top: tokens.spacing.sm,
+    left: tokens.spacing.sm,
+  },
   expressBadge: {
     position: 'absolute',
     top: tokens.spacing.sm,
@@ -118,6 +130,9 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.pill,
     paddingHorizontal: tokens.spacing.sm,
     paddingVertical: 3,
+  },
+  expressBadgeStacked: {
+    top: 36,
   },
   expressText: {
     fontSize: tokens.fontSize.xs,

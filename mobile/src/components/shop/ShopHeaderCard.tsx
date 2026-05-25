@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { HanootSelectBadge } from './HanootSelectBadge'
 
 interface Props {
   coverUrl: string
@@ -17,6 +18,7 @@ interface Props {
   deliveryFee: string
   minOrder: string
   isOpen?: boolean
+  isHanootSelect?: boolean
   onBack?: () => void
   onFavorite?: () => void
   onShare?: () => void
@@ -35,6 +37,7 @@ export function ShopHeaderCard({
   deliveryMinutes,
   deliveryFee,
   minOrder,
+  isHanootSelect,
   onBack,
   onFavorite,
   onShare,
@@ -95,7 +98,10 @@ export function ShopHeaderCard({
             </View>
           )}
           <View style={styles.nameCol}>
-            <Text style={styles.shopName} numberOfLines={1}>{name}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.shopName} numberOfLines={1}>{name}</Text>
+              {isHanootSelect ? <HanootSelectBadge size="md" /> : null}
+            </View>
             {vertical ? <Text style={styles.vertical} numberOfLines={1}>{vertical}</Text> : null}
           </View>
           <Ionicons name="chevron-forward" size={20} color={tokens.colors.textMuted} />
@@ -184,6 +190,12 @@ const styles = StyleSheet.create({
   logoFallback: { alignItems: 'center', justifyContent: 'center' },
   logoEmoji: { fontSize: 22 },
   nameCol: { flex: 1, gap: 2 },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.sm,
+    flexWrap: 'wrap',
+  },
   shopName: {
     fontSize: tokens.fontSize.lg,
     fontWeight: tokens.fontWeight.bold,

@@ -353,6 +353,7 @@ export default function ShopDetailScreen() {
           deliveryFee={meta.deliveryFee}
           minOrder={meta.minOrder}
           isOpen={meta.isOpen}
+          isHanootSelect={DEMO_SHOPS.find((d) => d.slug === slug)?.isHanootSelect ?? false}
           onBack={() => router.back()}
         />
 
