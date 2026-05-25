@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function NajmaSheet({ visible, onClose }: Props) {
+  const router = useRouter()
   const locale = useLanguageStore((s) => s.locale)
   const chatMessages = useNajmaStore((s) => s.chatMessages)
   const chatStatus = useNajmaStore((s) => s.chatStatus)
@@ -155,6 +157,17 @@ export function NajmaSheet({ visible, onClose }: Props) {
                   <Text style={styles.clearBtnText}>{t('najma.clear')}</Text>
                 </Pressable>
               )}
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync().catch(() => {})
+                  onClose()
+                  router.push('/najma/camera' as never)
+                }}
+                hitSlop={8}
+                accessibilityLabel={t('najma.vision.title')}
+              >
+                <Ionicons name="camera" size={22} color={tokens.colors.text} />
+              </Pressable>
               <Pressable onPress={onClose} hitSlop={8}>
                 <Ionicons name="close" size={22} color={tokens.colors.textMuted} />
               </Pressable>

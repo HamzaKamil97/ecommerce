@@ -79,6 +79,7 @@ export default function RootLayout() {
         <Stack.Screen name="help" options={{ title: t('comingSoon.help.title') }} />
         <Stack.Screen name="terms" options={{ title: t('comingSoon.terms.title') }} />
         <Stack.Screen name="privacy" options={{ title: t('comingSoon.privacy.title') }} />
+        <Stack.Screen name="najma/camera" options={{ headerShown: false }} />
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />

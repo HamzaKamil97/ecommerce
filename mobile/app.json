@@ -52,7 +52,13 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Najma uses the camera to identify items, scan receipts, and search by photo."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
