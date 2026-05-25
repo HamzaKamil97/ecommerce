@@ -459,6 +459,7 @@ export const en = {
   // SP-A7 — Round-4 phone-test bundle
   'auth.register.errorTitle': 'Could not create account',
   'auth.login.errorTitle': 'Could not sign in',
+  'auth.error.backendOffline': "We can't reach our servers right now. Check your connection.",
   'auth.validation.emailRequired': 'Email is required',
   'auth.validation.emailInvalid': 'Enter a valid email',
   'auth.validation.passwordRequired': 'Password is required',

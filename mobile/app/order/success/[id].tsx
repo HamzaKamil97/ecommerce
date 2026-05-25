@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import { tokens } from "@/src/theme/tokens"
 import { t } from "@/src/i18n"
 import { useLanguageStore } from "@/src/store/languageStore"
+import { useChromeStore } from "@/src/store/chromeStore"
 import { DEMO_ORDERS, findDemoOrder } from "@/src/data/demoOrders"
 
 const colors = {
@@ -28,6 +29,12 @@ export default function OrderSuccessScreen() {
       Animated.timing(scale, { toValue: 1, duration: 600, easing: Easing.bezier(0.34, 1.56, 0.64, 1), useNativeDriver: true }),
       Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
     ]).start()
+  }, [])
+
+  // Celebration screen: hide the Najma FAB so it doesn't clash with the animation.
+  useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
   }, [])
 
   const matched = findDemoOrder(id) ?? DEMO_ORDERS[0]

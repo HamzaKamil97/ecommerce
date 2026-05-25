@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, TextInput, Text, SafeAreaView, KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { useChromeStore } from '@/src/store/chromeStore';
 import { t } from '@/src/i18n';
 import { tokens } from '@/src/theme/tokens';
 import { AppButton } from '@/src/components/AppButton';
@@ -13,6 +14,12 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Hide the Najma FAB on auth screens.
+  useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true);
+    return () => useChromeStore.getState().setNajmaFabHidden(false);
+  }, []);
 
   const onSubmit = () => {
     if (!email.trim()) {

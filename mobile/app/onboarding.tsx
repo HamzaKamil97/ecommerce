@@ -16,6 +16,7 @@ import { FadeIn } from '@/src/components/FadeIn';
 import { tokens } from '@/src/theme/tokens';
 import { t } from '@/src/i18n';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { useChromeStore } from '@/src/store/chromeStore';
 import type { Locale } from '@/src/i18n';
 
 export const ONBOARDING_KEY = 'app.onboarded';
@@ -29,6 +30,12 @@ export default function OnboardingScreen() {
   const currentLocale = useLanguageStore((s) => s.locale);
 
   const [step, setStep] = useState<Step>('language');
+
+  // Hide the Najma FAB during onboarding.
+  useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true);
+    return () => useChromeStore.getState().setNajmaFabHidden(false);
+  }, []);
 
   // Bag emoji floats up-down gently + scales in.
   const float = useSharedValue(0);

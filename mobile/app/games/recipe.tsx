@@ -4,6 +4,7 @@ import { useRouter, Stack } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 import { RECIPES } from '@/src/data/waitGamesRecipes'
 
 function hashDate(s: string): number {
@@ -15,6 +16,12 @@ function hashDate(s: string): number {
 export default function RecipeScreen() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
+
+  // Hide the Najma FAB during the game.
+  React.useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
+  }, [])
 
   const startIndex = useMemo(
     () => hashDate(new Date().toDateString()) % RECIPES.length,

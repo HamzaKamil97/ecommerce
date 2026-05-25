@@ -4,6 +4,7 @@ import { useRouter, Stack } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 
 type PhraseKey =
   | 'games.soukWheel.phrase1'
@@ -47,6 +48,12 @@ export default function SoukWheelScreen() {
   const rotation = useRef(new Animated.Value(0)).current
   const totalRotation = useRef(0)
   const [spinning, setSpinning] = useState(false)
+
+  // Hide the Najma FAB during the game.
+  React.useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
+  }, [])
   const [result, setResult] = useState<PhraseKey | null>(null)
 
   function spin() {

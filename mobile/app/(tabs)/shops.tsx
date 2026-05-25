@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     paddingBottom: tokens.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: tokens.colors.border,
+    overflow: 'hidden',
   },
   heading: {
     fontSize: tokens.fontSize.xl,
@@ -205,10 +206,13 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 46,
+    maxHeight: 46,
+    minHeight: 46,
     fontSize: tokens.fontSize.base,
     color: tokens.colors.text,
     padding: 0,
     margin: 0,
+    paddingVertical: 0,
     textAlignVertical: 'center',
     includeFontPadding: false,
   },

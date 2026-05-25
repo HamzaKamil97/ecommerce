@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, ScrollView, Pressable, SafeAreaView, StyleSheet, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 import { useCartStore, type CartParticipant } from '@/src/store/cartStore'
 import { tokens } from '@/src/theme/tokens'
 import { StoreSection } from '@/src/components/cart/StoreSection'
@@ -17,10 +17,15 @@ import { useAuthStore } from '@/src/store/authStore'
 const DELIVERY_FEE = 2500
 
 export default function CartScreen() {
-  React.useEffect(() => {
-    useChromeStore.getState().setNajmaFabHidden(true)
-    return () => useChromeStore.getState().setNajmaFabHidden(false)
-  }, [])
+  // Hide the Najma FAB while the cart tab is focused. useFocusEffect fires on
+  // focus AND blur — important because tabs stay mounted, so a plain useEffect
+  // would only fire once and never restore the FAB on other tabs.
+  useFocusEffect(
+    React.useCallback(() => {
+      useChromeStore.getState().setNajmaFabHidden(true)
+      return () => useChromeStore.getState().setNajmaFabHidden(false)
+    }, []),
+  )
 
   const router = useRouter()
   useLanguageStore((s) => s.locale)

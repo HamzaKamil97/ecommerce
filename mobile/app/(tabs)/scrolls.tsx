@@ -1,8 +1,10 @@
 import React, { useRef, useState, useCallback } from 'react'
 import { View, FlatList, RefreshControl, StyleSheet, Dimensions, StatusBar, type ViewToken } from 'react-native'
+import { useFocusEffect } from 'expo-router'
 import { ScrollCard } from '@/src/components/scrolls/ScrollCard'
 import { DEMO_SCROLLS, type ScrollItem } from '@/src/data/demoScrolls'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 import { tokens } from '@/src/theme/tokens'
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
@@ -11,6 +13,14 @@ export default function ScrollsScreen() {
   useLanguageStore((s) => s.locale)
   const [activeIndex, setActiveIndex] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
+
+  // Hide the Najma FAB while the fullscreen Scrolls feed is focused.
+  useFocusEffect(
+    useCallback(() => {
+      useChromeStore.getState().setNajmaFabHidden(true)
+      return () => useChromeStore.getState().setNajmaFabHidden(false)
+    }, []),
+  )
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 70 }).current
 

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 
 interface Props {
   icon: React.ComponentProps<typeof Ionicons>['name']
@@ -13,6 +14,13 @@ interface Props {
 
 export function ComingSoon({ icon, title, subtitle }: Props) {
   useLanguageStore((s) => s.locale)
+
+  // Every Coming-Soon locked screen should hide the Najma FAB so it doesn't
+  // visually compete with the notify CTA.
+  React.useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
+  }, [])
 
   function onNotify() {
     Alert.alert(t('comingSoon.notifyAck'))

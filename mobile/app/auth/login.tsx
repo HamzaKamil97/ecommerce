@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, TextInput, Text, SafeAreaView, Pressable, KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/src/store/authStore';
 import { useLanguageStore } from '@/src/store/languageStore';
+import { useChromeStore } from '@/src/store/chromeStore';
 import { t } from '@/src/i18n';
 import { tokens } from '@/src/theme/tokens';
 import { AppButton } from '@/src/components/AppButton';
@@ -13,6 +14,7 @@ interface FormErrors {
   email?: string;
   password?: string;
   general?: string;
+  debug?: string;
 }
 
 export default function LoginScreen() {
@@ -25,6 +27,12 @@ export default function LoginScreen() {
   const [showPwd, setShowPwd] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Hide the Najma FAB on auth screens.
+  useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true);
+    return () => useChromeStore.getState().setNajmaFabHidden(false);
+  }, []);
+
   const validate = (): FormErrors => {
     const e: FormErrors = {};
     if (!email.trim()) e.email = t('auth.validation.emailRequired');
@@ -34,6 +42,7 @@ export default function LoginScreen() {
   };
 
   const onSubmit = async () => {
+    if (isLoading) return; // belt-and-braces double-submit guard
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
@@ -41,7 +50,16 @@ export default function LoginScreen() {
       await login(email.trim(), password);
       router.replace('/(tabs)');
     } catch (err: any) {
-      setErrors({ general: err?.response?.data?.message ?? err?.message ?? t('auth.login.errorTitle') });
+      const rawMsg: string = err?.response?.data?.message ?? err?.message ?? '';
+      const isNetworkError =
+        err?.code === 'ERR_NETWORK' ||
+        err?.message === 'Network Error' ||
+        /network/i.test(rawMsg);
+      const userMsg = isNetworkError
+        ? t('auth.error.backendOffline')
+        : rawMsg || t('auth.login.errorTitle');
+      const debugMsg = __DEV__ && rawMsg && rawMsg !== userMsg ? rawMsg : undefined;
+      setErrors({ general: userMsg, debug: debugMsg });
     }
   };
 
@@ -88,8 +106,9 @@ export default function LoginScreen() {
           </View>
 
           {errors.general ? <Text style={styles.generalError}>{errors.general}</Text> : null}
+          {errors.debug ? <Text style={styles.debugError}>(debug) {errors.debug}</Text> : null}
 
-          <AppButton title={t('auth.login')} onPress={onSubmit} loading={isLoading} />
+          <AppButton title={t('auth.login')} onPress={onSubmit} loading={isLoading} disabled={isLoading} />
           <AppButton
             title={t('auth.needAccount')}
             variant="secondary"
@@ -132,6 +151,12 @@ const styles = StyleSheet.create({
     padding: tokens.spacing.sm,
     borderRadius: tokens.radius.md,
     textAlign: 'center',
+  },
+  debugError: {
+    color: tokens.colors.textMuted,
+    fontSize: tokens.fontSize.xs,
+    textAlign: 'center',
+    marginTop: -tokens.spacing.xs,
   },
   pwdRow: { flexDirection: 'row', alignItems: 'center' },
   pwdEye: { position: 'absolute', right: tokens.spacing.md, padding: 4 },

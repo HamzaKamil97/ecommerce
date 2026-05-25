@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
+import { useChromeStore } from '@/src/store/chromeStore'
 
 type IconName = React.ComponentProps<typeof Ionicons>['name']
 
@@ -32,6 +33,12 @@ const TILES: GameTile[] = [
 export default function GamesHubScreen() {
   useLanguageStore((s) => s.locale)
   const router = useRouter()
+
+  // Hide the Najma FAB on the games hub.
+  React.useEffect(() => {
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
+  }, [])
 
   return (
     <SafeAreaView style={styles.root}>

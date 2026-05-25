@@ -459,6 +459,7 @@ export const ar: any = {
   // SP-A7 — Round-4 phone-test bundle
   'auth.register.errorTitle': 'تعذّر إنشاء الحساب',
   'auth.login.errorTitle': 'تعذّر تسجيل الدخول',
+  'auth.error.backendOffline': 'تعذّر الوصول لخوادمنا. تحقق من اتصالك.',
   'auth.validation.emailRequired': 'البريد الإلكتروني مطلوب',
   'auth.validation.emailInvalid': 'أدخل بريدًا إلكترونيًا صحيحًا',
   'auth.validation.passwordRequired': 'كلمة المرور مطلوبة',
