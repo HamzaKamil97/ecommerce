@@ -29,5 +29,6 @@ module.exports = defineConfig({
     { resolve: "./src/modules/loyalty" },
     { resolve: "./src/modules/payments" },
     { resolve: "./src/modules/promotions" },
+    { resolve: "./src/modules/wms" },
   ],
 })
