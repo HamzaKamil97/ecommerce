@@ -65,6 +65,10 @@ export type ReleaseReservationInput = {
   reason?: string;
 };
 
+export type ExpireReservationsResult = {
+  expired_count: number;
+};
+
 export type WmsServiceInterface = {
   ping(): string;
   getStock(vendorId: string, variantId: string): Promise<StockSnapshot>;
@@ -73,4 +77,5 @@ export type WmsServiceInterface = {
   createReservation(input: CreateReservationInput): Promise<ReservationDTO>;
   consumeReservation(input: ConsumeReservationInput): Promise<{ ok: true }>;
   releaseReservation(input: ReleaseReservationInput): Promise<{ ok: true }>;
+  expireReservations(): Promise<ExpireReservationsResult>;
 };

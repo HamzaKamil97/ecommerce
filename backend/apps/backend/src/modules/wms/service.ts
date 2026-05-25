@@ -8,6 +8,7 @@ import {
   CreateReservationInput,
   DecrementStockInput,
   DecrementStockResult,
+  ExpireReservationsResult,
   IncrementStockInput,
   IncrementStockResult,
   ReleaseReservationInput,
@@ -412,6 +413,57 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
         [movementId, r.vendor_id, r.variant_id, input.reservation_id, input.reason ?? null],
       )
       return { ok: true as const }
+    })
+  }
+
+  async expireReservations(): Promise<ExpireReservationsResult> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+
+    return await pg.transaction(async (trx: any) => {
+      const sel = await trx.raw(
+        `SELECT id, vendor_id, variant_id, qty::numeric AS qty
+           FROM wms_reservation
+          WHERE status = 'active'
+            AND expires_at < NOW()
+            AND deleted_at IS NULL
+          FOR UPDATE SKIP LOCKED`,
+      )
+      const rows = sel?.rows ?? sel ?? []
+      for (const row of rows) {
+        const qty = Number(row.qty)
+
+        await trx.raw(
+          `UPDATE wms_reservation
+             SET status = 'expired', released_at = NOW(), updated_at = NOW()
+           WHERE id = ?`,
+          [row.id],
+        )
+
+        await trx.raw(
+          `UPDATE wms_stock_pool
+             SET reserved_qty = reserved_qty - ?::numeric,
+                 raw_reserved_qty = jsonb_build_object('value', (reserved_qty - ?::numeric)::text),
+                 updated_at = NOW()
+           WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL`,
+          [qty, qty, row.vendor_id, row.variant_id],
+        )
+
+        const movementId = `mv_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+        await trx.raw(
+          `INSERT INTO wms_movement
+             (id, vendor_id, variant_id, type, qty_delta, raw_qty_delta, source_id, actor_id, note, created_at, updated_at)
+           VALUES (?, ?, ?, 'release', 0, '{"value":"0"}'::jsonb,
+                   ?, NULL, 'auto-expired', NOW(), NOW())`,
+          [movementId, row.vendor_id, row.variant_id, row.id],
+        )
+      }
+      return { expired_count: rows.length }
     })
   }
 }
