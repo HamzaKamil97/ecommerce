@@ -15,8 +15,8 @@ const DELIVERY_FEE = 2500
 
 export default function CartScreen() {
   React.useEffect(() => {
-    useChromeStore.getState().setButlerFabHidden(true)
-    return () => useChromeStore.getState().setButlerFabHidden(false)
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
   }, [])
 
   const router = useRouter()

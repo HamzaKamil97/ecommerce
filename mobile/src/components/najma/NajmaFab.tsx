@@ -3,10 +3,10 @@ import { Pressable, StyleSheet, Animated } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { useChromeStore } from '@/src/store/chromeStore'
-import { ButlerSheet } from './ButlerSheet'
+import { NajmaSheet } from './NajmaSheet'
 
-export function ButlerFab() {
-  const hidden = useChromeStore((s) => s.butlerFabHidden)
+export function NajmaFab() {
+  const hidden = useChromeStore((s) => s.najmaFabHidden)
   const [open, setOpen] = useState(false)
   const scale = useRef(new Animated.Value(1)).current
 
@@ -30,10 +30,10 @@ export function ButlerFab() {
           style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
           hitSlop={8}
         >
-          <Ionicons name="sparkles" size={26} color={tokens.colors.white} />
+          <Ionicons name="star" size={26} color={tokens.colors.white} />
         </Pressable>
       </Animated.View>
-      <ButlerSheet visible={open} onClose={() => setOpen(false)} />
+      <NajmaSheet visible={open} onClose={() => setOpen(false)} />
     </>
   )
 }

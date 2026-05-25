@@ -24,8 +24,8 @@ import { selectedLabels, type SelectedOptions, type ProductOption } from '@/src/
 
 export default function ProductDetailsScreen() {
   useEffect(() => {
-    useChromeStore.getState().setButlerFabHidden(true)
-    return () => useChromeStore.getState().setButlerFabHidden(false)
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
   }, [])
 
   const { id } = useLocalSearchParams<{ id: string }>()

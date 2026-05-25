@@ -110,6 +110,13 @@ export default function OnboardingScreen() {
                 {t('onboarding.title')}
               </Text>
             </FadeIn>
+            <FadeIn delay={450}>
+              <Text
+                style={{ fontSize: tokens.fontSize.sm, color: tokens.colors.textMuted, textAlign: 'center', fontStyle: 'italic' }}
+              >
+                {t('onboarding.tagline')}
+              </Text>
+            </FadeIn>
             <FadeIn delay={600}>
               <Text
                 style={{ fontSize: tokens.fontSize.base, color: tokens.colors.textMuted, textAlign: 'center', lineHeight: 22 }}

@@ -2,6 +2,7 @@ export const en = {
   // Onboarding
   'onboarding.title': 'Everything you need, in one place',
   'onboarding.subtitle': 'Food, flowers, vegetables, electronics, fashion — local shops and trusted brands, delivered to you.',
+  'onboarding.tagline': 'Hanoot — a souk in your pocket',
   'onboarding.cta': 'Start shopping',
 
   // Home / Shop tab
@@ -163,27 +164,27 @@ export const en = {
   'orderTimeline.out_for_delivery': 'On the way',
   'orderTimeline.delivered': 'Delivered',
 
-  // SP-G — AI moat: Scrolls / Butler / For-you
+  // SP-G — AI moat: Scrolls / Najma / For-you
   'tab.scrolls': 'Scrolls',
   'scrolls.add': 'Add for {price}',
   'scrolls.like': 'Like',
   'scrolls.save': 'Save',
   'scrolls.share': 'Share',
   'scrolls.added': 'Added to cart',
-  'butler.title': 'Butler',
-  'butler.tagline': "Tell me what you need — I'll find it",
-  'butler.responseTime': 'Average response: ~8 min',
-  'butler.placeholder': 'Describe what you need...',
-  'butler.send': 'Send request',
-  'butler.sent': 'Request sent ✓',
-  'butler.preset.findCheaper': 'Find this cheaper',
-  'butler.preset.itemNotListed': 'Find an item not listed',
-  'butler.preset.compareShops': 'Compare nearby shops',
-  'butler.preset.bundleDeal': 'Build me a bundle',
+  'najma.title': 'Najma',
+  'najma.tagline': "Marhaba — I'm Najma. Tell me what you're craving.",
+  'najma.responseTime': 'I usually reply in under a minute',
+  'najma.placeholder': 'Ask me anything — in any language',
+  'najma.send': 'Ask Najma',
+  'najma.sent': "I'm on it ✨",
+  'najma.preset.findCheaper': 'Find me a cheaper version',
+  'najma.preset.itemNotListed': 'Find something not in the app',
+  'najma.preset.compareShops': 'Compare shops nearby',
+  'najma.preset.bundleDeal': 'Build me a bundle',
   'forYou.title': 'For you ✨',
   'forYou.add': 'Add',
-  'forYou.badge': 'For you',
-  'forYou.reason.becauseYou': 'Because you ordered from {shop}',
+  'forYou.badge': "Najma's pick",
+  'forYou.reason.becauseYou': 'Because I noticed you ordered from {shop}',
   'forYou.reason.trendingIn': 'Trending in {vertical}',
 
   // SP-1.2 — UX upgrades
@@ -198,10 +199,10 @@ export const en = {
   // SP-1.3 — layout-driven home
   'promoted.label': 'Promoted',
   'home.orderAgain': 'Order again',
-  'home.picksForYou': 'Picks for you 🔥',
-  'home.trendingNearYou': 'Trending near you',
+  'home.picksForYou': 'I picked these for you 🔥',
+  'home.trendingNearYou': 'I noticed these are popular near you',
   'home.popularInBreakfast': 'Most popular in breakfast',
-  'home.inspiredByPast': 'Inspired by your past orders',
+  'home.inspiredByPast': "Inspired by what you've ordered",
 
   // SP-1.4 — round-2 phone-test polish
   'shop.openNow': 'Open now',

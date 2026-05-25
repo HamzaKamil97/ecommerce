@@ -4,6 +4,7 @@ export const ar: any = {
   // Onboarding
   'onboarding.title': 'كل ما تحتاجه في مكان واحد',
   'onboarding.subtitle': 'طعام، ورود، خضروات، إلكترونيات، أزياء — متاجر محلية وعلامات تجارية موثوقة، توصيل إليك.',
+  'onboarding.tagline': 'حانوت — سوق في جيبك',
   'onboarding.cta': 'ابدأ التسوق',
 
   // Home / Shop tab
@@ -165,23 +166,23 @@ export const ar: any = {
   'orderTimeline.out_for_delivery': 'في الطريق',
   'orderTimeline.delivered': 'تم التوصيل',
 
-  // SP-G — AI moat: Scrolls / Butler / For-you
+  // SP-G — AI moat: Scrolls / Najma / For-you
   'tab.scrolls': 'تمرير',
   'scrolls.add': 'أضف بـ {price}',
   'scrolls.like': 'إعجاب',
   'scrolls.save': 'حفظ',
   'scrolls.share': 'مشاركة',
   'scrolls.added': 'أضيف إلى السلة',
-  'butler.title': 'الخادم',
-  'butler.tagline': 'أخبرني ماذا تحتاج — سأجده',
-  'butler.responseTime': 'متوسط الاستجابة: ~٨ دقائق',
-  'butler.placeholder': 'اكتب ما تحتاجه...',
-  'butler.send': 'أرسل الطلب',
-  'butler.sent': 'تم إرسال الطلب ✓',
-  'butler.preset.findCheaper': 'ابحث عن سعر أرخص',
-  'butler.preset.itemNotListed': 'ابحث عن منتج غير مدرج',
-  'butler.preset.compareShops': 'قارن المتاجر القريبة',
-  'butler.preset.bundleDeal': 'أعدّ لي عرضًا متكاملًا',
+  'najma.title': 'نجمة',
+  'najma.tagline': 'مرحبا — أنا نجمة. أخبرني ماذا تريد.',
+  'najma.responseTime': 'متوسط الاستجابة: ~٨ دقائق',
+  'najma.placeholder': 'اكتب ما تحتاجه...',
+  'najma.send': 'أرسل الطلب',
+  'najma.sent': 'تم إرسال الطلب ✓',
+  'najma.preset.findCheaper': 'ابحث عن سعر أرخص',
+  'najma.preset.itemNotListed': 'ابحث عن منتج غير مدرج',
+  'najma.preset.compareShops': 'قارن المتاجر القريبة',
+  'najma.preset.bundleDeal': 'أعدّ لي عرضًا متكاملًا',
   'forYou.title': 'مختار لك ✨',
   'forYou.add': 'أضف',
   'forYou.badge': 'مختار لك',

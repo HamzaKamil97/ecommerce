@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { tokens } from '@/src/theme/tokens'
 import { t } from '@/src/i18n'
 import { useLanguageStore } from '@/src/store/languageStore'
-import { useButlerStore, type ButlerRequestKind } from '@/src/store/butlerStore'
+import { useNajmaStore, type NajmaRequestKind } from '@/src/store/najmaStore'
 import { PreviewPill } from '@/src/components/PreviewPill'
 
 interface Props {
@@ -23,30 +23,30 @@ interface Props {
 }
 
 interface Preset {
-  kind: ButlerRequestKind
+  kind: NajmaRequestKind
   icon: React.ComponentProps<typeof Ionicons>['name']
   labelKey:
-    | 'butler.preset.findCheaper'
-    | 'butler.preset.itemNotListed'
-    | 'butler.preset.compareShops'
-    | 'butler.preset.bundleDeal'
+    | 'najma.preset.findCheaper'
+    | 'najma.preset.itemNotListed'
+    | 'najma.preset.compareShops'
+    | 'najma.preset.bundleDeal'
 }
 
 const PRESETS: Preset[] = [
-  { kind: 'find_cheaper', icon: 'pricetag', labelKey: 'butler.preset.findCheaper' },
-  { kind: 'item_not_listed', icon: 'search', labelKey: 'butler.preset.itemNotListed' },
-  { kind: 'compare_shops', icon: 'git-compare', labelKey: 'butler.preset.compareShops' },
-  { kind: 'bundle_deal', icon: 'cube-outline', labelKey: 'butler.preset.bundleDeal' },
+  { kind: 'find_cheaper', icon: 'pricetag', labelKey: 'najma.preset.findCheaper' },
+  { kind: 'item_not_listed', icon: 'search', labelKey: 'najma.preset.itemNotListed' },
+  { kind: 'compare_shops', icon: 'git-compare', labelKey: 'najma.preset.compareShops' },
+  { kind: 'bundle_deal', icon: 'cube-outline', labelKey: 'najma.preset.bundleDeal' },
 ]
 
-export function ButlerSheet({ visible, onClose }: Props) {
+export function NajmaSheet({ visible, onClose }: Props) {
   useLanguageStore((s) => s.locale)
-  const addRequest = useButlerStore((s) => s.addRequest)
+  const addRequest = useNajmaStore((s) => s.addRequest)
   const [text, setText] = useState('')
   const [toast, setToast] = useState(false)
 
   const submit = useCallback(
-    (kind: ButlerRequestKind, body?: string) => {
+    (kind: NajmaRequestKind, body?: string) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
       addRequest({ kind, text: body })
       setToast(true)
@@ -78,10 +78,10 @@ export function ButlerSheet({ visible, onClose }: Props) {
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.brandRow}>
-                <Ionicons name="sparkles" size={20} color={tokens.colors.accent} />
-                <Text style={styles.brand}>{t('butler.title')}</Text>
+                <Ionicons name="star" size={20} color={tokens.colors.accent} />
+                <Text style={styles.brand}>{t('najma.title')}</Text>
               </View>
-              <Text style={styles.tagline}>{t('butler.tagline')}</Text>
+              <Text style={styles.tagline}>{t('najma.tagline')}</Text>
               <View style={styles.previewWrap}>
                 <PreviewPill size="sm" />
               </View>
@@ -108,7 +108,7 @@ export function ButlerSheet({ visible, onClose }: Props) {
             <TextInput
               value={text}
               onChangeText={setText}
-              placeholder={t('butler.placeholder')}
+              placeholder={t('najma.placeholder')}
               placeholderTextColor={tokens.colors.textSubtle}
               style={styles.input}
               multiline
@@ -122,15 +122,15 @@ export function ButlerSheet({ visible, onClose }: Props) {
               ]}
               disabled={!text.trim()}
             >
-              <Text style={styles.sendBtnText}>{t('butler.send')}</Text>
+              <Text style={styles.sendBtnText}>{t('najma.send')}</Text>
             </Pressable>
           </View>
 
-          <Text style={styles.footer}>{t('butler.responseTime')}</Text>
+          <Text style={styles.footer}>{t('najma.responseTime')}</Text>
 
           {toast && (
             <View style={styles.toast} pointerEvents="none">
-              <Text style={styles.toastText}>{t('butler.sent')}</Text>
+              <Text style={styles.toastText}>{t('najma.sent')}</Text>
             </View>
           )}
         </View>

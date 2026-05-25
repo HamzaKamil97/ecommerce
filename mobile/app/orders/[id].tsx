@@ -20,8 +20,8 @@ import {
 
 export default function OrderDetailScreen() {
   React.useEffect(() => {
-    useChromeStore.getState().setButlerFabHidden(true)
-    return () => useChromeStore.getState().setButlerFabHidden(false)
+    useChromeStore.getState().setNajmaFabHidden(true)
+    return () => useChromeStore.getState().setNajmaFabHidden(false)
   }, [])
   useLanguageStore((s) => s.locale)
   const { id } = useLocalSearchParams<{ id: string }>()

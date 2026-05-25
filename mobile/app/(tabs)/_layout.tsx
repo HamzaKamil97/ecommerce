@@ -4,7 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { ButlerFab } from '@/src/components/butler/ButlerFab';
+import { NajmaFab } from '@/src/components/najma/NajmaFab';
 import { t } from '@/src/i18n';
 import { useLanguageStore } from '@/src/store/languageStore';
 import { useCartStore } from '@/src/store/cartStore';
@@ -83,7 +83,7 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-      <ButlerFab />
+      <NajmaFab />
     </View>
   );
 }
