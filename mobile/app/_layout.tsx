@@ -4,6 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  useFonts,
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+} from '@expo-google-fonts/manrope';
+import { JetBrainsMono_500Medium, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
+import { NotoSansArabic_500Medium, NotoSansArabic_700Bold } from '@expo-google-fonts/noto-sans-arabic';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/src/store/authStore';
@@ -24,6 +34,20 @@ export default function RootLayout() {
   const router = useRouter();
   const initAuth = useAuthStore((s) => s.init);
   const initLanguage = useLanguageStore((s) => s.init);
+
+  // Fonts load asynchronously; RN swaps in the custom fonts once ready.
+  // We intentionally do not block render — the system font is the fallback.
+  useFonts({
+    Manrope_400Regular,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+    JetBrainsMono_500Medium,
+    JetBrainsMono_700Bold,
+    NotoSansArabic_500Medium,
+    NotoSansArabic_700Bold,
+  });
 
   useEffect(() => {
     initAuth();
@@ -59,7 +83,7 @@ export default function RootLayout() {
       <FlyToCartHost />
       <CrossShopModal />
       <ToastHost />
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </ThemeProvider>
   );
 }

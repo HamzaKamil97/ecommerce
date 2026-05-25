@@ -13,12 +13,26 @@ interface PriceTextProps {
   style?: TextStyle;
 }
 
-function formatIQD(amount: number): string {
-  return `${new Intl.NumberFormat('en-IQ').format(Math.round(amount))} IQD`;
+function formatIQDNumber(amount: number): string {
+  return new Intl.NumberFormat('en-IQ').format(Math.round(amount));
 }
 
-function formatUSD(amountCents: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amountCents / 100);
+function formatUSDNumber(amountCents: number): string {
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+    amountCents / 100,
+  );
+}
+
+function splitPrimary(upper: string, amount: number): { number: string; code: string } {
+  if (upper === 'IQD') return { number: formatIQDNumber(amount), code: 'IQD' };
+  return { number: `$${formatUSDNumber(amount)}`, code: 'USD' };
+}
+
+function formatSecondary(upper: string, amount: number, fxRate: number): string {
+  if (upper === 'IQD') {
+    return `$${formatUSDNumber(Math.round((amount / fxRate) * 100))} USD`;
+  }
+  return `${formatIQDNumber((amount / 100) * fxRate)} IQD`;
 }
 
 export function PriceText({
@@ -30,33 +44,41 @@ export function PriceText({
 }: PriceTextProps) {
   if (amount == null) return null;
   const upper = currencyCode.toUpperCase();
-  const primary = upper === 'IQD' ? formatIQD(amount) : formatUSD(amount);
-
-  let secondary: string | null = null;
-  if (showSecondary) {
-    if (upper === 'IQD') {
-      secondary = formatUSD(Math.round((amount / fxRate) * 100));
-    } else {
-      secondary = formatIQD((amount / 100) * fxRate);
-    }
-  }
+  const { number, code } = splitPrimary(upper, amount);
+  const secondary = showSecondary ? formatSecondary(upper, amount, fxRate) : null;
 
   return (
     <View>
-      <Text style={[styles.primary, style]}>{primary}</Text>
+      <View style={styles.primaryRow}>
+        <Text style={[styles.primaryNumber, style]}>{number}</Text>
+        <Text style={styles.primaryCode}>{code}</Text>
+      </View>
       {secondary && <Text style={styles.secondary}>{secondary}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  primary: {
+  primaryRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  primaryNumber: {
     fontSize: tokens.fontSize.xl,
+    fontFamily: tokens.fontFamily.monoBold,
     fontWeight: tokens.fontWeight.bold,
-    color: tokens.colors.primary,
+    color: tokens.colors.text,
+  },
+  primaryCode: {
+    fontSize: tokens.fontSize.sm,
+    fontFamily: tokens.fontFamily.semibold,
+    fontWeight: tokens.fontWeight.semibold,
+    color: tokens.colors.textMuted,
+    marginLeft: 4,
   },
   secondary: {
     fontSize: tokens.fontSize.sm,
+    fontFamily: tokens.fontFamily.mono,
     color: tokens.colors.textMuted,
     marginTop: 2,
   },

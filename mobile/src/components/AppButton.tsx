@@ -44,7 +44,7 @@ export function AppButton({
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text style={{ fontSize: tokens.fontSize.md, fontWeight: tokens.fontWeight.semibold, color: fg }}>{title}</Text>
+        <Text style={{ fontSize: tokens.fontSize.md, fontFamily: tokens.fontFamily.bold, fontWeight: tokens.fontWeight.bold, color: fg }}>{title}</Text>
       )}
     </Pressable>
   );
