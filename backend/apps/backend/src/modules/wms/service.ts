@@ -5,6 +5,8 @@ import { Movement } from "./models/movement.model"
 import {
   DecrementStockInput,
   DecrementStockResult,
+  IncrementStockInput,
+  IncrementStockResult,
   StockSnapshot,
   WmsServiceInterface,
 } from "./types"
@@ -109,6 +111,71 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
           input.type,
           -input.qty,
           (-input.qty).toString(),
+          input.source_id ?? null,
+          input.actor_id ?? null,
+          input.note ?? null,
+        ],
+      )
+
+      return { new_on_hand: newOnHand, movement_id: movementId }
+    })
+  }
+
+  async incrementStock(input: IncrementStockInput): Promise<IncrementStockResult> {
+    if (input.qty <= 0) {
+      throw new Error("qty must be positive")
+    }
+
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+
+    return await pg.transaction(async (trx: any) => {
+      // 1) Ensure pool row exists (implicit 0/0 if missing).
+      const newPoolId = `sp_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      await trx.raw(
+        `INSERT INTO wms_stock_pool
+           (id, vendor_id, variant_id, on_hand_qty, raw_on_hand_qty,
+            reserved_qty, raw_reserved_qty, created_at, updated_at)
+         VALUES (?, ?, ?, 0, '{"value":"0"}'::jsonb, 0, '{"value":"0"}'::jsonb, NOW(), NOW())
+         ON CONFLICT (vendor_id, variant_id) WHERE deleted_at IS NULL DO NOTHING`,
+        [newPoolId, input.vendor_id, input.variant_id],
+      )
+
+      // 2) Atomic increment — no constraint to check; always succeeds when row exists.
+      const upd = await trx.raw(
+        `UPDATE wms_stock_pool
+           SET on_hand_qty = on_hand_qty + ?::numeric,
+               raw_on_hand_qty = jsonb_build_object('value', (on_hand_qty + ?::numeric)::text),
+               last_movement_at = NOW(),
+               updated_at = NOW()
+         WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL
+         RETURNING on_hand_qty::numeric AS new_on_hand`,
+        [input.qty, input.qty, input.vendor_id, input.variant_id],
+      )
+      const updRows = upd?.rows ?? upd
+      const newOnHand = Number(updRows[0].new_on_hand)
+
+      // 3) Append-only audit row
+      const movementId = `mv_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      await trx.raw(
+        `INSERT INTO wms_movement
+           (id, vendor_id, variant_id, type, qty_delta, raw_qty_delta,
+            source_id, actor_id, note, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?::numeric,
+                 jsonb_build_object('value', ?::text),
+                 ?, ?, ?, NOW(), NOW())`,
+        [
+          movementId,
+          input.vendor_id,
+          input.variant_id,
+          input.type,
+          input.qty,
+          input.qty.toString(),
           input.source_id ?? null,
           input.actor_id ?? null,
           input.note ?? null,
