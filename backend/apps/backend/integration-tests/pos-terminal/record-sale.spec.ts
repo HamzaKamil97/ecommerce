@@ -81,6 +81,43 @@ medusaIntegrationTestRunner({
         const [rows] = await (svc as any).listAndCountSales({ client_id: 'cli_rs_oos' });
         expect(rows).toHaveLength(0);
       });
+
+      it('does NOT recurse on non-unique createSales errors', async () => {
+        const vendor = 'v_rs_nonunique';
+        const variant = 'var_rs_nonunique';
+        const wms: any = getContainer().resolve('wmsService');
+        await wms.incrementStock({ vendor_id: vendor, variant_id: variant, qty: 5, type: 'restock' });
+
+        const svc: any = getContainer().resolve('posTerminalService');
+        const cashier = await svc.createCashier({ vendor_id: vendor, name: 'NU', pin: '1', role: 'cashier' });
+
+        const original = (svc as any).createSales.bind(svc);
+        let calls = 0;
+        // Monkey-patch on the instance first; fall back to prototype if instance patch is not picked up
+        const proto = Object.getPrototypeOf(svc);
+        const patchTarget: any = typeof (svc as any).createSales === 'function' ? svc : proto;
+        patchTarget.createSales = async (...args: any[]) => {
+          calls++;
+          throw new Error('synthetic non-unique error');
+        };
+        try {
+          await expect(svc.recordSale({
+            client_id: 'cli_rs_nonunique',
+            vendor_id: vendor,
+            cashier_id: cashier.id,
+            terminal_id: 't_nu',
+            lines: [{ variant_id: variant, qty: 1, unit_price_minor: 1000, name_snapshot: 'NU' }],
+            paid_amount_minor: 1000,
+            currency_code: 'iqd',
+            client_created_at: new Date().toISOString(),
+          })).rejects.toThrow(/synthetic non-unique error/);
+          expect(calls).toBe(1); // exactly one call — no recursion
+          const after = await wms.getStock(vendor, variant);
+          expect(after.on_hand).toBe(5); // compensation restored stock
+        } finally {
+          patchTarget.createSales = original;
+        }
+      });
     });
   },
 });

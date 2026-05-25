@@ -20,6 +20,46 @@ function hashPin(pin: string, salt: string): string {
   return scryptSync(pin, salt, SCRYPT_KEYLEN).toString('hex');
 }
 
+/**
+ * Discriminates whether an error from createSales() is specifically a UNIQUE
+ * constraint violation on pos_sale.client_id.
+ *
+ * Probe findings (2026-05-25): Medusa's dbErrorMapper intercepts the raw PG
+ * UniqueConstraintViolationException before it reaches our catch block and
+ * converts it into a MedusaError with:
+ *   e.__isMedusaError === true
+ *   e.type             === 'invalid_data'
+ *   e.message          === "Pos sale with client_id: <value>, already exists."
+ *
+ * The raw pg code '23505', driverError, constraint, and previous fields are
+ * NOT present — the MedusaError swallows them. We therefore match on the
+ * MedusaError identity + message content.
+ *
+ * Defensive fallback: also accept raw pg/knex/MikroORM shapes in case
+ * dbErrorMapper is bypassed in a future Medusa version.
+ */
+function isUniqueClientIdViolation(e: any): boolean {
+  // Primary path: Medusa dbErrorMapper converts 23505 → MedusaError(invalid_data)
+  // with message "Pos sale with client_id: <value>, already exists."
+  if (e?.__isMedusaError && e?.type === 'invalid_data') {
+    const msg = String(e?.message ?? '');
+    return msg.includes('client_id') && msg.includes('already exists');
+  }
+  // Defensive fallback: raw PG / MikroORM / knex shapes (future-proof)
+  const code = e?.code ?? e?.driverError?.code ?? e?.previous?.code;
+  if (code === '23505') {
+    const constraint = String(
+      e?.constraint ?? e?.driverError?.constraint ?? e?.previous?.constraint ?? '',
+    );
+    return constraint.length === 0 || constraint.includes('client_id');
+  }
+  if (e?.name === 'UniqueConstraintViolationException') {
+    const msg = String(e?.message ?? '');
+    return msg.includes('client_id');
+  }
+  return false;
+}
+
 export class PosTerminalService extends PosTerminalServiceBase
   implements PosTerminalServiceInterface {
   ping(): string {
@@ -130,17 +170,22 @@ export class PosTerminalService extends PosTerminalServiceBase
       });
       saleRow = Array.isArray(created) ? created[0] : created;
     } catch (e: any) {
-      // unique-violation on client_id → another concurrent call won the race; compensate + re-read
+      // Always compensate the stock decrements we did above — regardless of error type.
       for (const s of succeeded) {
         try {
           await wms.incrementStock({
             vendor_id: input.vendor_id, variant_id: s.variant_id, qty: s.qty,
             type: 'adjustment', source_id: input.client_id, actor_id: input.cashier_id,
-            note: 'pos_sale dup-client_id rollback',
+            note: 'pos_sale createSales rollback',
           });
-        } catch { /* */ }
+        } catch { /* best effort */ }
       }
-      return this.recordSale(input); // recursive idempotent re-entry returns the winning sale
+      if (isUniqueClientIdViolation(e)) {
+        // Concurrent duplicate — the winner already wrote the sale; recurse to hit idempotency.
+        return this.recordSale(input);
+      }
+      // Any other error is a real failure — propagate it so the caller knows.
+      throw e;
     }
 
     await (this as any).createSaleLines(
