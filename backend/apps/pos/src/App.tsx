@@ -1,14 +1,9 @@
-import { useState } from 'react';
+import { useSession } from './state/session';
+import { LoginScreen } from './ui/screens/LoginScreen';
+import { RegisterScreen } from './ui/screens/RegisterScreen';
 
 export default function App() {
-  const [signedIn] = useState(false);
-  if (!signedIn) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1>Sign in</h1>
-        <p>Cashier login placeholder</p>
-      </main>
-    );
-  }
-  return <main>register placeholder</main>;
+  const cashier_id = useSession((s) => s.cashier_id);
+  if (!cashier_id) return <LoginScreen />;
+  return <RegisterScreen />;
 }
