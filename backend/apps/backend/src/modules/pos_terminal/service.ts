@@ -1,4 +1,6 @@
 import { MedusaService } from '@medusajs/framework/utils';
+import { Sale } from './models/sale.model';
+import { SaleLine } from './models/sale-line.model';
 import {
   CashierDTO,
   CreateCashierInput,
@@ -7,7 +9,7 @@ import {
   RecordSaleResult,
 } from './types';
 
-class PosTerminalServiceBase extends MedusaService({}) {}
+class PosTerminalServiceBase extends MedusaService({ Sale, SaleLine }) {}
 
 export class PosTerminalService extends PosTerminalServiceBase
   implements PosTerminalServiceInterface {
