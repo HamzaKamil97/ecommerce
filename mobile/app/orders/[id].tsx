@@ -1,7 +1,7 @@
 import React from 'react'
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { tokens } from '@/src/theme/tokens'
 import { EmptyState } from '@/src/components/EmptyState'
 import { t } from '@/src/i18n'
@@ -24,6 +24,7 @@ export default function OrderDetailScreen() {
     return () => useChromeStore.getState().setNajmaFabHidden(false)
   }, [])
   useLanguageStore((s) => s.locale)
+  const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const order = findDemoOrder(id)
 
@@ -53,6 +54,23 @@ export default function OrderDetailScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <StatusCard order={order} />
+
+        {isOutForDelivery && (
+          <Pressable
+            onPress={() => router.push('/games' as never)}
+            style={({ pressed }) => [styles.waitGamesCard, pressed && { opacity: 0.9 }]}
+          >
+            <View style={styles.waitGamesIcon}>
+              <Ionicons name="game-controller" size={22} color={tokens.colors.primary} />
+            </View>
+            <View style={styles.waitGamesText}>
+              <Text style={styles.waitGamesTitle}>{t('games.entryTitle')}</Text>
+              <Text style={styles.waitGamesSubtitle}>{t('games.entrySubtitle')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={tokens.colors.primary} />
+          </Pressable>
+        )}
+
         <TimelineCard order={order} />
         <ShopCard order={order} />
         <ItemsCard order={order} />
@@ -88,5 +106,33 @@ const styles = StyleSheet.create({
     color: tokens.colors.primary,
     fontWeight: tokens.fontWeight.bold,
     fontSize: tokens.fontSize.base,
+  },
+  waitGamesCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.spacing.md,
+    backgroundColor: tokens.colors.accentSoft,
+    borderRadius: tokens.radius.lg,
+    padding: tokens.spacing.md,
+    borderWidth: 1,
+    borderColor: tokens.colors.primary + '33',
+  },
+  waitGamesIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: tokens.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waitGamesText: { flex: 1, gap: 2 },
+  waitGamesTitle: {
+    fontSize: tokens.fontSize.base,
+    fontWeight: tokens.fontWeight.bold,
+    color: tokens.colors.text,
+  },
+  waitGamesSubtitle: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.textSubtle,
   },
 })

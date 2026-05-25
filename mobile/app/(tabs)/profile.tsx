@@ -89,6 +89,7 @@ export default function ProfileScreen() {
               <MenuRow icon="language-outline" label={t('account.language')} value={langLabel} onPress={() => setLangPickerOpen(true)} />
               <MenuRow icon="notifications-outline" label={t('account.notifications')} onPress={() => router.push('/notifications')} />
               <MenuRow icon="heart-outline" label={t('account.favorites')} onPress={() => router.push('/favorites' as never)} />
+              <MenuRow icon="game-controller-outline" label={t('games.menuLabel')} onPress={() => router.push('/games' as never)} />
             </View>
 
             <View style={[styles.menuGroup, { marginTop: tokens.spacing.md }]}>

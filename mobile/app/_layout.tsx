@@ -80,6 +80,16 @@ export default function RootLayout() {
         <Stack.Screen name="terms" options={{ title: t('comingSoon.terms.title') }} />
         <Stack.Screen name="privacy" options={{ title: t('comingSoon.privacy.title') }} />
         <Stack.Screen name="najma/camera" options={{ headerShown: false }} />
+        <Stack.Screen name="games" options={{ title: t('games.hubTitle'), headerShown: true }} />
+        <Stack.Screen name="games/souk-wheel" options={{ title: t('games.soukWheel.name'), headerShown: true }} />
+        <Stack.Screen name="games/recipe" options={{ title: t('games.recipe.name'), headerShown: true }} />
+        <Stack.Screen name="games/chefs-race" options={{ title: t('games.chefsRace.name'), headerShown: true }} />
+        <Stack.Screen name="games/guess-price" options={{ title: t('games.guessPrice.name'), headerShown: true }} />
+        <Stack.Screen name="games/predict-arrival" options={{ title: t('games.predictArrival.name'), headerShown: true }} />
+        <Stack.Screen name="games/souk-stories" options={{ title: t('games.soukStories.name'), headerShown: true }} />
+        <Stack.Screen name="games/voice-memo" options={{ title: t('games.voiceMemo.name'), headerShown: true }} />
+        <Stack.Screen name="games/prep-along" options={{ title: t('games.prepAlong.name'), headerShown: true }} />
+        <Stack.Screen name="games/playlist" options={{ title: t('games.playlist.name'), headerShown: true }} />
       </Stack>
       <FlyToCartHost />
       <CrossShopModal />
