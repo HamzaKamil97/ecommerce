@@ -120,7 +120,7 @@ const placeStep = createStep(
         const { updateCartPromotionsWorkflow } = await import("@medusajs/medusa/core-flows")
         if (updateCartPromotionsWorkflow) {
           await updateCartPromotionsWorkflow(container).run({
-            input: { id: cartId, promo_codes: [input.coupon_code] },
+            input: { cart_id: cartId, promo_codes: [input.coupon_code] },
           }).catch(() => {})
         }
       } catch {
