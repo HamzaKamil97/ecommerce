@@ -13,7 +13,7 @@ export const Reservation = model.define("wms_reservation", {
   variant_id: model.text().searchable(),
   qty: model.bigNumber(),
   expires_at: model.dateTime(),
-  status: model.enum(RESERVATION_STATUSES).default("active"),
+  status: model.enum([...RESERVATION_STATUSES]).default("active"),
   consumed_at: model.dateTime().nullable(),
   released_at: model.dateTime().nullable(),
 }).indexes([

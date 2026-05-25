@@ -9,7 +9,7 @@ export const Movement = model.define("wms_movement", {
   id: model.id({ prefix: "mv" }).primaryKey(),
   vendor_id: model.text().searchable(),
   variant_id: model.text().searchable(),
-  type: model.enum(MOVEMENT_TYPES),
+  type: model.enum([...MOVEMENT_TYPES]),
   qty_delta: model.bigNumber(),
   source_id: model.text().nullable(),
   actor_id: model.text().nullable(),
