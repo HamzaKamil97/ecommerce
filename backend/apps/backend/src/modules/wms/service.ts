@@ -1,6 +1,12 @@
+import { MedusaService } from "@medusajs/framework/utils"
+import { StockPool } from "./models/stock-pool.model"
 import { WmsServiceInterface } from "./types"
 
-export class WmsService implements WmsServiceInterface {
+class WmsServiceBase extends MedusaService({
+  StockPool,
+}) {}
+
+export class WmsService extends WmsServiceBase implements WmsServiceInterface {
   ping(): string {
     return "wms-ok"
   }
