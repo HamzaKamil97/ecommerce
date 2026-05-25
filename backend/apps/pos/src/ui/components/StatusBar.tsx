@@ -1,7 +1,10 @@
 import { useSession } from '../../state/session';
+import { useNet } from '../../sync/network-status';
 
-export function StatusBar({ online, queueDepth }: { online: boolean; queueDepth: number }) {
+export function StatusBar() {
   const cashier = useSession((s) => s.cashier_name);
+  const online = useNet((s) => s.online);
+  const queueDepth = useNet((s) => s.queueDepth);
   return (
     <header style={{ display: 'flex', alignItems: 'center', padding: 8,
       background: '#111', borderBottom: '1px solid #222', gap: 12 }}>

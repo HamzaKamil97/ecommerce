@@ -39,7 +39,7 @@ export function RegisterScreen() {
 
   return (
     <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr auto', height: '100vh' }}>
-      <StatusBar online={navigator.onLine} queueDepth={0} />
+      <StatusBar />
       <section style={{ overflow: 'auto' }}>
         {error && <p style={{ color: 'var(--danger)', padding: 8 }}>{error}</p>}
         <CartList />
