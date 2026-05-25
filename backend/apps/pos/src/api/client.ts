@@ -1,7 +1,10 @@
 import { API_BASE } from '../env';
 
 export class ApiError extends Error {
-  constructor(public status: number, public payload: unknown, message: string) { super(message); }
+  constructor(public status: number, public payload: unknown, message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {

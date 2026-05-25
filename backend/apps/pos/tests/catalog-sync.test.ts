@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { db, resetDbForTests } from '../src/db/dexie';
-import { syncCatalog } from '../src/db/catalog-sync';
+import { syncCatalog, findByBarcode } from '../src/db/catalog-sync';
 
 describe('catalog sync', () => {
   beforeEach(async () => { await resetDbForTests(); });
@@ -51,7 +51,11 @@ describe('catalog sync', () => {
       }),
     });
     await syncCatalog('v1');
-    const row = await db.catalog.where('barcode').equals('8901234567890').first();
+    const row = await findByBarcode('8901234567890');
     expect(row?.name).toBe('X');
+  });
+
+  it('findByBarcode returns undefined for empty input', async () => {
+    expect(await findByBarcode('')).toBeUndefined();
   });
 });

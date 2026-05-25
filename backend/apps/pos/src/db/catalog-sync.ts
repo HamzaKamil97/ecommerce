@@ -1,4 +1,4 @@
-import { db } from './dexie';
+import { db, CatalogRow } from './dexie';
 import { fetchCatalogSnapshot } from '../api/pos';
 
 export async function syncCatalog(vendorId: string): Promise<number> {
@@ -11,7 +11,7 @@ export async function syncCatalog(vendorId: string): Promise<number> {
   return snap.items.length;
 }
 
-export async function findByBarcode(barcode: string) {
+export async function findByBarcode(barcode: string): Promise<CatalogRow | undefined> {
   if (!barcode) return undefined;
   return db.catalog.where('barcode').equals(barcode).first();
 }

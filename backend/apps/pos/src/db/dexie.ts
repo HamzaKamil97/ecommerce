@@ -32,6 +32,7 @@ export interface CashierRow {
   vendor_id: string;
   name: string;
   role: 'cashier' | 'manager';
+  active: boolean;
   pin_hash_prefix: string;
 }
 
