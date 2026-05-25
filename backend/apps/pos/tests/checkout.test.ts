@@ -17,9 +17,9 @@ describe('checkout commitSale', () => {
     expect(out.client_id).toMatch(/^cli_/);
     const pending = await db.sales_pending.toArray();
     expect(pending).toHaveLength(1);
-    expect(pending[0].lines).toHaveLength(1);
-    expect(pending[0].paid_amount_minor).toBe(3000);
-    expect(pending[0].status).toBe('queued');
+    expect(pending[0]!.lines).toHaveLength(1);
+    expect(pending[0]!.paid_amount_minor).toBe(3000);
+    expect(pending[0]!.status).toBe('queued');
   });
 
   it('clears the cart after commit', async () => {

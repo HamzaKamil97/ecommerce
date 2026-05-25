@@ -9,7 +9,7 @@ describe('cart store', () => {
       variant_id: 'v_1', name: 'Bread', unit_price_minor: 1000, qty: 1,
     });
     expect(useCart.getState().lines).toHaveLength(1);
-    expect(useCart.getState().lines[0].qty).toBe(1);
+    expect(useCart.getState().lines[0]!.qty).toBe(1);
   });
 
   it('increments qty when same variant scanned twice', () => {
@@ -17,7 +17,7 @@ describe('cart store', () => {
     s.addLineFromScan({ variant_id: 'v_1', name: 'Bread', unit_price_minor: 1000, qty: 1 });
     s.addLineFromScan({ variant_id: 'v_1', name: 'Bread', unit_price_minor: 1000, qty: 1 });
     expect(useCart.getState().lines).toHaveLength(1);
-    expect(useCart.getState().lines[0].qty).toBe(2);
+    expect(useCart.getState().lines[0]!.qty).toBe(2);
   });
 
   it('subtotal recalculates in <100ms for 200 lines (speed bar)', () => {

@@ -39,7 +39,7 @@ describe('catalog sync', () => {
     await syncCatalog('v1');
     const rows = await db.catalog.toArray();
     expect(rows).toHaveLength(1);
-    expect(rows[0].price_minor).toBe(1200);
+    expect(rows[0]!.price_minor).toBe(1200);
   });
 
   it('looks up by barcode in O(indexed) time', async () => {

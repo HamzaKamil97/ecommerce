@@ -1,0 +1,4 @@
+# tsc -b compile output (not needed in source control)
+tsconfig.tsbuildinfo
+src/**/*.js
+tests/**/*.js
