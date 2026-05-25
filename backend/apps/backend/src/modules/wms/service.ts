@@ -2,6 +2,7 @@ import { ContainerRegistrationKeys, MedusaService } from "@medusajs/framework/ut
 import { randomUUID } from "crypto"
 import { StockPool } from "./models/stock-pool.model"
 import { Movement } from "./models/movement.model"
+import { Reservation } from "./models/reservation.model"
 import {
   DecrementStockInput,
   DecrementStockResult,
@@ -15,6 +16,7 @@ import { WmsInsufficientStockError } from "./errors"
 class WmsServiceBase extends MedusaService({
   StockPool,
   Movement,
+  Reservation,
 }) {}
 
 export class WmsService extends WmsServiceBase implements WmsServiceInterface {
