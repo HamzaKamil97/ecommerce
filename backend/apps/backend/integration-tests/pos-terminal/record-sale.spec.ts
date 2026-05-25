@@ -118,6 +118,56 @@ medusaIntegrationTestRunner({
           patchTarget.createSales = original;
         }
       });
+
+      it('compensates stock and removes orphaned sale row when createSaleLines fails', async () => {
+        const svc: any = getContainer().resolve('posTerminalService');
+        const wms: any = getContainer().resolve('wmsService');
+        const vendor = 'v_rs_orphan';
+        const variant = 'var_rs_orphan';
+        await wms.incrementStock({ vendor_id: vendor, variant_id: variant, qty: 5, type: 'restock' });
+        const cashier = await svc.createCashier({ vendor_id: vendor, name: 'O', pin: '1', role: 'cashier' });
+
+        // Monkey-patch createSaleLines on the prototype to throw a synthetic error
+        const patchTarget = Object.getPrototypeOf(svc);
+        const original = patchTarget.createSaleLines
+          ? patchTarget.createSaleLines.bind(svc)
+          : (svc as any).createSaleLines.bind(svc);
+        const effectiveTarget: any = typeof patchTarget.createSaleLines === 'function' ? patchTarget : svc;
+        effectiveTarget.createSaleLines = async () => { throw new Error('synthetic lines-write failure'); };
+
+        const args = {
+          client_id: 'cli_rs_orphan',
+          vendor_id: vendor,
+          cashier_id: cashier.id,
+          terminal_id: 't_o',
+          lines: [{ variant_id: variant, qty: 2, unit_price_minor: 1500, name_snapshot: 'O' }],
+          paid_amount_minor: 3000,
+          currency_code: 'iqd',
+          client_created_at: new Date().toISOString(),
+        };
+
+        try {
+          await expect(svc.recordSale(args)).rejects.toThrow(/synthetic lines-write failure/);
+
+          // Stock must be restored (compensation ran)
+          const after = await wms.getStock(vendor, variant);
+          expect(after.on_hand).toBe(5);
+
+          // The pos_sale row must not be visible via the active filter (soft-deleted or removed)
+          const [rows] = await (svc as any).listAndCountSales({ client_id: 'cli_rs_orphan' });
+          expect(rows).toHaveLength(0);
+
+          // A subsequent retry with the same client_id must NOT hit the idempotency short-circuit
+          // (i.e., it should treat this as a fresh sale, decrement stock, create a sale row).
+          // Restore the real createSaleLines for the retry.
+          effectiveTarget.createSaleLines = original;
+          const retry = await svc.recordSale(args);
+          expect(retry.sale_id).toMatch(/^pos_/);
+          expect(retry.stock_after[0].on_hand).toBe(3);
+        } finally {
+          effectiveTarget.createSaleLines = original;
+        }
+      });
     });
   },
 });

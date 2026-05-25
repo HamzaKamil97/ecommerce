@@ -188,15 +188,35 @@ export class PosTerminalService extends PosTerminalServiceBase
       throw e;
     }
 
-    await (this as any).createSaleLines(
-      input.lines.map((l) => ({
-        sale_id: saleRow.id,
-        variant_id: l.variant_id,
-        qty: l.qty,
-        unit_price_minor: l.unit_price_minor,
-        name_snapshot: l.name_snapshot,
-      })),
-    );
+    try {
+      await (this as any).createSaleLines(
+        input.lines.map((l) => ({
+          sale_id: saleRow.id,
+          variant_id: l.variant_id,
+          qty: l.qty,
+          unit_price_minor: l.unit_price_minor,
+          name_snapshot: l.name_snapshot,
+        })),
+      );
+    } catch (e: any) {
+      // Soft-delete the sale row first so client_id frees up and the idempotency
+      // check (WHERE deleted_at IS NULL) won't find it on a future retry.
+      try {
+        await (this as any).softDeleteSales([saleRow.id]);
+      } catch { /* best effort — drift detector + manual audit will catch */ }
+
+      // Compensate stock — same loop as the createSales catch block above.
+      for (const s of succeeded) {
+        try {
+          await wms.incrementStock({
+            vendor_id: input.vendor_id, variant_id: s.variant_id, qty: s.qty,
+            type: 'adjustment', source_id: input.client_id, actor_id: input.cashier_id,
+            note: 'pos_sale createSaleLines rollback',
+          });
+        } catch { /* best effort */ }
+      }
+      throw e;
+    }
 
     const stock_after = await Promise.all(
       input.lines.map(async (l) => {
