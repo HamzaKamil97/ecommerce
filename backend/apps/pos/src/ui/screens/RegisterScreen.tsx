@@ -4,12 +4,16 @@ import { CartList } from '../components/CartList';
 import { StatusBar } from '../components/StatusBar';
 import { findByBarcode } from '../../db/catalog-sync';
 import { startBarcodeListener } from '../../hardware/barcode';
+import { PaymentScreen } from './PaymentScreen';
 
 export function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
   const subtotal = useCart((s) => s.subtotalMinor());
+  const lines = useCart((s) => s.lines);
 
   useEffect(() => {
+    if (payOpen) return;
     const stop = startBarcodeListener({
       onScan: async (code) => {
         setError(null);
@@ -29,7 +33,9 @@ export function RegisterScreen() {
       },
     });
     return stop;
-  }, []);
+  }, [payOpen]);
+
+  if (payOpen) return <PaymentScreen onClose={() => setPayOpen(false)} />;
 
   return (
     <div style={{ display: 'grid', gridTemplateRows: 'auto 1fr auto', height: '100vh' }}>
@@ -41,8 +47,9 @@ export function RegisterScreen() {
       <footer style={{ padding: 16, background: '#111', borderTop: '1px solid #222',
         display: 'flex', alignItems: 'center', gap: 16 }}>
         <strong style={{ fontSize: 28, flex: 1 }}>{(subtotal / 1000).toFixed(0)}k IQD</strong>
-        <button style={{ padding: '12px 24px', fontSize: 20, background: 'var(--accent)',
-          color: '#000', border: 'none', borderRadius: 'var(--radius)' }}>Charge</button>
+        <button onClick={() => setPayOpen(true)} disabled={lines.length === 0}
+          style={{ padding: '12px 24px', fontSize: 20, background: 'var(--accent)',
+                   color: '#000', border: 'none', borderRadius: 'var(--radius)' }}>Charge</button>
       </footer>
     </div>
   );
