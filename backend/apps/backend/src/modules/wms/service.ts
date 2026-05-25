@@ -9,6 +9,8 @@ import {
   CreateReservationInput,
   DecrementStockInput,
   DecrementStockResult,
+  DriftFlag,
+  DriftReport,
   ExpireReservationsResult,
   IncrementStockInput,
   IncrementStockResult,
@@ -620,6 +622,50 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       delivery_radius_km: Number(r.delivery_radius_km),
       distance_km: Number(r.distance_km),
     }))
+  }
+
+  async detectStockDrift(input: { vendor_id?: string }): Promise<DriftReport> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+    const filter = input.vendor_id ? `AND vendor_id = ?` : ``
+    const args = input.vendor_id ? [input.vendor_id] : []
+    const result = await pg.raw(
+      `SELECT vendor_id, variant_id,
+              on_hand_qty::numeric AS on_hand,
+              reserved_qty::numeric AS reserved
+         FROM wms_stock_pool
+        WHERE deleted_at IS NULL ${filter}`,
+      args,
+    )
+    const rows = result?.rows ?? result ?? []
+    const flagged: DriftReport["flagged"] = []
+    for (const r of rows) {
+      const onHand = Number(r.on_hand)
+      const reserved = Number(r.reserved)
+      if (onHand < 0) {
+        flagged.push({
+          vendor_id: r.vendor_id,
+          variant_id: r.variant_id,
+          on_hand: onHand,
+          reserved,
+          flag: "negative_on_hand" as DriftFlag,
+        })
+      } else if (reserved > onHand) {
+        flagged.push({
+          vendor_id: r.vendor_id,
+          variant_id: r.variant_id,
+          on_hand: onHand,
+          reserved,
+          flag: "reserved_exceeds_on_hand" as DriftFlag,
+        })
+      }
+    }
+    return { flagged }
   }
 }
 

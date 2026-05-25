@@ -91,6 +91,18 @@ export type ShopLocationResult = {
   distance_km: number;
 };
 
+export type DriftFlag = "negative_on_hand" | "reserved_exceeds_on_hand";
+
+export type DriftReport = {
+  flagged: Array<{
+    vendor_id: string;
+    variant_id: string;
+    on_hand: number;
+    reserved: number;
+    flag: DriftFlag;
+  }>;
+};
+
 export type WmsServiceInterface = {
   ping(): string;
   getStock(vendorId: string, variantId: string): Promise<StockSnapshot>;
@@ -102,4 +114,5 @@ export type WmsServiceInterface = {
   expireReservations(): Promise<ExpireReservationsResult>;
   upsertShopLocation(input: UpsertShopLocationInput): Promise<{ ok: true }>;
   shopsWithinRadius(input: ShopsWithinRadiusInput): Promise<ShopLocationResult[]>;
+  detectStockDrift(input: { vendor_id?: string }): Promise<DriftReport>;
 };
