@@ -54,10 +54,23 @@ export type ReservationDTO = {
   status: "active" | "consumed" | "released" | "expired";
 };
 
+export type ConsumeReservationInput = {
+  reservation_id: string;
+  actor_id?: string;
+  note?: string;
+};
+
+export type ReleaseReservationInput = {
+  reservation_id: string;
+  reason?: string;
+};
+
 export type WmsServiceInterface = {
   ping(): string;
   getStock(vendorId: string, variantId: string): Promise<StockSnapshot>;
   decrementStock(input: DecrementStockInput): Promise<DecrementStockResult>;
   incrementStock(input: IncrementStockInput): Promise<IncrementStockResult>;
   createReservation(input: CreateReservationInput): Promise<ReservationDTO>;
+  consumeReservation(input: ConsumeReservationInput): Promise<{ ok: true }>;
+  releaseReservation(input: ReleaseReservationInput): Promise<{ ok: true }>;
 };

@@ -4,11 +4,13 @@ import { StockPool } from "./models/stock-pool.model"
 import { Movement } from "./models/movement.model"
 import { Reservation } from "./models/reservation.model"
 import {
+  ConsumeReservationInput,
   CreateReservationInput,
   DecrementStockInput,
   DecrementStockResult,
   IncrementStockInput,
   IncrementStockResult,
+  ReleaseReservationInput,
   ReservationDTO,
   StockSnapshot,
   WmsServiceInterface,
@@ -294,6 +296,122 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
         expires_at: expiresAt,
         status: "active",
       }
+    })
+  }
+
+  async consumeReservation(input: ConsumeReservationInput): Promise<{ ok: true }> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+
+    return await pg.transaction(async (trx: any) => {
+      // 1) Lock reservation, ensure it's active
+      const rsSel = await trx.raw(
+        `SELECT vendor_id, variant_id, qty::numeric AS qty, status
+           FROM wms_reservation
+          WHERE id = ? AND deleted_at IS NULL
+          FOR UPDATE`,
+        [input.reservation_id],
+      )
+      const rsRows = rsSel?.rows ?? rsSel
+      if (!rsRows || rsRows.length === 0 || rsRows[0].status !== "active") {
+        throw new Error(`Reservation ${input.reservation_id} not active`)
+      }
+      const r = rsRows[0]
+      const qty = Number(r.qty)
+
+      // 2) Decrement on_hand AND reserved on the pool (atomic, both dual-col)
+      await trx.raw(
+        `UPDATE wms_stock_pool
+           SET on_hand_qty   = on_hand_qty - ?::numeric,
+               raw_on_hand_qty = jsonb_build_object('value', (on_hand_qty - ?::numeric)::text),
+               reserved_qty  = reserved_qty - ?::numeric,
+               raw_reserved_qty = jsonb_build_object('value', (reserved_qty - ?::numeric)::text),
+               last_movement_at = NOW(),
+               updated_at = NOW()
+         WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL`,
+        [qty, qty, qty, qty, r.vendor_id, r.variant_id],
+      )
+
+      // 3) Mark reservation consumed
+      await trx.raw(
+        `UPDATE wms_reservation
+           SET status = 'consumed', consumed_at = NOW(), updated_at = NOW()
+         WHERE id = ?`,
+        [input.reservation_id],
+      )
+
+      // 4) Movement audit (type='pick')
+      const movementId = `mv_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      await trx.raw(
+        `INSERT INTO wms_movement
+           (id, vendor_id, variant_id, type, qty_delta, raw_qty_delta, source_id, actor_id, note, created_at, updated_at)
+         VALUES (?, ?, ?, 'pick', ?::numeric, jsonb_build_object('value', ?::text),
+                 ?, ?, ?, NOW(), NOW())`,
+        [
+          movementId, r.vendor_id, r.variant_id,
+          -qty, (-qty).toString(),
+          input.reservation_id, input.actor_id ?? null, input.note ?? null,
+        ],
+      )
+      return { ok: true as const }
+    })
+  }
+
+  async releaseReservation(input: ReleaseReservationInput): Promise<{ ok: true }> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+
+    return await pg.transaction(async (trx: any) => {
+      const rsSel = await trx.raw(
+        `SELECT vendor_id, variant_id, qty::numeric AS qty, status
+           FROM wms_reservation
+          WHERE id = ? AND deleted_at IS NULL
+          FOR UPDATE`,
+        [input.reservation_id],
+      )
+      const rsRows = rsSel?.rows ?? rsSel
+      if (!rsRows || rsRows.length === 0 || rsRows[0].status !== "active") {
+        throw new Error(`Reservation ${input.reservation_id} not active`)
+      }
+      const r = rsRows[0]
+      const qty = Number(r.qty)
+
+      // Drop reserved_qty cache (on_hand untouched)
+      await trx.raw(
+        `UPDATE wms_stock_pool
+           SET reserved_qty = reserved_qty - ?::numeric,
+               raw_reserved_qty = jsonb_build_object('value', (reserved_qty - ?::numeric)::text),
+               updated_at = NOW()
+         WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL`,
+        [qty, qty, r.vendor_id, r.variant_id],
+      )
+
+      await trx.raw(
+        `UPDATE wms_reservation
+           SET status = 'released', released_at = NOW(), updated_at = NOW()
+         WHERE id = ?`,
+        [input.reservation_id],
+      )
+
+      const movementId = `mv_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      await trx.raw(
+        `INSERT INTO wms_movement
+           (id, vendor_id, variant_id, type, qty_delta, raw_qty_delta, source_id, actor_id, note, created_at, updated_at)
+         VALUES (?, ?, ?, 'release', 0, '{"value":"0"}'::jsonb,
+                 ?, NULL, ?, NOW(), NOW())`,
+        [movementId, r.vendor_id, r.variant_id, input.reservation_id, input.reason ?? null],
+      )
+      return { ok: true as const }
     })
   }
 }
