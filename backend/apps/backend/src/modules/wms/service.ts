@@ -3,6 +3,7 @@ import { randomUUID } from "crypto"
 import { StockPool } from "./models/stock-pool.model"
 import { Movement } from "./models/movement.model"
 import { Reservation } from "./models/reservation.model"
+import { ShopLocation } from "./models/shop-location.model"
 import {
   ConsumeReservationInput,
   CreateReservationInput,
@@ -13,7 +14,10 @@ import {
   IncrementStockResult,
   ReleaseReservationInput,
   ReservationDTO,
+  ShopLocationResult,
+  ShopsWithinRadiusInput,
   StockSnapshot,
+  UpsertShopLocationInput,
   WmsServiceInterface,
 } from "./types"
 import { WmsInsufficientStockError } from "./errors"
@@ -22,6 +26,7 @@ class WmsServiceBase extends MedusaService({
   StockPool,
   Movement,
   Reservation,
+  ShopLocation,
 }) {}
 
 export class WmsService extends WmsServiceBase implements WmsServiceInterface {
@@ -465,6 +470,63 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       }
       return { expired_count: rows.length }
     })
+  }
+
+  async upsertShopLocation(input: UpsertShopLocationInput): Promise<{ ok: true }> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+    await pg.raw(
+      `INSERT INTO wms_shop_location
+         (vendor_id, lat, lng, delivery_radius_km, address_text, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+       ON CONFLICT (vendor_id) DO UPDATE
+         SET lat = EXCLUDED.lat,
+             lng = EXCLUDED.lng,
+             delivery_radius_km = EXCLUDED.delivery_radius_km,
+             address_text = EXCLUDED.address_text,
+             updated_at = NOW()`,
+      [input.vendor_id, input.lat, input.lng, input.delivery_radius_km, input.address_text ?? null],
+    )
+    return { ok: true as const }
+  }
+
+  async shopsWithinRadius(input: ShopsWithinRadiusInput): Promise<ShopLocationResult[]> {
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+    const result = await pg.raw(
+      `WITH q AS (
+         SELECT vendor_id, lat, lng, delivery_radius_km,
+           (6371 * 2 * ASIN(SQRT(
+             POWER(SIN(RADIANS((? - lat) / 2)), 2) +
+             COS(RADIANS(?)) * COS(RADIANS(lat)) *
+             POWER(SIN(RADIANS((? - lng) / 2)), 2)
+           ))) AS distance_km
+         FROM wms_shop_location
+         WHERE deleted_at IS NULL
+       )
+       SELECT * FROM q
+       WHERE distance_km <= LEAST(?::double precision, delivery_radius_km)
+       ORDER BY distance_km ASC`,
+      [input.lat, input.lat, input.lng, input.radius_km],
+    )
+    const rows = result?.rows ?? result ?? []
+    return rows.map((r: any) => ({
+      vendor_id: r.vendor_id,
+      lat: Number(r.lat),
+      lng: Number(r.lng),
+      delivery_radius_km: Number(r.delivery_radius_km),
+      distance_km: Number(r.distance_km),
+    }))
   }
 }
 

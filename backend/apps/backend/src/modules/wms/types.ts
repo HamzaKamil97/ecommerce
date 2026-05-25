@@ -69,6 +69,28 @@ export type ExpireReservationsResult = {
   expired_count: number;
 };
 
+export type UpsertShopLocationInput = {
+  vendor_id: string;
+  lat: number;
+  lng: number;
+  delivery_radius_km: number;
+  address_text?: string;
+};
+
+export type ShopsWithinRadiusInput = {
+  lat: number;
+  lng: number;
+  radius_km: number;
+};
+
+export type ShopLocationResult = {
+  vendor_id: string;
+  lat: number;
+  lng: number;
+  delivery_radius_km: number;
+  distance_km: number;
+};
+
 export type WmsServiceInterface = {
   ping(): string;
   getStock(vendorId: string, variantId: string): Promise<StockSnapshot>;
@@ -78,4 +100,6 @@ export type WmsServiceInterface = {
   consumeReservation(input: ConsumeReservationInput): Promise<{ ok: true }>;
   releaseReservation(input: ReleaseReservationInput): Promise<{ ok: true }>;
   expireReservations(): Promise<ExpireReservationsResult>;
+  upsertShopLocation(input: UpsertShopLocationInput): Promise<{ ok: true }>;
+  shopsWithinRadius(input: ShopsWithinRadiusInput): Promise<ShopLocationResult[]>;
 };
