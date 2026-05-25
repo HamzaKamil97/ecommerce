@@ -4,10 +4,12 @@ import { StockPool } from "./models/stock-pool.model"
 import { Movement } from "./models/movement.model"
 import { Reservation } from "./models/reservation.model"
 import {
+  CreateReservationInput,
   DecrementStockInput,
   DecrementStockResult,
   IncrementStockInput,
   IncrementStockResult,
+  ReservationDTO,
   StockSnapshot,
   WmsServiceInterface,
 } from "./types"
@@ -185,6 +187,113 @@ export class WmsService extends WmsServiceBase implements WmsServiceInterface {
       )
 
       return { new_on_hand: newOnHand, movement_id: movementId }
+    })
+  }
+
+  async createReservation(input: CreateReservationInput): Promise<ReservationDTO> {
+    if (input.qty <= 0) {
+      throw new Error("qty must be positive")
+    }
+
+    const container: any = (this as any).__container__
+    const pg: any =
+      container?.[ContainerRegistrationKeys.PG_CONNECTION] ??
+      container?.["__pg_connection__"]
+    if (!pg) {
+      throw new Error("PG connection not available in WMS container")
+    }
+    const ttl = input.ttl_seconds ?? 900
+
+    return await pg.transaction(async (trx: any) => {
+      // 1) Ensure pool row exists (implicit 0/0 if missing).
+      const newPoolId = `sp_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      await trx.raw(
+        `INSERT INTO wms_stock_pool
+           (id, vendor_id, variant_id, on_hand_qty, raw_on_hand_qty,
+            reserved_qty, raw_reserved_qty, created_at, updated_at)
+         VALUES (?, ?, ?, 0, '{"value":"0"}'::jsonb, 0, '{"value":"0"}'::jsonb, NOW(), NOW())
+         ON CONFLICT (vendor_id, variant_id) WHERE deleted_at IS NULL DO NOTHING`,
+        [newPoolId, input.vendor_id, input.variant_id],
+      )
+
+      // 2) Lock the pool row so concurrent reservations serialize across the
+      // read-check-write that follows.
+      const poolSel = await trx.raw(
+        `SELECT on_hand_qty::numeric AS on_hand
+           FROM wms_stock_pool
+          WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL
+          FOR UPDATE`,
+        [input.vendor_id, input.variant_id],
+      )
+      const poolRows = poolSel?.rows ?? poolSel
+      const onHand = Number(poolRows[0].on_hand)
+
+      // 3) Sum live (active + unexpired) reservations from the source of truth,
+      // NOT the cached reserved_qty on the pool (which could be stale).
+      const sumSel = await trx.raw(
+        `SELECT COALESCE(SUM(qty::numeric), 0) AS reserved
+           FROM wms_reservation
+          WHERE vendor_id = ? AND variant_id = ?
+            AND status = 'active'
+            AND expires_at > NOW()
+            AND deleted_at IS NULL`,
+        [input.vendor_id, input.variant_id],
+      )
+      const sumRows = sumSel?.rows ?? sumSel
+      const reservedExisting = Number(sumRows[0].reserved)
+      const available = onHand - reservedExisting
+      if (available < input.qty) {
+        throw new WmsInsufficientStockError(
+          input.vendor_id,
+          input.variant_id,
+          input.qty,
+          available,
+        )
+      }
+
+      // 4) Insert the reservation row.
+      const rsId = `rs_${randomUUID().replace(/-/g, "").slice(0, 16)}`
+      const ins = await trx.raw(
+        `INSERT INTO wms_reservation
+           (id, vendor_id, order_id, variant_id, qty, raw_qty,
+            expires_at, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?::numeric,
+                 jsonb_build_object('value', ?::text),
+                 NOW() + (? || ' seconds')::interval,
+                 'active', NOW(), NOW())
+         RETURNING expires_at`,
+        [
+          rsId,
+          input.vendor_id,
+          input.order_id,
+          input.variant_id,
+          input.qty,
+          input.qty.toString(),
+          String(ttl),
+        ],
+      )
+      const insRows = ins?.rows ?? ins
+      const expiresAt = new Date(insRows[0].expires_at)
+
+      // 5) Bump the reserved_qty cache on the pool (both NUMERIC + JSONB).
+      await trx.raw(
+        `UPDATE wms_stock_pool
+           SET reserved_qty = reserved_qty + ?::numeric,
+               raw_reserved_qty = jsonb_build_object('value', (reserved_qty + ?::numeric)::text),
+               updated_at = NOW()
+         WHERE vendor_id = ? AND variant_id = ? AND deleted_at IS NULL`,
+        [input.qty, input.qty, input.vendor_id, input.variant_id],
+      )
+
+      return {
+        id: rsId,
+        vendor_id: input.vendor_id,
+        order_id: input.order_id,
+        variant_id: input.variant_id,
+        qty: input.qty,
+        expires_at: expiresAt,
+        status: "active",
+      }
     })
   }
 }

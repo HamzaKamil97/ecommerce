@@ -36,9 +36,28 @@ export type IncrementStockResult = {
   movement_id: string;
 };
 
+export type CreateReservationInput = {
+  vendor_id: string;
+  order_id: string;
+  variant_id: string;
+  qty: number;
+  ttl_seconds?: number;
+};
+
+export type ReservationDTO = {
+  id: string;
+  vendor_id: string;
+  order_id: string;
+  variant_id: string;
+  qty: number;
+  expires_at: Date;
+  status: "active" | "consumed" | "released" | "expired";
+};
+
 export type WmsServiceInterface = {
   ping(): string;
   getStock(vendorId: string, variantId: string): Promise<StockSnapshot>;
   decrementStock(input: DecrementStockInput): Promise<DecrementStockResult>;
   incrementStock(input: IncrementStockInput): Promise<IncrementStockResult>;
+  createReservation(input: CreateReservationInput): Promise<ReservationDTO>;
 };
