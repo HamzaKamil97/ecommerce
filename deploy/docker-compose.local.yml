@@ -1,0 +1,64 @@
+# deploy/docker-compose.local.yml
+# Local smoke-test override. Layered on top of docker-compose.prod.yml.
+# Use:  docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.local.yml up
+#
+# Differences vs prod:
+#   - Builds images locally instead of pulling from ghcr.io
+#   - Maps Caddy to host ports 8080/8443 (avoid clashing with anything on 80/443)
+#   - Storefront/Vendor point at http://localhost so we don't need real TLS
+#   - Caddy uses a HTTP-only Caddyfile (auto-HTTPS disabled for the host's name)
+
+services:
+  medusa:
+    image: hanoot-backend:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.medusa
+    environment:
+      MEDUSA_BACKEND_URL: http://localhost:8080
+
+  storefront:
+    image: hanoot-storefront:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.storefront
+      args:
+        MEDUSA_BACKEND_URL: http://localhost:8080
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
+    environment:
+      MEDUSA_BACKEND_URL: http://localhost:8080
+      NEXT_PUBLIC_BASE_URL: http://localhost:8080
+
+  vendor:
+    image: hanoot-vendor:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.vendor
+    environment:
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:8080
+
+  pos:
+    image: hanoot-pos:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: backend/apps/pos/Dockerfile
+    ports:
+      - "9200:9200"
+    environment:
+      VITE_API_BASE: "http://medusa:9000"
+      VITE_VENDOR_ID: "v_demo_grocer"
+      VITE_TERMINAL_ID: "term_dev_1"
+    depends_on:
+      - medusa
+    volumes:
+      - ../backend/apps/pos:/app
+      - /app/node_modules
+
+  caddy:
+    ports: !override
+      - "8080:80"
+      - "8443:443"
