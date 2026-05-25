@@ -6,6 +6,8 @@ import { tokens } from '@/src/theme/tokens'
 import { MenuRow } from '@/src/components/account/MenuRow'
 import { AppButton } from '@/src/components/AppButton'
 import { LanguagePicker } from '@/src/components/LanguagePicker'
+import { PassTierCard } from '@/src/components/profile/PassTierCard'
+import { PassTierSheet } from '@/src/components/profile/PassTierSheet'
 import { useLanguageStore } from '@/src/store/languageStore'
 import { t } from '@/src/i18n'
 
@@ -23,6 +25,7 @@ export default function ProfileScreen() {
   const router = useRouter()
   const locale = useLanguageStore((s) => s.locale)
   const [langPickerOpen, setLangPickerOpen] = useState(false)
+  const [passSheetTier, setPassSheetTier] = useState<'dhahab' | 'khass' | null>(null)
 
   const langLabel = locale === 'ar' ? 'العربية' : 'English'
 
@@ -57,6 +60,9 @@ export default function ProfileScreen() {
                 <Text style={styles.editProfileText}>{t('account.edit')}</Text>
               </Pressable>
             </View>
+
+            {/* Hanoot Pass tier card */}
+            <PassTierCard onSelectTier={(tier) => setPassSheetTier(tier)} />
 
             {/* Quick stats */}
             <View style={styles.statsRow}>
@@ -134,6 +140,12 @@ export default function ProfileScreen() {
       <LanguagePicker
         visible={langPickerOpen}
         onClose={() => setLangPickerOpen(false)}
+      />
+
+      <PassTierSheet
+        visible={passSheetTier !== null}
+        tier={passSheetTier}
+        onClose={() => setPassSheetTier(null)}
       />
     </SafeAreaView>
   )

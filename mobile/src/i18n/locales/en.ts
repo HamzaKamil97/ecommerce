@@ -487,6 +487,33 @@ export const en = {
   'auth.forgotSubtitle': 'Enter your email and we will send instructions.',
   'auth.forgotSubmit': 'Send instructions',
   'auth.forgotAck': 'If an account exists with this email, we sent reset instructions.',
+
+  // Hanoot Pass tiers (A-Re3)
+  'pass.title': 'Hanoot Pass',
+  'pass.subtitle': 'Pick the tier that fits you',
+  'pass.active': 'Active',
+  'pass.comingSoon': 'Coming soon',
+  'pass.priceFree': 'Free',
+  'pass.pricePerMonth': '{amount} IQD / month',
+  'pass.fidda.name': 'Fidda',
+  'pass.fidda.tagline': 'Silver — your free everyday tier',
+  'pass.fidda.perk1': 'Standard delivery',
+  'pass.fidda.perk2': 'Najma chat — basics',
+  'pass.fidda.perk3': 'Order tracking',
+  'pass.dhahab.name': 'Dhahab',
+  'pass.dhahab.tagline': 'Gold — for regulars',
+  'pass.dhahab.perk1': 'Free delivery on orders over 25k IQD',
+  'pass.dhahab.perk2': 'Najma chat — full',
+  'pass.dhahab.perk3': 'Priority shop bookings',
+  'pass.khass.name': 'Khass',
+  'pass.khass.tagline': 'Exclusive — concierge in your pocket',
+  'pass.khass.perk1': 'All Dhahab perks',
+  'pass.khass.perk2': 'Layan — your personal concierge',
+  'pass.khass.perk3': 'Early access to new shops',
+  'pass.notifyMe': 'Notify me at launch',
+  'pass.notifyEmailPlaceholder': 'Your email',
+  'pass.notifyAck': "I'll let you know the moment it's ready ✨",
+  'pass.continueBrowsing': 'Continue browsing',
 } as const;
 
 export type EnDict = typeof en;
