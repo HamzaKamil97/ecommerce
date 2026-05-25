@@ -44,6 +44,11 @@ catalog attracts customers ─→ customer orders pay grocers ─→ grocers sta
 3. Vendor lock-in concerns — must offer open data export to keep "free" trust
 4. Geographic concentration v1 — Baghdad first; Erbil follows in v2
 
+### Reference apps studied
+- **Loyverse** (PoS for small retailers) — gold standard for clean UI consistent across mobile / PC / dashboard. **Hanoot's PoS must match Loyverse on UX quality and beat it on integration depth** (free, AI-assisted, integrated with customer demand via Hanoot app).
+- **Square** (PoS + payments) — best-in-class hardware integration patterns
+- **Talabat groceries** (Iraq's incumbent in food delivery) — studied for failure modes (Section 6)
+- **Webvan / Kozmo / Instacart early years** — studied for grocery-delivery failure modes
 ---
 
 ## 2. Architecture — 6 clients + 1 backbone
@@ -58,12 +63,38 @@ catalog attracts customers ─→ customer orders pay grocers ─→ grocers sta
             ▲       ▲       ▲       ▲       ▲       ▲
             │       │       │       │       │       │
        Customer  PoS+Inv  Vendor  Picker  Rider  Super-admin
-       super-app          Admin   (Android (mobile)   (web,
-       (Expo)    (web,   (web+    phone in only)      v2)
-                 Win+    phone,    aisles)
-                 tablet) dashboard)
+       super-app          Admin   (PWA +  (mobile)   (web,
+       (Expo)    (web,   (web+    Android only)      v2)
+                 Win+    phone,    later)
+                 tablet  dashboard
+                 +phone) +phone)
 ```
 
+### Form-factor priority per user (critical refinement)
+
+Different users prefer different devices. Build for the device they actually grab:
+
+| User | Primary device | Secondary | Note |
+|---|---|---|---|
+| Cashier (daily counter work) | **Windows POS terminal** | Android tablet | Touch screen, full keyboard for ringing, barcode scanner, receipt printer attached. PWA in Chrome / Edge. |
+| Data-entry / catalog manager | **Mobile phone** | Tablet, then desktop | Walks the aisles with phone, scans barcodes, takes photos, fills schema-driven fields. PoS web app responsive down to phone. |
+| Vendor owner (reports / settings) | Phone + desktop | Tablet | Quick check on phone, deep dives on desktop |
+| Picker | **Android phone** (PWA acceptable v1) | iOS later | One-handed, aisle-mobile, barcode-scan via phone camera |
+| Rider | **Android phone** | iOS later | GPS, navigation, single-task UI |
+
+**Key implication:** PoS + Inventory + Vendor Admin **all share the same responsive React+Vite codebase**, optimized for three breakpoints (phone / tablet / desktop). One UI codebase, three form factors, role-based views inside.
+
+### Role-based privilege model (mandatory for easy expansion)
+
+The platform must support arbitrary role combinations from day 1. Roles aren't hardcoded — they're a permissions matrix configured per vendor. Expected v1 roles:
+
+- **Owner** — full access to everything in their vendor scope
+- **Cashier** — register only, no catalog edits, no reports
+- **Data-entry staff** — catalog edits, no register, no reports
+- **Picker** — pick lists only, no register, no catalog
+- **Manager** — reports + catalog, no register
+
+**Future-ready** (built but unused in v1): preparation-window roles, multi-queue cashier (lane 1 / lane 2 / lane 3 with shared but trackable stock), kitchen-display role (when restaurant vertical ships). Adding a new role later = configuration, not code.
 ### Client roster
 
 | # | Client | Platform | Primary user | Status |
@@ -71,8 +102,8 @@ catalog attracts customers ─→ customer orders pay grocers ─→ grocers sta
 | 1 | **Customer super-app (Hanoot)** | iOS + Android (Expo) | end customer | Shipped through Phase A-Re |
 | 2 | **Hanoot PoS + Inventory** | Web (PWA) — Windows + Android tablet | cashier (daily), vendor (data entry) | v1 build |
 | 3 | **Vendor Admin** | Web + mobile-responsive, also inside PoS as PIN-gated mode | vendor owner/manager (weekly) | v1 build |
-| 4 | **Hanoot Picker** | Android phone (Expo) | warehouse picker walking aisles | v1 build |
-| 5 | **Hanoot Rider** | Android + iOS (Expo) | courier | v1 build |
+| 4 | **Hanoot Picker** | PWA v1 (reuse the PoS-Vite codebase, phone-optimized view) → native Android in v2 → iOS later | warehouse picker walking aisles | v1 build |
+| 5 | **Hanoot Rider** | Android + iOS (Expo) | courier | v1 build | 
 | 6 | **Super-admin console** | Web only, internal | Hanoot ops | v2 (deferred) |
 
 ### Backbone design principles
@@ -110,6 +141,7 @@ Modules within the Medusa monolith today, each splittable later:
 
 Splitting a module to a microservice later = swap in-process bus for HTTP + Redis events. No data model rewrite. No consumer rewrite.
 
+**Confirmed:** Modular monolith for v1. Microservices when scale demands it (likely after 50+ shops + when one module's load dominates the rest).
 ---
 
 ## 3. Tech stack (locked)
@@ -130,8 +162,8 @@ Splitting a module to a microservice later = swap in-process bus for HTTP + Redi
 
 ### PoS technical specifics
 - **PWA install** for Windows POS terminals (vendor opens `pos.hanoot.iq`, "Install app")
-- **WebUSB / WebSerial / WebBluetooth** for hardware: barcode (USB HID — auto), receipt printer (ESC/POS over Serial), cash drawer (relay via printer)
-- **IndexedDB + service worker** for offline catalog cache (~20MB for 10k SKUs)
+- **WebUSB / WebSerial / WebBluetooth** for hardware: barcode (USB HID — auto), receipt printer (ESC/POS over Serial), cash drawer (relay via printer). **The PoS owns the invoice template** — Hanoot designs the layout (shop logo + items + tax + footer); PoS sends ESC/POS bytes to whatever printer the vendor has. We support a curated list of printer drivers (Epson TM-T20, Bixolon, Star) and a generic ESC/POS fallback. **Invoice template designer** in Vendor Admin lets the vendor adjust footer copy / logo within bounds.
+- **IndexedDB + service worker** for offline catalog cache. Budget headroom up to 1GB (was 20MB target) — enough for 100k+ SKUs with thumbnails + 30 days of transaction history. Dexie handles eviction policy.
 - **WebSocket** to backbone for real-time stock updates from other terminals
 - **Configurable UI** — vendors customize layout, quick-buttons, theme
 - **Schema-driven product fields per industry** — grocery (weight, expiry), clothes (size, color), salon (service duration)
@@ -293,10 +325,10 @@ H-1 Backbone-WMS  ─→  H-2 PoS shell  ─→  H-3 Data entry
 - Auto-generate product descriptions
 
 **PoS (cashier productivity):**
-- Voice ringing ("1L milk, 2 bread, eggs" → SKUs)
-- Inventory drift detection (anomaly flagging)
+- **Audio feedback ringing** — beep on successful scan, distinct error tone on unknown barcode, success chime on payment. No item-name pronunciation (slows cashier, annoys customers).
+- **Inventory alerts** — notification feed for: items expiring soon (configurable threshold per category — milk 7 days, packaged goods 30 days), items running low (sales velocity → predicted stockout date), items depleted, items receiving abnormal sales pattern (anomaly), items with no movement in N weeks (slow-mover flag for clearance pricing).
 - Restock predictor (sales velocity forecast)
-- Sales report summarization (vendor asks "How were sales last week?")
+- Sales report summarization (vendor asks "How were sales last week?") 
 
 **Picker (operational):**
 - AI substitution suggestions (out-of-stock → 3 alternatives from same category)
@@ -343,14 +375,23 @@ H-1 Backbone-WMS  ─→  H-2 PoS shell  ─→  H-3 Data entry
 
 ---
 
-## 8. Open questions (to resolve before kick-off)
+## 8. Resolved decisions (closed during 2026-05-25 review)
 
-1. **Partner shop** — who's the first grocery? Friend / family / Hanoot office network / cold outreach? Approach A's build sequence is locked, but **if** a partner shop is available from day 1, run the build with them in the loop (weekly demos, real catalog from their shelves) — this combines Approach A's discipline with Approach C's validation without changing the sequence.
-2. **Couriers v1** — Hanoot-hired riders or partnership / WhatsApp coordination only? Affects Rider-app scope.
-3. **Vendor staff identity** — does a single vendor have multiple cashier logins (each tracked) or one shared shop login? Affects users module.
-4. **Revenue model timing** — PoS free v1 + take-rate on Hanoot orders only? Or PoS subscribed tier later? Affects how we talk to first vendors.
-5. **Data residency** — Hostinger VPS is fine for v1; when do we move? Affects deployment phase.
-6. **Founder bandwidth** — solo + Claude subagents → 9-month v1. Co-founder or hire → faster. Affects phasing.
+1. **Partner shop pattern** — Hamza is the primary tester. Two-stage validation: each phase first validated in Hamza's test environment; once approved, deployed to a real-environment partner shop (friend / official network) for live validation. We don't expose half-baked code to a real shop.
+
+2. **Courier sourcing v1** — Hybrid model:
+   - **Preferred:** target shops that *already have their own riders* (most Iraqi grocers do). Rider app onboards the shop's existing rider as a vendor-scoped courier.
+   - **Fallback:** Hanoot hires a very small number (2-3) of riders to cover big metro areas where partner shops lack their own.
+   - Both routed through the same Rider app; backbone assigns by `vendor_owned_rider OR hanoot_pool`.
+
+3. **Vendor staff identity** — Multi-cashier per vendor confirmed mandatory. Each cashier has their own login + tracking (`cashier_id` on every sale). Vendor owner sees per-cashier reports. v1 supports up to ~10 cashiers per shop.
+
+4. **Revenue model** — PoS perpetually free for v1 (no time limit promised). Paid tiers introduced minimum 1-2 years post-launch, after PMF. v1 says "free, no charges" in vendor sign-up copy. **Future revenue paths** (not v1): paid PoS tier with advanced analytics, take-rate on Hanoot customer orders (likely 5-10% of order value), payment-processing fee when card/digital lands.
+
+5. **Data residency / deploy** — **Local-first development**: all v1 phases tested locally (docker-compose) before any Hostinger VPS push. Hostinger as the v1 production target. Migration to scalable cloud (AWS/Hetzner) when shop count or traffic demands.
+
+6. **Team** — Hamza + Claude + subagents. No co-founder yet. Hamza's role: requirements / testing / partner-shop relationships / installing tools or plugins Claude requests. Claude's role: design + implementation via subagents. 9-month v1 is calibrated to this team shape.
+
 
 ---
 
