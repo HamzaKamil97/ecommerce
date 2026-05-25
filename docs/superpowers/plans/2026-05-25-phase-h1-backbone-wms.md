@@ -17,9 +17,9 @@
 ### Task 0: Verify backend structure + dependencies
 
 **Files (read-only):**
-- Check: `backend/apps/api/package.json`
-- Check: `backend/apps/api/medusa-config.ts` (or `.js`)
-- Check: `backend/apps/api/src/modules/` (existing modules)
+- Check: `backend/apps/backend/package.json`
+- Check: `backend/apps/backend/medusa-config.ts` (or `.js`)
+- Check: `backend/apps/backend/src/modules/` (existing modules)
 
 - [ ] **Step 1: Confirm Medusa v2 + dependencies present**
 
@@ -36,7 +36,7 @@ If any are missing or the version is wrong, STOP and flag to the user.
 
 - [ ] **Step 2: List existing modules**
 
-Run: `ls backend/apps/api/src/modules/`
+Run: `ls backend/apps/backend/src/modules/`
 
 Expected: at least `catalog/` or similar e-commerce modules. Note them — Task 12 (events) will reference these.
 
@@ -63,14 +63,14 @@ If everything passes, proceed to Task 1. If not, fix the foundation first.
 ## Task 1: Scaffold the WMS module
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/index.ts`
-- Create: `backend/apps/api/src/modules/wms/service.ts`
-- Create: `backend/apps/api/src/modules/wms/types.ts`
-- Modify: `backend/apps/api/medusa-config.ts`
+- Create: `backend/apps/backend/src/modules/wms/index.ts`
+- Create: `backend/apps/backend/src/modules/wms/service.ts`
+- Create: `backend/apps/backend/src/modules/wms/types.ts`
+- Modify: `backend/apps/backend/medusa-config.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/module-loads.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/module-loads.spec.ts`
 
 ```ts
 import { MedusaContainer } from '@medusajs/types';
@@ -104,14 +104,14 @@ Expected: FAIL with "wmsService not registered" or similar.
 
 - [ ] **Step 3: Create the module skeleton**
 
-Create `backend/apps/api/src/modules/wms/types.ts`:
+Create `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 export type WmsServiceInterface = {
   ping(): string;
 };
 ```
 
-Create `backend/apps/api/src/modules/wms/service.ts`:
+Create `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
 import { WmsServiceInterface } from './types';
 
@@ -122,7 +122,7 @@ export class WmsService implements WmsServiceInterface {
 }
 ```
 
-Create `backend/apps/api/src/modules/wms/index.ts`:
+Create `backend/apps/backend/src/modules/wms/index.ts`:
 ```ts
 import { Module } from '@medusajs/framework/utils';
 import { WmsService } from './service';
@@ -136,7 +136,7 @@ export default Module(WMS_MODULE, {
 
 - [ ] **Step 4: Register the module in medusa-config.ts**
 
-Modify `backend/apps/api/medusa-config.ts` — add to the `modules` array:
+Modify `backend/apps/backend/medusa-config.ts` — add to the `modules` array:
 ```ts
 modules: [
   // ...existing modules
@@ -154,7 +154,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/medusa-config.ts backend/apps/api/integration-tests/wms/module-loads.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/medusa-config.ts backend/apps/backend/integration-tests/wms/module-loads.spec.ts
 git commit -m "feat(wms): scaffold WMS module with health check"
 ```
 
@@ -163,12 +163,12 @@ git commit -m "feat(wms): scaffold WMS module with health check"
 ## Task 2: Stock pool model + migration
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/models/stock-pool.model.ts`
-- Create: `backend/apps/api/src/modules/wms/migrations/Migration20260525000001.ts`
+- Create: `backend/apps/backend/src/modules/wms/models/stock-pool.model.ts`
+- Create: `backend/apps/backend/src/modules/wms/migrations/Migration20260525000001.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/stock-pool-model.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/stock-pool-model.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -211,7 +211,7 @@ Expected: FAIL — "relation wms_stock_pool does not exist".
 
 - [ ] **Step 3: Create the model**
 
-Create `backend/apps/api/src/modules/wms/models/stock-pool.model.ts`:
+Create `backend/apps/backend/src/modules/wms/models/stock-pool.model.ts`:
 ```ts
 import { model } from '@medusajs/framework/utils';
 
@@ -235,7 +235,7 @@ export const StockPool = model.define('wms_stock_pool', {
 
 - [ ] **Step 4: Create the migration**
 
-Create `backend/apps/api/src/modules/wms/migrations/Migration20260525000001.ts`:
+Create `backend/apps/backend/src/modules/wms/migrations/Migration20260525000001.ts`:
 ```ts
 import { Migration } from '@mikro-orm/migrations';
 
@@ -266,7 +266,7 @@ export class Migration20260525000001 extends Migration {
 
 - [ ] **Step 5: Register the model with the module**
 
-Modify `backend/apps/api/src/modules/wms/index.ts`:
+Modify `backend/apps/backend/src/modules/wms/index.ts`:
 ```ts
 import { Module } from '@medusajs/framework/utils';
 import { WmsService } from './service';
@@ -288,7 +288,7 @@ Expected: PASS for both inserts; second test PASS (duplicate rejected).
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/stock-pool-model.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/stock-pool-model.spec.ts
 git commit -m "feat(wms): add stock pool model + migration with uniqueness on (vendor,variant)"
 ```
 
@@ -297,13 +297,13 @@ git commit -m "feat(wms): add stock pool model + migration with uniqueness on (v
 ## Task 3: Stock pool repository + service.getStock()
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
+- Create: `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/get-stock.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/get-stock.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -343,7 +343,7 @@ Expected: FAIL — "svc.getStock is not a function".
 
 - [ ] **Step 3: Add types**
 
-Modify `backend/apps/api/src/modules/wms/types.ts`:
+Modify `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 export type StockSnapshot = {
   on_hand: number;
@@ -359,7 +359,7 @@ export type WmsServiceInterface = {
 
 - [ ] **Step 4: Create the repository**
 
-Create `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts`:
+Create `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts`:
 ```ts
 import { EntityManager } from '@mikro-orm/postgresql';
 
@@ -383,7 +383,7 @@ export class StockPoolRepository {
 
 - [ ] **Step 5: Wire repository into service**
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
 import { MedusaService } from '@medusajs/framework/utils';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -419,7 +419,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/get-stock.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/get-stock.spec.ts
 git commit -m "feat(wms): WmsService.getStock returns on_hand / reserved / available"
 ```
 
@@ -428,12 +428,12 @@ git commit -m "feat(wms): WmsService.getStock returns on_hand / reserved / avail
 ## Task 4: Movement model + migration (audit log)
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/models/movement.model.ts`
-- Create: `backend/apps/api/src/modules/wms/migrations/Migration20260525000002.ts`
+- Create: `backend/apps/backend/src/modules/wms/models/movement.model.ts`
+- Create: `backend/apps/backend/src/modules/wms/migrations/Migration20260525000002.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/movement-model.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/movement-model.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -466,7 +466,7 @@ Expected: FAIL — "relation wms_movement does not exist".
 
 - [ ] **Step 3: Create the model**
 
-Create `backend/apps/api/src/modules/wms/models/movement.model.ts`:
+Create `backend/apps/backend/src/modules/wms/models/movement.model.ts`:
 ```ts
 import { model } from '@medusajs/framework/utils';
 
@@ -488,7 +488,7 @@ export const Movement = model.define('wms_movement', {
 
 - [ ] **Step 4: Create the migration**
 
-Create `backend/apps/api/src/modules/wms/migrations/Migration20260525000002.ts`:
+Create `backend/apps/backend/src/modules/wms/migrations/Migration20260525000002.ts`:
 ```ts
 import { Migration } from '@mikro-orm/migrations';
 
@@ -519,7 +519,7 @@ export class Migration20260525000002 extends Migration {
 
 - [ ] **Step 5: Register the Movement model**
 
-Modify `backend/apps/api/src/modules/wms/index.ts`:
+Modify `backend/apps/backend/src/modules/wms/index.ts`:
 ```ts
 import { Module } from '@medusajs/framework/utils';
 import { WmsService } from './service';
@@ -542,7 +542,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/movement-model.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/movement-model.spec.ts
 git commit -m "feat(wms): movement audit log model + migration"
 ```
 
@@ -551,14 +551,14 @@ git commit -m "feat(wms): movement audit log model + migration"
 ## Task 5: Atomic decrement (the heart of WMS)
 
 **Files:**
-- Modify: `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
-- Create: `backend/apps/api/src/modules/wms/errors.ts`
+- Modify: `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
+- Create: `backend/apps/backend/src/modules/wms/errors.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/decrement.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/decrement.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -628,7 +628,7 @@ Expected: FAIL — "decrementStock is not a function".
 
 - [ ] **Step 3: Define errors**
 
-Create `backend/apps/api/src/modules/wms/errors.ts`:
+Create `backend/apps/backend/src/modules/wms/errors.ts`:
 ```ts
 export class WmsError extends Error {
   constructor(message: string) {
@@ -647,7 +647,7 @@ export class WmsInsufficientStockError extends WmsError {
 
 - [ ] **Step 4: Extend types**
 
-Modify `backend/apps/api/src/modules/wms/types.ts`:
+Modify `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 import type { MovementType } from './models/movement.model';
 
@@ -681,7 +681,7 @@ export type WmsServiceInterface = {
 
 - [ ] **Step 5: Implement atomic decrement in repository**
 
-Modify `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts` — add method:
+Modify `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts` — add method:
 ```ts
 import { randomUUID } from 'crypto';
 
@@ -725,7 +725,7 @@ import { randomUUID } from 'crypto';
 
 - [ ] **Step 6: Implement decrementStock in service**
 
-Modify `backend/apps/api/src/modules/wms/service.ts` — add method:
+Modify `backend/apps/backend/src/modules/wms/service.ts` — add method:
 ```ts
 import { randomUUID } from 'crypto';
 import { DecrementStockInput, DecrementStockResult } from './types';
@@ -766,7 +766,7 @@ Expected: PASS all 3 cases.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/decrement.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/decrement.spec.ts
 git commit -m "feat(wms): atomic decrement with row-level lock + insufficient-stock error + movement audit"
 ```
 
@@ -775,13 +775,13 @@ git commit -m "feat(wms): atomic decrement with row-level lock + insufficient-st
 ## Task 6: Increment / restock + manual adjustment
 
 **Files:**
-- Modify: `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
+- Modify: `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/increment.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/increment.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -822,7 +822,7 @@ Expected: FAIL — "incrementStock is not a function".
 
 - [ ] **Step 3: Extend types**
 
-Modify `backend/apps/api/src/modules/wms/types.ts` — add:
+Modify `backend/apps/backend/src/modules/wms/types.ts` — add:
 ```ts
 export type IncrementStockInput = {
   vendor_id: string;
@@ -845,7 +845,7 @@ export type IncrementStockResult = {
 
 - [ ] **Step 4: Implement repository method**
 
-Modify `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts` — add:
+Modify `backend/apps/backend/src/modules/wms/repositories/stock-pool.repository.ts` — add:
 ```ts
   async atomicIncrement(vendorId: string, variantId: string, qty: number): Promise<{ new_on_hand: number }> {
     await this.em.execute(
@@ -867,7 +867,7 @@ Modify `backend/apps/api/src/modules/wms/repositories/stock-pool.repository.ts` 
 
 - [ ] **Step 5: Implement service method**
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
   async incrementStock(input: IncrementStockInput): Promise<IncrementStockResult> {
     if (input.qty <= 0) throw new Error('qty must be positive');
@@ -894,7 +894,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/increment.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/increment.spec.ts
 git commit -m "feat(wms): incrementStock for restock / manual / adjustment movements"
 ```
 
@@ -903,12 +903,12 @@ git commit -m "feat(wms): incrementStock for restock / manual / adjustment movem
 ## Task 7: Reservation model + migration
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/models/reservation.model.ts`
-- Create: `backend/apps/api/src/modules/wms/migrations/Migration20260525000003.ts`
+- Create: `backend/apps/backend/src/modules/wms/models/reservation.model.ts`
+- Create: `backend/apps/backend/src/modules/wms/migrations/Migration20260525000003.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/reservation-model.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/reservation-model.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -941,7 +941,7 @@ Expected: FAIL — "relation wms_reservation does not exist".
 
 - [ ] **Step 3: Create model**
 
-Create `backend/apps/api/src/modules/wms/models/reservation.model.ts`:
+Create `backend/apps/backend/src/modules/wms/models/reservation.model.ts`:
 ```ts
 import { model } from '@medusajs/framework/utils';
 
@@ -964,7 +964,7 @@ export const Reservation = model.define('wms_reservation', {
 
 - [ ] **Step 4: Create migration**
 
-Create `backend/apps/api/src/modules/wms/migrations/Migration20260525000003.ts`:
+Create `backend/apps/backend/src/modules/wms/migrations/Migration20260525000003.ts`:
 ```ts
 import { Migration } from '@mikro-orm/migrations';
 
@@ -1000,7 +1000,7 @@ export class Migration20260525000003 extends Migration {
 
 - [ ] **Step 5: Register model + run migration + test**
 
-Modify `backend/apps/api/src/modules/wms/index.ts` — add `Reservation` to the `models` array.
+Modify `backend/apps/backend/src/modules/wms/index.ts` — add `Reservation` to the `models` array.
 
 Run: `cd backend/apps/api && npx medusa db:migrate && npx jest integration-tests/wms/reservation-model.spec.ts`
 Expected: PASS.
@@ -1008,7 +1008,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/reservation-model.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/reservation-model.spec.ts
 git commit -m "feat(wms): reservation model + migration with status enum + lazy-expiry indexes"
 ```
 
@@ -1017,14 +1017,14 @@ git commit -m "feat(wms): reservation model + migration with status enum + lazy-
 ## Task 8: createReservation with OOS guard
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/repositories/reservation.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
-- Modify: `backend/apps/api/src/modules/wms/errors.ts`
+- Create: `backend/apps/backend/src/modules/wms/repositories/reservation.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
+- Modify: `backend/apps/backend/src/modules/wms/errors.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/create-reservation.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/create-reservation.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1086,7 +1086,7 @@ Expected: FAIL — "createReservation is not a function".
 
 - [ ] **Step 3: Extend types**
 
-Modify `backend/apps/api/src/modules/wms/types.ts` — add:
+Modify `backend/apps/backend/src/modules/wms/types.ts` — add:
 ```ts
 export type CreateReservationInput = {
   vendor_id: string;
@@ -1112,7 +1112,7 @@ export type Reservation = {
 
 - [ ] **Step 4: Create reservation repository**
 
-Create `backend/apps/api/src/modules/wms/repositories/reservation.repository.ts`:
+Create `backend/apps/backend/src/modules/wms/repositories/reservation.repository.ts`:
 ```ts
 import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'crypto';
@@ -1147,7 +1147,7 @@ export class ReservationRepository {
 
 - [ ] **Step 5: Implement service method**
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
 import { ReservationRepository } from './repositories/reservation.repository';
 import { CreateReservationInput, Reservation as ReservationT } from './types';
@@ -1200,7 +1200,7 @@ Expected: PASS all 3 cases.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/create-reservation.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/create-reservation.spec.ts
 git commit -m "feat(wms): createReservation with OOS guard + 15-min TTL"
 ```
 
@@ -1209,13 +1209,13 @@ git commit -m "feat(wms): createReservation with OOS guard + 15-min TTL"
 ## Task 9: consumeReservation + releaseReservation
 
 **Files:**
-- Modify: `backend/apps/api/src/modules/wms/repositories/reservation.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
+- Modify: `backend/apps/backend/src/modules/wms/repositories/reservation.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/reservation-lifecycle.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/reservation-lifecycle.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1270,7 +1270,7 @@ Expected: FAIL — "consumeReservation is not a function".
 
 - [ ] **Step 3: Extend types**
 
-Modify `backend/apps/api/src/modules/wms/types.ts`:
+Modify `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 export type ConsumeReservationInput = {
   reservation_id: string;
@@ -1290,7 +1290,7 @@ export type ReleaseReservationInput = {
 
 - [ ] **Step 4: Extend repository**
 
-Modify `backend/apps/api/src/modules/wms/repositories/reservation.repository.ts` — add:
+Modify `backend/apps/backend/src/modules/wms/repositories/reservation.repository.ts` — add:
 ```ts
   async lockActive(reservationId: string): Promise<{ vendor_id: string; variant_id: string; qty: number; status: string } | null> {
     const rows: any[] = await this.em.execute(
@@ -1319,7 +1319,7 @@ Modify `backend/apps/api/src/modules/wms/repositories/reservation.repository.ts`
 
 - [ ] **Step 5: Implement service methods**
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
 import { ConsumeReservationInput, ReleaseReservationInput } from './types';
 
@@ -1377,7 +1377,7 @@ Expected: PASS all 3 cases.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/reservation-lifecycle.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/reservation-lifecycle.spec.ts
 git commit -m "feat(wms): consumeReservation + releaseReservation with row-lock + audit"
 ```
 
@@ -1386,13 +1386,13 @@ git commit -m "feat(wms): consumeReservation + releaseReservation with row-lock 
 ## Task 10: Reservation expiry (lazy + scheduled cleanup)
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/jobs/reservation-expirer.job.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Create: `backend/apps/api/src/jobs/wms-reservation-expirer.ts` (Medusa scheduled job entry)
+- Create: `backend/apps/backend/src/modules/wms/jobs/reservation-expirer.job.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Create: `backend/apps/backend/src/jobs/wms-reservation-expirer.ts` (Medusa scheduled job entry)
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/reservation-expiry.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/reservation-expiry.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1443,7 +1443,7 @@ Expected: FAIL — "expireReservations is not a function".
 
 - [ ] **Step 3: Implement service method**
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
   async expireReservations(): Promise<{ expired_count: number }> {
     const em = this.container_.resolve<EntityManager>('manager');
@@ -1477,7 +1477,7 @@ Modify `backend/apps/api/src/modules/wms/service.ts`:
 
 - [ ] **Step 4: Create scheduled job entry**
 
-Create `backend/apps/api/src/jobs/wms-reservation-expirer.ts`:
+Create `backend/apps/backend/src/jobs/wms-reservation-expirer.ts`:
 ```ts
 import { MedusaContainer } from '@medusajs/types';
 
@@ -1503,7 +1503,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/src/jobs/wms-reservation-expirer.ts backend/apps/api/integration-tests/wms/reservation-expiry.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/src/jobs/wms-reservation-expirer.ts backend/apps/backend/integration-tests/wms/reservation-expiry.spec.ts
 git commit -m "feat(wms): expireReservations + scheduled job (every minute)"
 ```
 
@@ -1512,11 +1512,11 @@ git commit -m "feat(wms): expireReservations + scheduled job (every minute)"
 ## Task 11: Concurrency test (two-cashier last-unit race)
 
 **Files:**
-- Create: `backend/apps/api/integration-tests/wms/concurrency.spec.ts`
+- Create: `backend/apps/backend/integration-tests/wms/concurrency.spec.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/concurrency.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/concurrency.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1578,7 +1578,7 @@ If FAIL: investigate the `SELECT ... FOR UPDATE` in `atomicDecrement` — likely
 - [ ] **Step 3: Commit**
 
 ```bash
-git add backend/apps/api/integration-tests/wms/concurrency.spec.ts
+git add backend/apps/backend/integration-tests/wms/concurrency.spec.ts
 git commit -m "test(wms): concurrent decrement never over-sells (last-unit race + 100-thread batch)"
 ```
 
@@ -1587,15 +1587,15 @@ git commit -m "test(wms): concurrent decrement never over-sells (last-unit race 
 ## Task 12: Shop location model + geo radius query
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/models/shop-location.model.ts`
-- Create: `backend/apps/api/src/modules/wms/migrations/Migration20260525000004.ts`
-- Create: `backend/apps/api/src/modules/wms/repositories/shop-location.repository.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
+- Create: `backend/apps/backend/src/modules/wms/models/shop-location.model.ts`
+- Create: `backend/apps/backend/src/modules/wms/migrations/Migration20260525000004.ts`
+- Create: `backend/apps/backend/src/modules/wms/repositories/shop-location.repository.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/geo-radius.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/geo-radius.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1635,7 +1635,7 @@ Expected: FAIL — "relation wms_shop_location does not exist" or "shopsWithinRa
 
 - [ ] **Step 3: Create model**
 
-Create `backend/apps/api/src/modules/wms/models/shop-location.model.ts`:
+Create `backend/apps/backend/src/modules/wms/models/shop-location.model.ts`:
 ```ts
 import { model } from '@medusajs/framework/utils';
 
@@ -1651,7 +1651,7 @@ export const ShopLocation = model.define('wms_shop_location', {
 
 - [ ] **Step 4: Create migration**
 
-Create `backend/apps/api/src/modules/wms/migrations/Migration20260525000004.ts`:
+Create `backend/apps/backend/src/modules/wms/migrations/Migration20260525000004.ts`:
 ```ts
 import { Migration } from '@mikro-orm/migrations';
 
@@ -1678,7 +1678,7 @@ export class Migration20260525000004 extends Migration {
 
 - [ ] **Step 5: Create repository**
 
-Create `backend/apps/api/src/modules/wms/repositories/shop-location.repository.ts`:
+Create `backend/apps/backend/src/modules/wms/repositories/shop-location.repository.ts`:
 ```ts
 import { EntityManager } from '@mikro-orm/postgresql';
 
@@ -1736,7 +1736,7 @@ export class ShopLocationRepository {
 
 - [ ] **Step 6: Extend types + service**
 
-Modify `backend/apps/api/src/modules/wms/types.ts`:
+Modify `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 export type UpsertShopLocationInput = {
   vendor_id: string;
@@ -1765,7 +1765,7 @@ export type ShopLocationResult = {
 //   shopsWithinRadius(input: ShopsWithinRadiusInput): Promise<ShopLocationResult[]>;
 ```
 
-Modify `backend/apps/api/src/modules/wms/service.ts` — add `ShopLocation` to the `MedusaService` call:
+Modify `backend/apps/backend/src/modules/wms/service.ts` — add `ShopLocation` to the `MedusaService` call:
 ```ts
 export class WmsService extends MedusaService({ StockPool, Movement, Reservation, ShopLocation }) implements WmsServiceInterface {
   // ...
@@ -1793,7 +1793,7 @@ Expected: PASS both tests.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/geo-radius.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/geo-radius.spec.ts
 git commit -m "feat(wms): shop location upsert + Haversine radius query (both customer + shop radii)"
 ```
 
@@ -1802,12 +1802,12 @@ git commit -m "feat(wms): shop location upsert + Haversine radius query (both cu
 ## Task 13: Event emissions
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/events.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
+- Create: `backend/apps/backend/src/modules/wms/events.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/events.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/events.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1860,7 +1860,7 @@ Expected: FAIL — no events captured.
 
 - [ ] **Step 3: Create event constants**
 
-Create `backend/apps/api/src/modules/wms/events.ts`:
+Create `backend/apps/backend/src/modules/wms/events.ts`:
 ```ts
 export const WMS_EVENTS = {
   STOCK_INCREMENTED: 'wms.stock.incremented',
@@ -1891,7 +1891,7 @@ export type WmsReservationEventPayload = {
 
 - [ ] **Step 4: Emit from service methods**
 
-Modify `backend/apps/api/src/modules/wms/service.ts` — at top, resolve event bus:
+Modify `backend/apps/backend/src/modules/wms/service.ts` — at top, resolve event bus:
 ```ts
 import { WMS_EVENTS } from './events';
 
@@ -1923,7 +1923,7 @@ Expected: PASS both tests.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/integration-tests/wms/events.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/integration-tests/wms/events.spec.ts
 git commit -m "feat(wms): emit domain events for stock + reservation transitions"
 ```
 
@@ -1932,14 +1932,14 @@ git commit -m "feat(wms): emit domain events for stock + reservation transitions
 ## Task 14: Drift detection job
 
 **Files:**
-- Create: `backend/apps/api/src/modules/wms/jobs/stock-drift-detector.job.ts`
-- Modify: `backend/apps/api/src/modules/wms/service.ts`
-- Modify: `backend/apps/api/src/modules/wms/types.ts`
-- Create: `backend/apps/api/src/jobs/wms-drift-nightly.ts`
+- Create: `backend/apps/backend/src/modules/wms/jobs/stock-drift-detector.job.ts`
+- Modify: `backend/apps/backend/src/modules/wms/service.ts`
+- Modify: `backend/apps/backend/src/modules/wms/types.ts`
+- Create: `backend/apps/backend/src/jobs/wms-drift-nightly.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/drift.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/drift.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -1974,7 +1974,7 @@ Expected: FAIL — "detectStockDrift is not a function".
 
 - [ ] **Step 3: Add types + implement**
 
-Modify `backend/apps/api/src/modules/wms/types.ts`:
+Modify `backend/apps/backend/src/modules/wms/types.ts`:
 ```ts
 export type DriftFlag = 'negative_on_hand' | 'reserved_exceeds_on_hand';
 export type DriftReport = {
@@ -1991,7 +1991,7 @@ export type DriftReport = {
 //   detectStockDrift(input: { vendor_id?: string }): Promise<DriftReport>;
 ```
 
-Modify `backend/apps/api/src/modules/wms/service.ts`:
+Modify `backend/apps/backend/src/modules/wms/service.ts`:
 ```ts
   async detectStockDrift(input: { vendor_id?: string }): Promise<DriftReport> {
     const em = this.container_.resolve<EntityManager>('manager');
@@ -2018,7 +2018,7 @@ Modify `backend/apps/api/src/modules/wms/service.ts`:
 
 - [ ] **Step 4: Create scheduled job entry**
 
-Create `backend/apps/api/src/jobs/wms-drift-nightly.ts`:
+Create `backend/apps/backend/src/jobs/wms-drift-nightly.ts`:
 ```ts
 import { MedusaContainer } from '@medusajs/types';
 
@@ -2050,7 +2050,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add backend/apps/api/src/modules/wms backend/apps/api/src/jobs/wms-drift-nightly.ts backend/apps/api/integration-tests/wms/drift.spec.ts
+git add backend/apps/backend/src/modules/wms backend/apps/backend/src/jobs/wms-drift-nightly.ts backend/apps/backend/integration-tests/wms/drift.spec.ts
 git commit -m "feat(wms): drift detection (negative on_hand / reserved>on_hand) + nightly job"
 ```
 
@@ -2059,15 +2059,15 @@ git commit -m "feat(wms): drift detection (negative on_hand / reserved>on_hand) 
 ## Task 15: Admin REST API — stock, reservations, movements
 
 **Files:**
-- Create: `backend/apps/api/src/api/admin/wms/stock/route.ts`
-- Create: `backend/apps/api/src/api/admin/wms/reservations/route.ts`
-- Create: `backend/apps/api/src/api/admin/wms/movements/route.ts`
-- Create: `backend/apps/api/src/api/admin/wms/drift-report/route.ts`
-- Create: `backend/apps/api/src/api/admin/wms/locations/route.ts`
+- Create: `backend/apps/backend/src/api/admin/wms/stock/route.ts`
+- Create: `backend/apps/backend/src/api/admin/wms/reservations/route.ts`
+- Create: `backend/apps/backend/src/api/admin/wms/movements/route.ts`
+- Create: `backend/apps/backend/src/api/admin/wms/drift-report/route.ts`
+- Create: `backend/apps/backend/src/api/admin/wms/locations/route.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/api-admin.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/api-admin.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -2114,7 +2114,7 @@ Expected: FAIL — 404 on each route.
 
 - [ ] **Step 3: Implement the routes**
 
-Create `backend/apps/api/src/api/admin/wms/stock/route.ts`:
+Create `backend/apps/backend/src/api/admin/wms/stock/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2137,7 +2137,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 }
 ```
 
-Create `backend/apps/api/src/api/admin/wms/reservations/route.ts`:
+Create `backend/apps/backend/src/api/admin/wms/reservations/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2153,7 +2153,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 ```
 
-Create `backend/apps/api/src/api/admin/wms/movements/route.ts`:
+Create `backend/apps/backend/src/api/admin/wms/movements/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2173,7 +2173,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 ```
 
-Create `backend/apps/api/src/api/admin/wms/drift-report/route.ts`:
+Create `backend/apps/backend/src/api/admin/wms/drift-report/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2185,7 +2185,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 ```
 
-Create `backend/apps/api/src/api/admin/wms/locations/route.ts`:
+Create `backend/apps/backend/src/api/admin/wms/locations/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2206,7 +2206,7 @@ Expected: PASS all 4 tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add backend/apps/api/src/api/admin/wms backend/apps/api/integration-tests/wms/api-admin.spec.ts
+git add backend/apps/backend/src/api/admin/wms backend/apps/backend/integration-tests/wms/api-admin.spec.ts
 git commit -m "feat(wms): admin REST routes for stock / reservations / movements / drift / locations"
 ```
 
@@ -2215,12 +2215,12 @@ git commit -m "feat(wms): admin REST routes for stock / reservations / movements
 ## Task 16: Store REST API — shops-nearby + availability check
 
 **Files:**
-- Create: `backend/apps/api/src/api/store/wms/shops-nearby/route.ts`
-- Create: `backend/apps/api/src/api/store/wms/availability/route.ts`
+- Create: `backend/apps/backend/src/api/store/wms/shops-nearby/route.ts`
+- Create: `backend/apps/backend/src/api/store/wms/availability/route.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create: `backend/apps/api/integration-tests/wms/api-store.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/api-store.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -2263,7 +2263,7 @@ Expected: FAIL — 404.
 
 - [ ] **Step 3: Implement routes**
 
-Create `backend/apps/api/src/api/store/wms/shops-nearby/route.ts`:
+Create `backend/apps/backend/src/api/store/wms/shops-nearby/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2278,7 +2278,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 }
 ```
 
-Create `backend/apps/api/src/api/store/wms/availability/route.ts`:
+Create `backend/apps/backend/src/api/store/wms/availability/route.ts`:
 ```ts
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
@@ -2307,7 +2307,7 @@ Expected: PASS both tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add backend/apps/api/src/api/store/wms backend/apps/api/integration-tests/wms/api-store.spec.ts
+git add backend/apps/backend/src/api/store/wms backend/apps/backend/integration-tests/wms/api-store.spec.ts
 git commit -m "feat(wms): store routes — shops-nearby (geo) + availability check"
 ```
 
@@ -2316,11 +2316,11 @@ git commit -m "feat(wms): store routes — shops-nearby (geo) + availability che
 ## Task 17: End-to-end integration scenario
 
 **Files:**
-- Create: `backend/apps/api/integration-tests/wms/e2e-order-loop.spec.ts`
+- Create: `backend/apps/backend/integration-tests/wms/e2e-order-loop.spec.ts`
 
 - [ ] **Step 1: Write the failing test (which will pass — it's an integration validation)**
 
-Create: `backend/apps/api/integration-tests/wms/e2e-order-loop.spec.ts`
+Create: `backend/apps/backend/integration-tests/wms/e2e-order-loop.spec.ts`
 
 ```ts
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -2387,7 +2387,7 @@ If any FAIL, debug — but everything underneath has been individually tested in
 - [ ] **Step 3: Commit**
 
 ```bash
-git add backend/apps/api/integration-tests/wms/e2e-order-loop.spec.ts
+git add backend/apps/backend/integration-tests/wms/e2e-order-loop.spec.ts
 git commit -m "test(wms): end-to-end order loop (reserve → consume / cancel / expire)"
 ```
 
@@ -2437,7 +2437,7 @@ metadata:
   type: project
 ---
 
-WMS module at `backend/apps/api/src/modules/wms/`. Public surface:
+WMS module at `backend/apps/backend/src/modules/wms/`. Public surface:
 - WmsService: getStock, decrementStock, incrementStock, createReservation,
   consumeReservation, releaseReservation, expireReservations,
   upsertShopLocation, shopsWithinRadius, detectStockDrift.
