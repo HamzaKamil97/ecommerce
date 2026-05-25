@@ -30,6 +30,6 @@ module.exports = defineConfig({
     { resolve: "./src/modules/payments" },
     { resolve: "./src/modules/promotions" },
     { resolve: "./src/modules/wms" },
-    { resolve: "./src/modules/pos_terminal" },
+    { resolve: "./src/modules/pos_terminal", dependencies: ['wmsService'] },
   ],
 })
