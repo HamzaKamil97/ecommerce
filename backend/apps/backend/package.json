@@ -19,6 +19,7 @@
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:wms": "for f in integration-tests/wms/*.spec.ts; do echo \"\\n=== $f ===\"; TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit \"$f\" || exit 1; done",
+    "test:integration:pos-terminal": "for f in integration-tests/pos-terminal/*.spec.ts; do echo \"\\n=== $f ===\"; TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit \"$f\" || exit 1; done",
     "test:integration:wms:http": "for f in integration-tests/http/admin-wms.spec.ts integration-tests/http/store-wms.spec.ts; do echo \"\\n=== $f ===\"; TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit \"$f\" || exit 1; done",
     "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit"
   },

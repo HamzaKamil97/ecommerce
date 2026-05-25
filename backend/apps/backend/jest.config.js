@@ -24,6 +24,7 @@ if (process.env.TEST_TYPE === "integration:http") {
   module.exports.testMatch = [
     "**/src/modules/*/__tests__/**/*.[jt]s",
     "**/integration-tests/wms/**/*.spec.[jt]s",
+    "**/integration-tests/pos-terminal/**/*.spec.[jt]s",
   ];
 } else if (process.env.TEST_TYPE === "unit") {
   module.exports.testMatch = ["**/src/**/__tests__/**/*.unit.spec.[jt]s"];
