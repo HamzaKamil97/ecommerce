@@ -1,5 +1,22 @@
 # Phase H-1 (Backbone-WMS) — In-progress checkpoint
 
+## ⚡ Copy-paste prompt to resume Phase H-1 in a new session
+
+```
+Continue Phase H-1 (Backbone-WMS). The plan is at
+docs/superpowers/plans/2026-05-25-phase-h1-backbone-wms.md.
+The progress checkpoint is at
+docs/superpowers/plans/2026-05-25-phase-h1-progress.md — read it
+FIRST to get the carry-forward learnings about Medusa v2 patterns
+in this codebase before dispatching any subagents.
+
+Invoke the subagent-driven-development skill. Start from whichever
+task is next per the progress doc. Dispatch task-by-task until your
+own context starts filling, then write a fresh updated progress
+checkpoint and stop cleanly. Don't ask me anything unless you're
+genuinely blocked.
+```
+
 **Started:** 2026-05-25 via subagent-driven-development skill.
 **Plan:** [`2026-05-25-phase-h1-backbone-wms.md`](./2026-05-25-phase-h1-backbone-wms.md)
 
