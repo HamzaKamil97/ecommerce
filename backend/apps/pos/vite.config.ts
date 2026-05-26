@@ -8,6 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
+      devOptions: { enabled: true, type: 'module' },
       manifest: {
         name: 'Hanoot PoS',
         short_name: 'Hanoot PoS',
