@@ -2,7 +2,7 @@ import { model } from '@medusajs/framework/utils';
 
 export const AuditLog = model.define('platform_audit_log', {
   id: model.id({ prefix: 'aul' }).primaryKey(),
-  vendor_id: model.text().nullable().index(),
+  vendor_id: model.text().nullable(),
   actor_id: model.text().nullable(),
   actor_type: model.enum(['user', 'cashier', 'system']),
   module: model.text(),
