@@ -1,4 +1,4 @@
-import { loadConfig } from '../state/config';
+import { db } from '../db/dexie';
 
 export type ThemeName = 'dark' | 'light';
 
@@ -7,6 +7,7 @@ export function applyTheme(theme: ThemeName): void {
 }
 
 export async function resolveStoredTheme(): Promise<void> {
-  const cfg = await loadConfig();
-  applyTheme(cfg.theme);
+  const row = await db.config.get('app');
+  const persisted = (row?.value as { theme?: ThemeName } | undefined);
+  applyTheme(persisted?.theme ?? 'dark');
 }
