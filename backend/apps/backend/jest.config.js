@@ -23,6 +23,7 @@ if (process.env.TEST_TYPE === "integration:http") {
 } else if (process.env.TEST_TYPE === "integration:modules") {
   module.exports.testMatch = [
     "**/src/modules/*/__tests__/**/*.[jt]s",
+    "**/src/permissions/__tests__/**/*.[jt]s",
     "**/integration-tests/wms/**/*.spec.[jt]s",
     "**/integration-tests/pos-terminal/**/*.spec.[jt]s",
   ];
