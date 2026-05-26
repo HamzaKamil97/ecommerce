@@ -55,5 +55,20 @@ medusaIntegrationTestRunner({
         expect(typeof r.data.confidence).toBe('number');
       });
     });
+
+    describe('GET /admin/catalog/barcode-lookup', () => {
+      it('400 when code missing', async () => {
+        const r = await api.get('/admin/catalog/barcode-lookup', { headers: adminHeaders })
+          .catch((e: any) => e.response);
+        expect(r.status).toBe(400);
+      });
+
+      it('returns { found: false } gracefully when upstream returns no product', async () => {
+        const r = await api.get('/admin/catalog/barcode-lookup?code=0000000000000',
+          { headers: adminHeaders });
+        expect(r.status).toBe(200);
+        expect(r.data.found).toBe(false);
+      });
+    });
   },
 });
