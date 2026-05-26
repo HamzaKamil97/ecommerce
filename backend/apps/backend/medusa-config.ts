@@ -32,5 +32,6 @@ module.exports = defineConfig({
     { resolve: "./src/modules/wms" },
     { resolve: "./src/modules/pos_terminal", dependencies: ['wmsService'] },
     { resolve: "./src/modules/catalog_schema" },
+    { resolve: "./src/modules/audit_log" },
   ],
 })
