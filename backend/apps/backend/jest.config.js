@@ -14,6 +14,10 @@ module.exports = {
   },
   testEnvironment: "node",
   moduleFileExtensions: ["js", "ts", "json"],
+  moduleNameMapper: {
+    // Allow ESM-style .js extension imports to resolve .ts source files
+    "^(\\.\\.?/.*)\\.js$": "$1",
+  },
   modulePathIgnorePatterns: ["dist/", "<rootDir>/.medusa/"],
   setupFiles: ["./integration-tests/setup.js"],
 };

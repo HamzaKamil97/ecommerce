@@ -8,4 +8,5 @@ export const Cashier = model.define('pos_cashier', {
   pin_salt: model.text(),
   role: model.enum(['cashier', 'manager']).default('cashier'),
   active: model.boolean().default(true),
+  permission_overrides: model.json().nullable(),
 });

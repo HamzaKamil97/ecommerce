@@ -13,4 +13,5 @@ export const Sale = model.define('pos_sale', {
   status: model.enum(['completed', 'voided']).default('completed'),
   voided_at: model.dateTime().nullable(),
   client_created_at: model.dateTime().nullable(),
+  channel: model.text().default('offline'),
 });
