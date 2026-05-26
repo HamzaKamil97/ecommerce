@@ -49,3 +49,56 @@ export async function verifyCashierPin(cashier_id: string, pin: string): Promise
   });
   return r.cashier;
 }
+
+export type FieldDef = {
+  key: string;
+  label: string;
+  kind: 'text' | 'textarea' | 'number' | 'price_minor' | 'select' | 'multi_select' | 'date' | 'boolean' | 'image';
+  required?: boolean;
+  options?: string[];
+  unit?: string;
+  help?: string;
+};
+
+export type CategoryDTO = { id: string; handle: string; name: string; icon: string | null; position: number };
+
+export async function fetchCategories(): Promise<CategoryDTO[]> {
+  const r = await api<{ categories: CategoryDTO[] }>('/admin/catalog-schema/categories');
+  return r.categories;
+}
+
+export async function fetchSchema(handle: string): Promise<{ category_handle: string; fields: FieldDef[] }> {
+  const r = await api<{ schema: { category_handle: string; fields: FieldDef[] } }>(
+    `/admin/catalog-schema/schemas/${encodeURIComponent(handle)}`);
+  return r.schema;
+}
+
+export type BarcodeLookupResult = {
+  found: boolean; code: string;
+  name?: string | null; brand?: string | null; image_url?: string | null;
+  weight_grams?: number | null;
+};
+
+export async function barcodeLookup(code: string): Promise<BarcodeLookupResult> {
+  return api<BarcodeLookupResult>(`/admin/catalog/barcode-lookup?code=${encodeURIComponent(code)}`);
+}
+
+export async function classifyName(name: string, hint?: string): Promise<{ category_handle: string; confidence: number }> {
+  return api(`/admin/catalog/classify`, { method: 'POST', body: JSON.stringify({ name, hint }) });
+}
+
+export async function createProduct(body: {
+  vendor_id: string; title: string; description?: string;
+  barcode?: string; sku?: string; thumbnail?: string;
+  price_minor: number; currency_code: string;
+  category_handle: string; schema_fields?: Record<string, unknown>;
+  initial_on_hand?: number;
+}): Promise<{ product: any }> {
+  return api('/admin/catalog/products', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function importCsv(vendor_id: string, csv: string): Promise<{ total: number; created: number; failed: number; errors: Array<{ row: number; reason: string }> }> {
+  return api(`/admin/catalog/import-csv?vendor_id=${encodeURIComponent(vendor_id)}`, {
+    method: 'POST', body: csv, headers: { 'Content-Type': 'text/csv' },
+  });
+}
