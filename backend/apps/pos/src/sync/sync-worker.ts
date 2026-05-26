@@ -61,3 +61,16 @@ export function startBackgroundSync(intervalMs = 5000) {
 export function stopBackgroundSync() {
   if (timer) { clearInterval(timer); timer = null; }
 }
+
+/**
+ * Resets any pending sales left in 'sending' state from a prior session that
+ * was killed mid-drain. Called once on app mount before background sync starts.
+ * Otherwise these rows would never be retried (drainOnce only picks 'queued').
+ */
+export async function resetStuckSendingRows(): Promise<number> {
+  const stuck = await db.sales_pending.where('status').equals('sending').toArray();
+  for (const row of stuck) {
+    await db.sales_pending.update(row.client_id, { status: 'queued' });
+  }
+  return stuck.length;
+}
