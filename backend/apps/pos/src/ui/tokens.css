@@ -1,11 +1,29 @@
-:root {
-  --bg: #0a0a0a;
-  --fg: #f5f5f5;
+:root,
+:root[data-theme='dark'] {
+  --bg: #0B0B0F;
+  --surface: #15151B;
+  --text: #F7F7F8;
   --accent: #21d07a;
-  --danger: #e23636;
-  --muted: #888;
+  --danger: #DC2626;
   --radius: 8px;
+  /* legacy aliases kept for existing components */
+  --fg: #F7F7F8;
+  --muted: #888;
 }
-html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--fg);
+
+:root[data-theme='light'] {
+  --bg: #FFFFFF;
+  --surface: #F7F7F8;
+  --text: #0B0B0F;
+  --accent: #0F766E;
+  --danger: #DC2626;
+  --radius: 8px;
+  /* legacy aliases kept for existing components */
+  --fg: #0B0B0F;
+  --muted: #555;
+}
+
+html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+body { background: var(--bg); color: var(--text); }
 button { font: inherit; }

@@ -1,4 +1,5 @@
 import { db } from '../db/dexie';
+import { applyTheme } from '../pwa/theme';
 
 export type QuickButton = { variant_id: string; label: string; color: string };
 
@@ -23,4 +24,5 @@ export async function loadConfig(): Promise<Config> {
 
 export async function saveConfig(c: Config): Promise<void> {
   await db.config.put({ key: 'app', value: c });
+  applyTheme(c.theme);
 }
