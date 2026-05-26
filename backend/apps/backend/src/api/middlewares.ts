@@ -1,6 +1,7 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
 import cors from "cors"
 import { text } from "express"
+import { auditLogMiddleware } from './middlewares/audit-log'
 
 // Custom /vendor/* CORS — Medusa's built-in CORS only handles /store, /admin,
 // /auth namespaces. The vendor portal lives at localhost:9100 (Next.js dev)
@@ -42,6 +43,16 @@ export default defineMiddlewares({
       middlewares: [
         text({ type: "text/*", limit: "10mb" }),
       ],
+    },
+    {
+      matcher: '/admin/*',
+      method: ['POST', 'PUT', 'PATCH', 'DELETE'],
+      middlewares: [auditLogMiddleware],
+    },
+    {
+      matcher: '/vendor/*',
+      method: ['POST', 'PUT', 'PATCH', 'DELETE'],
+      middlewares: [auditLogMiddleware],
     },
   ],
 })
