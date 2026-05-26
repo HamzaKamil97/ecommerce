@@ -1,7 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import './ui/fonts.css';
 import './ui/tokens.css';
+import './ui/animations.css';
 import { registerServiceWorker } from './pwa/register-sw';
 import { resolveStoredTheme } from './pwa/theme';
 
