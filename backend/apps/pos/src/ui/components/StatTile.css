@@ -1,0 +1,32 @@
+.stat-tile {
+  background: linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 100%);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.stat-tile:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.stat-icon { position: absolute; top: 8px; right: 10px; font-size: 16px; opacity: 0.5; }
+.stat-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+}
+.stat-trend { font-size: 11px; font-weight: 700; margin-top: 2px; }
+.stat-trend-up { color: var(--emerald); }
+.stat-trend-down { color: var(--burgundy); }
+.stat-trend-flat { color: var(--ink-3); }
