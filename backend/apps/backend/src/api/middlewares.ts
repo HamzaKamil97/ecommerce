@@ -1,5 +1,6 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
 import cors from "cors"
+import { text } from "express"
 
 // Custom /vendor/* CORS — Medusa's built-in CORS only handles /store, /admin,
 // /auth namespaces. The vendor portal lives at localhost:9100 (Next.js dev)
@@ -29,6 +30,17 @@ export default defineMiddlewares({
           ],
           methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         }),
+      ],
+    },
+    {
+      // Express text() defaults to text/plain only; CSV import needs text/csv
+      // parsed as a string in req.body. We add a text/* parser here so that
+      // Medusa's default body-parser chain is bypassed for this route and the
+      // raw CSV string lands in req.body.
+      matcher: "/admin/catalog/import-csv",
+      method: "POST",
+      middlewares: [
+        text({ type: "text/*", limit: "10mb" }),
       ],
     },
   ],
