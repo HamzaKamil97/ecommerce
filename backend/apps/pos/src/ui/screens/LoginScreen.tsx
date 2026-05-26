@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from '../../state/session';
-import { fetchCashiers, CashierListItem } from '../../api/pos';
-import { VENDOR_ID, API_BASE } from '../../env';
+import { fetchCashiers, verifyCashierPin, CashierListItem } from '../../api/pos';
+import { VENDOR_ID } from '../../env';
 import { db } from '../../db/dexie';
 
 export function LoginScreen() {
@@ -30,12 +30,7 @@ export function LoginScreen() {
     if (!selected) return;
     setErr(null);
     try {
-      const res = await fetch(`${API_BASE}/admin/pos-terminal/cashiers/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cashier_id: selected.id, pin }),
-      });
-      if (!res.ok) throw new Error('Bad PIN');
+      await verifyCashierPin(selected.id, pin);
       signIn({ cashier_id: selected.id, cashier_name: selected.name, role: selected.role });
     } catch {
       setErr('Bad PIN — try again');
