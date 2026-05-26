@@ -2,6 +2,7 @@ import { defineMiddlewares } from "@medusajs/framework/http"
 import cors from "cors"
 import { text } from "express"
 import { auditLogMiddleware } from './middlewares/audit-log'
+import { requireSuperAdmin } from './middlewares/require-super-admin'
 
 // Custom /vendor/* CORS — Medusa's built-in CORS only handles /store, /admin,
 // /auth namespaces. The vendor portal lives at localhost:9100 (Next.js dev)
@@ -43,6 +44,10 @@ export default defineMiddlewares({
       middlewares: [
         text({ type: "text/*", limit: "10mb" }),
       ],
+    },
+    {
+      matcher: '/super-admin/*',
+      middlewares: [requireSuperAdmin],
     },
     {
       matcher: '/admin/*',
