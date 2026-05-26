@@ -1,0 +1,8 @@
+.skel {
+  background: linear-gradient(90deg, var(--line-4) 25%, var(--paper) 50%, var(--line-4) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+.skel-line { height: 12px; margin-bottom: 8px; }
