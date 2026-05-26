@@ -73,8 +73,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       });
       const p = Array.isArray(createdRows) ? createdRows[0] : createdRows;
       if (stock > 0) {
+        const variantId = p?.variants?.[0]?.id;
+        if (!variantId) throw new Error('product created without variant id; stock not seeded');
         await wms.incrementStock({
-          vendor_id, variant_id: p.variants[0].id, qty: stock,
+          vendor_id, variant_id: variantId, qty: stock,
           type: 'restock', note: 'csv import',
         });
       }

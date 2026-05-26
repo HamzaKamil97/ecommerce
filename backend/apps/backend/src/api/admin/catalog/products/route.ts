@@ -57,10 +57,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const p = Array.isArray(created) ? created[0] : created;
 
   if (body.initial_on_hand && body.initial_on_hand > 0) {
+    const variantId = p?.variants?.[0]?.id;
+    if (!variantId) {
+      return res.status(500).json({
+        error: 'product created without variant id; stock not seeded',
+        product_id: p?.id,
+      });
+    }
     const wms: any = req.scope.resolve('wmsService');
     await wms.incrementStock({
       vendor_id: body.vendor_id,
-      variant_id: p.variants[0].id,
+      variant_id: variantId,
       qty: body.initial_on_hand,
       type: 'restock',
       note: 'catalog initial on_hand',
