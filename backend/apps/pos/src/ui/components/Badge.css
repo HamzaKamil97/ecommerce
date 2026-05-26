@@ -1,0 +1,13 @@
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.badge-ok { background: var(--emerald); color: #fff; }
+.badge-warn { background: var(--gold); color: var(--ink); }
+.badge-crit { background: var(--burgundy); color: #fff; }
+.badge-info { background: var(--line-3); color: var(--ink); }
+.badge-quiet { background: transparent; border: 1px solid var(--line); color: var(--ink-3); }
