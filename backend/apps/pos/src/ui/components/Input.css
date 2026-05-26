@@ -1,0 +1,30 @@
+.inp-group { display: flex; flex-direction: column; gap: 4px; }
+.inp-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.inp {
+  background: var(--paper);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.inp:focus {
+  background: var(--paper-2);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 58, .2);
+  outline: none;
+}
+.inp-error .inp { border-color: var(--burgundy); }
+.inp-error .inp:focus { box-shadow: 0 0 0 3px rgba(134, 42, 58, .2); }
+.inp-help { font-size: 10px; color: var(--ink-3); }
+.inp-err-msg { font-size: 10px; color: var(--burgundy); font-weight: 700; }
