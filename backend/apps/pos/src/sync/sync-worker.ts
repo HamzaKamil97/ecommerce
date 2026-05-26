@@ -69,8 +69,9 @@ export function stopBackgroundSync() {
  */
 export async function resetStuckSendingRows(): Promise<number> {
   const stuck = await db.sales_pending.where('status').equals('sending').toArray();
-  for (const row of stuck) {
-    await db.sales_pending.update(row.client_id, { status: 'queued' });
-  }
+  if (stuck.length === 0) return 0;
+  await db.sales_pending.bulkUpdate(
+    stuck.map((row) => ({ key: row.client_id, changes: { status: 'queued' } })),
+  );
   return stuck.length;
 }
