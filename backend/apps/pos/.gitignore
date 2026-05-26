@@ -2,3 +2,9 @@
 tsconfig.tsbuildinfo
 src/**/*.js
 tests/**/*.js
+
+# vite-plugin-pwa dev-mode service worker output
+dev-dist/
+
+# Vite production build output
+dist/
