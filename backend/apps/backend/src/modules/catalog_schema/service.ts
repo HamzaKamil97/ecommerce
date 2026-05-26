@@ -20,7 +20,7 @@ export class CatalogSchemaService extends CatalogSchemaServiceBase
   }
 
   async getSchemaByHandle(handle: string): Promise<SchemaDTO | null> {
-    const [rows] = await (this as any).listAndCountSchemas({ category_handle: handle });
+    const [rows] = await (this as any).listAndCountSchemata({ category_handle: handle });
     if (!rows.length) return null;
     const r = rows[0];
     return {
