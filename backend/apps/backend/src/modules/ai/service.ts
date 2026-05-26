@@ -116,6 +116,51 @@ class AiService extends MedusaService({
     return { description: data?.choices?.[0]?.message?.content ?? "", provider: "openai" }
   }
 
+  // ===== Category classification (key-optional) =====
+
+  /**
+   * Pick the best category handle for a product name from the allowed list.
+   * key-optional: returns { category_handle: 'other', confidence: 0 } when no key is configured
+   * or when the upstream call fails for any reason.
+   */
+  async classifyProductCategory(
+    name: string,
+    hint: string | undefined,
+    allowed: string[],
+  ): Promise<{ category_handle: string; confidence: number }> {
+    if (!allowed.length) throw new Error('allowed list must be non-empty');
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) return { category_handle: 'other', confidence: 0 };
+
+    const prompt =
+      `Classify the retail product name into ONE of: ${allowed.join(', ')}.\n` +
+      `Name: ${name}\n` +
+      (hint ? `Hint: ${hint}\n` : '') +
+      `Respond as compact JSON: {"category_handle":"<one of the list>","confidence":<0..1>}`;
+
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: 'json_object' },
+          max_tokens: 60,
+        }),
+      });
+      if (!res.ok) return { category_handle: 'other', confidence: 0 };
+      const json: any = await res.json();
+      const txt = json?.choices?.[0]?.message?.content ?? '{}';
+      const parsed = JSON.parse(txt);
+      const handle = allowed.includes(parsed.category_handle) ? parsed.category_handle : 'other';
+      const conf = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0)));
+      return { category_handle: handle, confidence: conf };
+    } catch {
+      return { category_handle: 'other', confidence: 0 };
+    }
+  }
+
   // ===== Auto-categorization (stub) =====
 
   async suggestCategorization(input: {
