@@ -20,6 +20,15 @@ function hashPin(pin: string, salt: string): string {
   return scryptSync(pin, salt, SCRYPT_KEYLEN).toString('hex');
 }
 
+// Pre-computed once at module load. Salt + hash are arbitrary 32-byte hex
+// values; their only purpose is to make the not-found path execute the same
+// scrypt+timingSafeEqual sequence as the found path, so an attacker cannot
+// distinguish "wrong PIN" from "wrong cashier_id" by response latency.
+const DUMMY_PIN_SALT =
+  '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
+const DUMMY_PIN_HASH = scryptSync('__dummy__', DUMMY_PIN_SALT, SCRYPT_KEYLEN)
+  .toString('hex');
+
 /**
  * Discriminates whether an error from createSales() is specifically a UNIQUE
  * constraint violation on pos_sale.client_id.
@@ -274,19 +283,31 @@ export class PosTerminalService extends PosTerminalServiceBase
       id: cashierId,
       active: true,
     });
-    if (!rows.length) throw new PosTerminalBadPinError(cashierId);
-    const r = rows[0];
-    const candidate = Buffer.from(hashPin(pin, r.pin_salt), 'hex');
-    const stored = Buffer.from(r.pin_hash, 'hex');
-    if (candidate.length !== stored.length || !timingSafeEqual(candidate, stored)) {
-      throw new PosTerminalBadPinError(cashierId);
-    }
+    const row = rows[0];
+    const salt = row?.pin_salt ?? DUMMY_PIN_SALT;
+    const storedHex = row?.pin_hash ?? DUMMY_PIN_HASH;
+
+    const candidate = Buffer.from(hashPin(pin, salt), 'hex');
+    const stored = Buffer.from(storedHex, 'hex');
+    const lengthsMatch = candidate.length === stored.length;
+    // timingSafeEqual requires equal lengths. If they differ, do an equal-length
+    // compare against a truncated slice (result discarded) so the not-found and
+    // wrong-PIN paths execute the same number of crypto ops, then return false.
+    const safeMatch = lengthsMatch
+      ? timingSafeEqual(candidate, stored)
+      : (timingSafeEqual(
+          candidate.slice(0, Math.min(candidate.length, stored.length)),
+          stored.slice(0, Math.min(candidate.length, stored.length)),
+        ), false);
+
+    if (!row || !safeMatch) throw new PosTerminalBadPinError(cashierId);
+
     return {
-      id: r.id,
-      vendor_id: r.vendor_id,
-      name: r.name,
-      role: r.role,
-      active: r.active,
+      id: row.id,
+      vendor_id: row.vendor_id,
+      name: row.name,
+      role: row.role,
+      active: row.active,
     };
   }
 }
