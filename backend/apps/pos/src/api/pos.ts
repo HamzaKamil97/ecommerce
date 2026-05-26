@@ -37,3 +37,15 @@ export async function postSale(p: RecordSalePayload) {
     '/admin/pos-terminal/sales', { method: 'POST', body: JSON.stringify(p) },
   );
 }
+
+export type VerifyResult = {
+  id: string; vendor_id: string; name: string;
+  role: 'cashier' | 'manager'; active: boolean;
+};
+
+export async function verifyCashierPin(cashier_id: string, pin: string): Promise<VerifyResult> {
+  const r = await api<{ cashier: VerifyResult }>('/admin/pos-terminal/cashiers/verify', {
+    method: 'POST', body: JSON.stringify({ cashier_id, pin }),
+  });
+  return r.cashier;
+}
