@@ -1,10 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCart } from '../../state/cart';
 import { useSession } from '../../state/session';
 import { useResponsive } from '../../hooks/useResponsive';
 import { CartList } from '../components/CartList';
 import { ScanZone } from '../components/ScanZone';
+import { CashierAlertPanel } from '../components/CashierAlertPanel';
 import { findByBarcode } from '../../db/catalog-sync';
+import { fetchAlerts, type AlertRow } from '../../api/alerts';
 import { PaymentScreen } from './PaymentScreen';
 import { SettingsScreen } from './SettingsScreen';
 import './RegisterScreen.css';
@@ -44,6 +46,24 @@ export function RegisterScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('departments');
   const [activeDept, setActiveDept] = useState<string>('All');
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<AlertRow[]>([]);
+  const vendor_id = (import.meta as any).env?.VITE_VENDOR_ID ?? 'v_test';
+
+  useEffect(() => {
+    let mounted = true;
+    async function poll() {
+      try {
+        const rows = await fetchAlerts(vendor_id);
+        if (mounted) setAlerts(rows);
+      } catch {
+        // Backend may be down — empty array is fine
+      }
+    }
+    poll();
+    const id = window.setInterval(poll, 30_000);
+    return () => { mounted = false; clearInterval(id); };
+  }, [vendor_id]);
 
   const subtotal = useCart((s) => s.subtotalMinor());
   const lines = useCart((s) => s.lines);
@@ -131,7 +151,7 @@ export function RegisterScreen() {
             type="button"
             className="icon-btn"
             aria-label="Alerts"
-            onClick={() => { /* C10 wires CashierAlertPanel */ }}
+            onClick={() => setAlertsOpen(true)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
@@ -151,6 +171,13 @@ export function RegisterScreen() {
           </button>
         </div>
       </header>
+
+      <CashierAlertPanel
+        open={alertsOpen}
+        alerts={alerts}
+        onClose={() => setAlertsOpen(false)}
+        onMarkAllRead={() => setAlerts((a) => a.map((x) => ({ ...x, read_at: new Date().toISOString() })))}
+      />
 
       {error && (
         <div className="register-error" role="alert">{error}</div>
