@@ -58,26 +58,41 @@ export class InventoryCountService extends InventoryCountServiceBase {
     // positive qty plus a MovementType. Dispatch on the sign of the delta.
     const wms: any = (this as any).__container__['wmsService'];
     let countedTotal = 0, expectedTotal = 0, deltaTotal = 0;
-    for (const l of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
       const delta = Number(l.delta);
-      if (delta !== 0) {
-        const common = {
-          vendor_id: rows[0].vendor_id,
-          variant_id: l.variant_id,
-          type: 'adjustment' as const,
-          source_id: input.session_id,
-          actor_id: input.actor_id,
-          note: l.reason ?? 'stock_count',
-        };
-        if (delta > 0) {
-          await wms.incrementStock({ ...common, qty: delta });
-        } else {
-          await wms.decrementStock({ ...common, qty: -delta });
+      try {
+        if (delta !== 0) {
+          const common = {
+            vendor_id: rows[0].vendor_id,
+            variant_id: l.variant_id,
+            type: 'adjustment' as const,
+            source_id: input.session_id,
+            actor_id: input.actor_id,
+            note: l.reason ?? 'stock_count',
+          };
+          if (delta > 0) {
+            await wms.incrementStock({ ...common, qty: delta });
+          } else {
+            await wms.decrementStock({ ...common, qty: -delta });
+          }
         }
+        countedTotal += Number(l.actual_qty);
+        expectedTotal += Number(l.system_qty);
+        deltaTotal += delta;
+      } catch (e: any) {
+        // Partial-failure breadcrumb: lines [0..i-1] are already committed to
+        // wms. Tag the error with the failing index + session/variant so the
+        // apply route can return COUNT_APPLY_PARTIAL (207) and the operator
+        // has a clear resume point. We leave the session in `in_progress` so
+        // a retry of apply is still possible after the underlying issue
+        // (insufficient stock, bad variant, etc.) is corrected.
+        e.code = e.code ?? 'COUNT_APPLY_PARTIAL';
+        e.applied_line_index = i;
+        e.session_id = input.session_id;
+        e.failed_variant_id = l.variant_id;
+        throw e;
       }
-      countedTotal += Number(l.actual_qty);
-      expectedTotal += Number(l.system_qty);
-      deltaTotal += delta;
     }
     const updated = await (this as any).updateCountSessions({
       id: input.session_id,

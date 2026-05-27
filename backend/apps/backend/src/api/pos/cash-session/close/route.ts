@@ -8,6 +8,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
   try {
     const session = await svc.closeSession(body);
+    // Attribute audit row to the session's vendor. The request body only
+    // carries session_id; without this, audit-log middleware would write
+    // vendor_id=null and the row would not surface in listAuditByVendor.
+    (req as any).audit_context = { vendor_id: session?.vendor_id ?? null };
     res.json({ session });
   } catch (e: any) {
     const status = e.code === 'CASH_SESSION_NOT_FOUND' ? 404

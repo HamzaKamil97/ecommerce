@@ -7,7 +7,18 @@ const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
  * Runs after the route handler. On non-2xx, no audit row is written.
  *
  * Captures actor from req.user (set by Medusa auth middleware) when available.
- * Captures vendor_id from query/body/params in that order.
+ * Captures vendor_id, in priority order:
+ *   1. (req as any).audit_context.vendor_id  — opt-in, set by the route handler
+ *      AFTER it has resolved the vendor (e.g. via a service lookup). Read at
+ *      response-finish time, so handlers may set it any time before they call
+ *      res.json/res.end.
+ *   2. req.query.vendor_id
+ *   3. req.body.vendor_id
+ *   4. req.params.vendor_id
+ *
+ * The audit_context pattern exists for multi-step routes (cash-session/close,
+ * inventory-count/:id PATCH + apply) whose request bodies do not carry
+ * vendor_id but whose handlers know the vendor via a session lookup.
  */
 export async function auditLogMiddleware(
   req: MedusaRequest,
@@ -16,12 +27,7 @@ export async function auditLogMiddleware(
 ): Promise<void> {
   if (!MUTATING_METHODS.has(req.method ?? '')) return next();
 
-  // Capture identifying info upfront — body may be mutated by handlers
-  const vendor_id =
-    (req.query.vendor_id as string | undefined) ??
-    (req.body as any)?.vendor_id ??
-    (req.params as any)?.vendor_id ??
-    null;
+  // Capture body snapshot upfront — handlers may mutate req.body
   const path = req.path;
   const method = req.method;
   const module = path.split('/').filter(Boolean)[1] ?? 'unknown';  // /admin/<module>/...
@@ -29,6 +35,15 @@ export async function auditLogMiddleware(
     : method === 'PATCH' || method === 'PUT' ? 'update'
     : 'create';
   const body_snapshot = req.body ? JSON.parse(JSON.stringify(req.body)) : null;
+
+  // Resolve vendor_id at finish time so route handlers have a chance to set
+  // (req as any).audit_context = { vendor_id } after a service lookup.
+  const captureVendorId = (): string | null =>
+    (req as any).audit_context?.vendor_id ??
+    (req.query.vendor_id as string | undefined) ??
+    (req.body as any)?.vendor_id ??
+    (req.params as any)?.vendor_id ??
+    null;
 
   // Hook into res.on('finish') to know status code without buffering body
   res.on('finish', () => {
@@ -40,7 +55,7 @@ export async function auditLogMiddleware(
       const actor_type = actor_id ? 'user' : 'system';
       // Fire and forget — audit must never fail the user's request
       auditSvc.writeAudit({
-        vendor_id,
+        vendor_id: captureVendorId(),
         actor_id,
         actor_type,
         module,

@@ -40,15 +40,27 @@ medusaIntegrationTestRunner({
       const stock = await wms.getStock('v_ic_http', 'v_ic_milk');
       expect(Number(stock.on_hand)).toBe(8);
 
-      // Audit row written by middleware. The audit middleware reads vendor_id
-      // from query/body/params — only the POST /pos/inventory-count (open)
-      // request carries vendor_id, so PATCH addLine and POST apply audit rows
-      // get vendor_id=null. We assert at least the open row was written under
-      // this vendor; full audit coverage is verified in audit-log-middleware.spec.
+      // With the req.audit_context opt-in, all three mutating requests (open,
+      // addLine, apply) attribute their audit rows to v_ic_http. PATCH and
+      // POST /apply look up the session and set req.audit_context.vendor_id
+      // before responding; the middleware reads audit_context at finish time.
       await new Promise(r => setTimeout(r, 200));
       const auditSvc: any = getContainer().resolve('auditLogService');
       const audits = await auditSvc.listAuditByVendor('v_ic_http');
-      expect(audits.some((a: any) => a.action === 'create' && a.module === 'inventory-count')).toBe(true);
+      expect(audits.length).toBeGreaterThanOrEqual(3);
+      // open: POST /pos/inventory-count → create
+      expect(audits.some((a: any) =>
+        a.action === 'create' && a.metadata?.path === '/pos/inventory-count',
+      )).toBe(true);
+      // addLine: PATCH /pos/inventory-count/:id → update with entity_id === id
+      expect(audits.some((a: any) =>
+        a.action === 'update' && a.entity_id === id,
+      )).toBe(true);
+      // apply: POST /pos/inventory-count/:id/apply → create with the apply path
+      expect(audits.some((a: any) =>
+        a.action === 'create' &&
+        a.metadata?.path === `/pos/inventory-count/${id}/apply`,
+      )).toBe(true);
     });
 
     it('apply on missing session returns 404', async () => {
@@ -80,6 +92,49 @@ medusaIntegrationTestRunner({
       ).catch((e: any) => e.response);
       expect(r.status).toBe(409);
       expect(r.data.code).toBe('COUNT_NOT_OPEN');
+    });
+
+    it('apply with insufficient stock returns 207 with applied_line_index', async () => {
+      const posSvc: any = getContainer().resolve('posTerminalService');
+      const cashier = await posSvc.createCashier({
+        vendor_id: 'v_ic_partial', name: 'M', pin: '1234', role: 'manager',
+      });
+      const wms: any = getContainer().resolve('wmsService');
+      // Seed: 5 units of widget_a, 0 units of widget_b (no seed).
+      await wms.incrementStock({
+        vendor_id: 'v_ic_partial', variant_id: 'widget_a', qty: 5,
+        type: 'restock', actor_id: 'seed',
+      });
+
+      const openR = await api.post('/pos/inventory-count', {
+        vendor_id: 'v_ic_partial', actor_id: cashier.id, scope: 'all',
+      });
+      const id = openR.data.session.id;
+
+      // Line 0: widget_a 5 → 3 (delta=-2, decrement 2 from 5 — succeeds, 3 left).
+      await api.patch(`/pos/inventory-count/${id}`, {
+        variant_id: 'widget_a', system_qty: 5, actual_qty: 3, reason: 'damaged',
+      });
+      // Line 1: widget_b 5 → 0 (delta=-5, decrement 5 from on_hand=0 — wms
+      // throws WmsInsufficientStockError; the service tags applied_line_index=1).
+      await api.patch(`/pos/inventory-count/${id}`, {
+        variant_id: 'widget_b', system_qty: 5, actual_qty: 0, reason: 'damaged',
+      });
+
+      const r = await api.post(`/pos/inventory-count/${id}/apply`,
+        { actor_id: cashier.id },
+        { headers: { 'x-cashier-id': cashier.id } },
+      ).catch((e: any) => e.response);
+
+      expect(r.status).toBe(207);
+      expect(r.data.code).toBe('COUNT_APPLY_PARTIAL');
+      expect(r.data.applied_line_index).toBe(1);
+      expect(r.data.session_id).toBe(id);
+      expect(r.data.failed_variant_id).toBe('widget_b');
+
+      // Line 0's wms decrement was committed before line 1 failed.
+      const widgetAStock = await wms.getStock('v_ic_partial', 'widget_a');
+      expect(Number(widgetAStock.on_hand)).toBe(3);
     });
 
     it('apply route enforces catalog.stock_count capability — 403 when denied', async () => {

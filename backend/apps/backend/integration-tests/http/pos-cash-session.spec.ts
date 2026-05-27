@@ -36,6 +36,20 @@ medusaIntegrationTestRunner({
       expect(closeR.status).toBe(200);
       expect(closeR.data.session.status).toBe('closed');
       expect(Number(closeR.data.session.diff_minor)).toBe(500);
+
+      // The close route sets req.audit_context = { vendor_id } so the audit
+      // row is attributed to v_cs_http even though the close body carries
+      // only session_id (no vendor_id). Without the audit_context fix the
+      // close row would have vendor_id=null and would not surface here.
+      await new Promise(r => setTimeout(r, 200));
+      const auditsAfterClose = await auditSvc.listAuditByVendor('v_cs_http');
+      const closeAudit = auditsAfterClose.find(
+        (a: any) =>
+          a.module === 'cash-session' &&
+          a.action === 'create' &&
+          a.metadata?.path === '/pos/cash-session/close',
+      );
+      expect(closeAudit).toBeTruthy();
     });
 
     it('rejects opening a second session on same terminal with 409', async () => {

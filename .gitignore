@@ -71,3 +71,6 @@ coverage/
 # Temp
 tmp/
 temp/
+
+# Brainstorming visual companion sessions
+.superpowers/
