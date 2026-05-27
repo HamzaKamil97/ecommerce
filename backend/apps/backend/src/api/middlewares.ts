@@ -59,5 +59,10 @@ export default defineMiddlewares({
       method: ['POST', 'PUT', 'PATCH', 'DELETE'],
       middlewares: [auditLogMiddleware],
     },
+    {
+      matcher: '/pos/*',
+      method: ['POST', 'PUT', 'PATCH', 'DELETE'],
+      middlewares: [auditLogMiddleware],
+    },
   ],
 })
