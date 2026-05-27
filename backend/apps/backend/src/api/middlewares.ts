@@ -3,6 +3,7 @@ import cors from "cors"
 import { text } from "express"
 import { auditLogMiddleware } from './middlewares/audit-log'
 import { requireSuperAdmin } from './middlewares/require-super-admin'
+import { requirePermission } from './middlewares/require-permission'
 
 // Custom /vendor/* CORS — Medusa's built-in CORS only handles /store, /admin,
 // /auth namespaces. The vendor portal lives at localhost:9100 (Next.js dev)
@@ -63,6 +64,11 @@ export default defineMiddlewares({
       matcher: '/pos/*',
       method: ['POST', 'PUT', 'PATCH', 'DELETE'],
       middlewares: [auditLogMiddleware],
+    },
+    {
+      matcher: '/pos/cash-session/close',
+      method: ['POST'],
+      middlewares: [requirePermission('pos.end_of_day')],
     },
   ],
 })
