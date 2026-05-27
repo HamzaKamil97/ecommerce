@@ -1,0 +1,282 @@
+/* PaymentScreen — H-3.2b payment keypad v2
+ * Dark-themed payment surface. Tokens come from tokens.css; surface colors are
+ * hard-coded (counter glare friendly, matches keypad-v2.html mockup).
+ */
+
+.payment-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0E0D0B;
+  color: #F7F2E5;
+  font-family: var(--font-sans, Manrope, system-ui, sans-serif);
+  animation: fadeIn 220ms ease-out;
+}
+
+/* ─── Header ───────────────────────────────────────────────────── */
+.payment-header {
+  padding: 16px 22px 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid #1a1815;
+}
+.payment-header .back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(247, 242, 229, 0.06);
+  border: 1px solid #2a2520;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #F7F2E5;
+  font-size: 18px;
+  transition: background 150ms;
+}
+.payment-header .back-btn:hover {
+  background: rgba(247, 242, 229, 0.1);
+}
+.payment-header .back-btn:active {
+  transform: scale(0.95);
+}
+.payment-header h1 {
+  font-weight: 800;
+  font-size: 15px;
+  margin: 0;
+}
+.payment-header p {
+  font-size: 11px;
+  color: #a59f8c;
+  font-weight: 600;
+  margin: 2px 0 0;
+}
+
+/* ─── Total card ───────────────────────────────────────────────── */
+.total-card {
+  margin: 18px 18px 0;
+  padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1a1815 0%, #221e1a 100%);
+  border: 1px solid #2a2520;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.total-card .total-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.label-dark {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a59f8c;
+}
+.total-amount {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-size: 32px;
+  font-weight: 800;
+  color: #F7F2E5;
+  letter-spacing: -0.02em;
+}
+
+.paid-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #2a2520;
+}
+.paid-input {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold, #b88a3a);
+  background: transparent;
+  border: 0;
+  width: 100%;
+  padding: 0;
+  outline: none;
+}
+.change-amount {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 22px;
+  display: flex;
+  align-items: flex-end;
+}
+.change-pos { color: #21d07a; }
+.change-zero { color: #F7F2E5; }
+.change-neg { color: var(--burgundy-2, #9d3548); }
+
+/* ─── Quick-cash chips ─────────────────────────────────────────── */
+.chips-row {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips-row::-webkit-scrollbar { display: none; }
+
+.chip-cash {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 13px;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 2px 6px rgba(184, 138, 58, 0.4);
+  transition: transform 100ms, box-shadow 150ms;
+}
+.chip-cash:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 6px 12px rgba(184, 138, 58, 0.5);
+}
+.chip-cash:active { transform: scale(0.96); }
+.chip-cash.exact {
+  background: rgba(247, 242, 229, 0.06);
+  border: 1px dashed #2a2520;
+  color: #F7F2E5;
+  box-shadow: none;
+}
+
+/* ─── Keypad grid ──────────────────────────────────────────────── */
+.keypad {
+  margin: 14px 14px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex: 1;
+}
+.key {
+  background: linear-gradient(180deg, #221e1a 0%, #1a1815 100%);
+  border: 1px solid #2a2520;
+  color: #F7F2E5;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-size: 26px;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 18px 0;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: transform 100ms, background 150ms;
+}
+.key:hover {
+  background: linear-gradient(180deg, #2a2520 0%, #221e1a 100%);
+}
+.key:active {
+  transform: scale(0.96);
+  background: linear-gradient(180deg, #1a1815 0%, #15110e 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.key.dot { font-size: 20px; }
+.key.backspace {
+  color: var(--burgundy-2, #9d3548);
+  font-size: 20px;
+}
+
+/* ─── Confirm button ───────────────────────────────────────────── */
+.confirm-btn {
+  margin: 14px;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  border: 0;
+  border-radius: 16px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+              0 4px 12px rgba(184, 138, 58, 0.3),
+              0 8px 20px rgba(184, 138, 58, 0.4);
+  transition: transform 150ms;
+}
+.confirm-btn .amt {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 18px;
+}
+.confirm-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.confirm-btn:active:not(:disabled) { transform: scale(0.97); }
+.confirm-btn:disabled {
+  background: linear-gradient(135deg, #3a322a, #2a2520);
+  color: #6a6356;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ─── Error banner ─────────────────────────────────────────────── */
+.payment-error {
+  margin: 0 18px;
+  padding: 10px 14px;
+  background: rgba(157, 53, 72, 0.15);
+  border: 1px solid var(--burgundy-2, #9d3548);
+  border-radius: 10px;
+  color: #ffb4be;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── Done state ───────────────────────────────────────────────── */
+.payment-done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+}
+.payment-done h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #21d07a;
+  margin: 0;
+}
+.payment-done .change-line {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-size: 36px;
+  font-weight: 800;
+  color: #F7F2E5;
+}
+.payment-done .new-sale-btn {
+  margin-top: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 4px 12px rgba(184, 138, 58, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-screen, .key, .chip-cash, .confirm-btn, .back-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}
