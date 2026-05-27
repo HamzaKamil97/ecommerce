@@ -22,3 +22,32 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) throw new ApiError(res.status, body, (body as any)?.error ?? res.statusText);
   return body as T;
 }
+
+// Verb-shaped helpers built on top of `api()`. Same auth, same error semantics.
+// Used by the typed PoS API client modules (cashSession / refunds / onlineOrders / inventoryCount / alerts).
+
+type ApiOpts = { headers?: Record<string, string> };
+
+export async function apiGet<T = any>(path: string, opts?: ApiOpts): Promise<T> {
+  return api<T>(path, { method: 'GET', headers: opts?.headers });
+}
+
+export async function apiPost<T = any>(path: string, body?: any, opts?: ApiOpts): Promise<T> {
+  return api<T>(path, {
+    method: 'POST',
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: opts?.headers,
+  });
+}
+
+export async function apiPatch<T = any>(path: string, body?: any, opts?: ApiOpts): Promise<T> {
+  return api<T>(path, {
+    method: 'PATCH',
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: opts?.headers,
+  });
+}
+
+export async function apiDelete<T = any>(path: string, opts?: ApiOpts): Promise<T> {
+  return api<T>(path, { method: 'DELETE', headers: opts?.headers });
+}
