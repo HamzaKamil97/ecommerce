@@ -75,5 +75,10 @@ export default defineMiddlewares({
       method: ['POST'],
       middlewares: [requirePermission('catalog.stock_count')],
     },
+    {
+      matcher: '/pos/refunds',
+      method: ['POST'],
+      middlewares: [requirePermission('pos.refund_or_void')],
+    },
   ],
 })

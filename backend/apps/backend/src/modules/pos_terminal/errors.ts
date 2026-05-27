@@ -20,3 +20,11 @@ export class PosTerminalSaleConflictError extends PosTerminalError {
     this.name = 'PosTerminalSaleConflictError';
   }
 }
+
+export class InvalidRefundError extends PosTerminalError {
+  code = 'INVALID_REFUND';
+  constructor(msg: string) {
+    super(msg);
+    this.name = 'InvalidRefundError';
+  }
+}

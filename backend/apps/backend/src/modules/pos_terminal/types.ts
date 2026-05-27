@@ -38,10 +38,40 @@ export type CashierDTO = {
   active: boolean;
 };
 
+export type RefundReason =
+  | 'damaged' | 'expired' | 'changed_mind' | 'wrong_item' | 'quality_issue' | 'other';
+
+export type ProcessReturnLine = {
+  original_sale_line_id: string;
+  variant_id: string;
+  qty: number;
+  unit_price_minor: number;
+  reason: RefundReason;
+};
+
+export type ProcessReturnInput = {
+  vendor_id: string;
+  cashier_id: string;
+  manager_id: string;          // who approved the PIN
+  terminal_id: string;
+  original_sale_id: string;
+  lines: ProcessReturnLine[];
+  method: 'cash' | 'store_credit';
+  client_id: string;
+};
+
+export type ProcessReturnResult = {
+  refund_sale_id: string;
+  refund_total_minor: number;
+  stock_damaged_units: number;
+  stock_returned_units: number;
+};
+
 export interface PosTerminalServiceInterface {
   ping(): string;
   recordSale(input: RecordSaleInput): Promise<RecordSaleResult>;
   createCashier(input: CreateCashierInput): Promise<CashierDTO>;
   listCashiers(vendorId: string): Promise<Array<CashierDTO & { pin_hash_prefix: string }>>;
   verifyCashierPin(cashierId: string, pin: string): Promise<CashierDTO>;
+  processReturn(input: ProcessReturnInput): Promise<ProcessReturnResult>;
 }

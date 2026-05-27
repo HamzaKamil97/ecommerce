@@ -7,10 +7,12 @@ import {
   CashierDTO,
   CreateCashierInput,
   PosTerminalServiceInterface,
+  ProcessReturnInput,
+  ProcessReturnResult,
   RecordSaleInput,
   RecordSaleResult,
 } from './types';
-import { PosTerminalBadPinError } from './errors';
+import { InvalidRefundError, PosTerminalBadPinError } from './errors';
 import { POS_TERMINAL_EVENTS } from './events';
 
 class PosTerminalServiceBase extends MedusaService({ Sale, SaleLine, Cashier }) {}
@@ -308,6 +310,90 @@ export class PosTerminalService extends PosTerminalServiceBase
       name: row.name,
       role: row.role,
       active: row.active,
+    };
+  }
+
+  /**
+   * Processes a return/refund. Creates a `pos_sale` row with `status: 'voided'`
+   * and writes `pos_sale_line` rows with NEGATIVE qty (audit-log convention).
+   * For each line:
+   *   - reason in ['damaged', 'expired'] → no wms call (goods written off)
+   *   - reason in ['changed_mind', 'wrong_item', 'quality_issue', 'other']
+   *     → wms.incrementStock({ type: 'restock' }) (goods returned to inventory)
+   *
+   * The original sale row stays intact — this refund event is its own row.
+   */
+  async processReturn(input: ProcessReturnInput): Promise<ProcessReturnResult> {
+    if (!input.lines || input.lines.length === 0) {
+      throw new InvalidRefundError('no lines to refund');
+    }
+    for (const l of input.lines) {
+      if (l.qty <= 0) {
+        throw new InvalidRefundError(`invalid qty for variant ${l.variant_id}`);
+      }
+      if (l.unit_price_minor < 0) {
+        throw new InvalidRefundError(`invalid unit_price for variant ${l.variant_id}`);
+      }
+    }
+
+    // Compute totals + classify
+    let total = 0;
+    let damaged = 0;
+    let returned = 0;
+    for (const l of input.lines) {
+      total += l.qty * l.unit_price_minor;
+      if (l.reason === 'damaged' || l.reason === 'expired') damaged += l.qty;
+      else returned += l.qty;
+    }
+
+    // Persist the refund as a voided pos_sale row
+    const created = await (this as any).createSales({
+      vendor_id: input.vendor_id,
+      cashier_id: input.cashier_id,
+      terminal_id: input.terminal_id,
+      client_id: input.client_id,
+      total_minor: total,
+      paid_amount_minor: 0,
+      change_due_minor: 0,
+      currency_code: 'iqd',
+      status: 'voided',
+      voided_at: new Date(),
+      channel: 'offline',
+      client_created_at: new Date(),
+    });
+    const refundRow: any = Array.isArray(created) ? created[0] : created;
+
+    // Write sale lines with NEGATIVE qty (refund convention)
+    await (this as any).createSaleLines(
+      input.lines.map((l) => ({
+        sale_id: refundRow.id,
+        variant_id: l.variant_id,
+        qty: -l.qty,
+        unit_price_minor: l.unit_price_minor,
+        name_snapshot: `refund:${l.reason}`,
+      })),
+    );
+
+    // Stock dispatch: returned items go back to stock; damaged/expired written off
+    const wms: any = (this as any).__container__['wmsService'];
+    for (const l of input.lines) {
+      if (l.reason === 'damaged' || l.reason === 'expired') continue;
+      await wms.incrementStock({
+        vendor_id: input.vendor_id,
+        variant_id: l.variant_id,
+        qty: l.qty,
+        type: 'restock',
+        source_id: refundRow.id,
+        actor_id: input.cashier_id,
+        note: `refund:${l.reason}`,
+      });
+    }
+
+    return {
+      refund_sale_id: refundRow.id,
+      refund_total_minor: total,
+      stock_damaged_units: damaged,
+      stock_returned_units: returned,
     };
   }
 }
