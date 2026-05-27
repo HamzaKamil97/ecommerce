@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { useCart } from '../../src/state/cart';
@@ -72,5 +72,13 @@ describe('RegisterScreen v2', () => {
     render(<MemoryRouter><RegisterScreen /></MemoryRouter>);
     const deptTab = screen.queryByText(/^Departments$/i);
     expect(deptTab).toBeNull();
+  });
+
+  it('clicking a quick-tile adds the item to the cart', () => {
+    setViewport(1280);
+    render(<MemoryRouter><RegisterScreen /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /Milk 1L/i }));
+    expect(useCart.getState().lines.length).toBe(1);
+    expect(useCart.getState().lines[0]?.name).toMatch(/Milk 1L/);
   });
 });

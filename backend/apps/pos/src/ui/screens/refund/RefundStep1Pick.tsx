@@ -27,8 +27,14 @@ export function RefundStep1Pick({ refund, onPicked, onClose }: Props) {
       const sale = await fetchSale(id);
       refund.setSale(sale);
       onPicked();
-    } catch {
-      setLocalError('Could not load sale');
+    } catch (e) {
+      const err = e as { payload?: { error?: string; message?: string }; message?: string };
+      setLocalError(
+        err?.payload?.error ??
+          err?.payload?.message ??
+          err?.message ??
+          'Could not load sale',
+      );
     } finally {
       setLoading(false);
     }

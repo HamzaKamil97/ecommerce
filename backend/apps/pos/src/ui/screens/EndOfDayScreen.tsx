@@ -89,8 +89,15 @@ export function EndOfDayScreen({ onClose }: EndOfDayScreenProps) {
         if (cancelled) return;
         setSession(s);
       } catch (e) {
-        if (!cancelled)
-          setError(e instanceof Error ? e.message : 'Failed to load session');
+        if (!cancelled) {
+          const err = e as { payload?: { error?: string; message?: string }; message?: string };
+          setError(
+            err?.payload?.error ??
+              err?.payload?.message ??
+              err?.message ??
+              'Failed to load session',
+          );
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -137,7 +144,13 @@ export function EndOfDayScreen({ onClose }: EndOfDayScreenProps) {
       });
       setClosedState({ closed: true, diffMinor: updated.diff_minor ?? diff });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Close failed');
+      const err = e as { payload?: { error?: string; message?: string }; message?: string };
+      setError(
+        err?.payload?.error ??
+          err?.payload?.message ??
+          err?.message ??
+          'Close failed',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -163,7 +176,13 @@ export function EndOfDayScreen({ onClose }: EndOfDayScreenProps) {
       const reloaded = await getCurrentSession(TERMINAL_ID);
       setSession(reloaded ?? (opened as unknown as CashSession));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to open session');
+      const err = e as { payload?: { error?: string; message?: string }; message?: string };
+      setError(
+        err?.payload?.error ??
+          err?.payload?.message ??
+          err?.message ??
+          'Failed to open session',
+      );
     } finally {
       setOpeningPending(false);
     }

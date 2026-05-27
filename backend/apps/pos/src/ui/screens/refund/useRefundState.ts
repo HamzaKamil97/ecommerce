@@ -104,8 +104,13 @@ export function useRefundState(opts: { vendor_id: string; cashier_id: string; te
       });
       setSuccess(result);
     } catch (e: unknown) {
-      const err = e as { payload?: { error?: string }; message?: string };
-      setError(err?.payload?.error ?? err?.message ?? 'Refund failed');
+      const err = e as { payload?: { error?: string; message?: string }; message?: string };
+      setError(
+        err?.payload?.error ??
+          err?.payload?.message ??
+          err?.message ??
+          'Refund failed',
+      );
     } finally {
       setSubmitting(false);
     }

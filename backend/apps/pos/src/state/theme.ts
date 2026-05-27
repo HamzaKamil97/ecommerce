@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type Theme = 'light' | 'dark';
 
@@ -19,18 +20,27 @@ type ThemeState = {
   reset: () => void;
 };
 
-export const useTheme = create<ThemeState>((set, get) => ({
-  theme: 'light',
-  autoMode: false,
-  setTheme: (t) => set({ theme: t, autoMode: false }),
-  setAutoMode: (on) =>
-    set((s) => ({ autoMode: on, theme: on ? deriveAutoTheme(new Date()) : s.theme })),
-  tick: (now = new Date()) => {
-    if (!get().autoMode) return;
-    set({ theme: deriveAutoTheme(now) });
-  },
-  reset: () => set({ theme: 'light', autoMode: false }),
-}));
+export const useTheme = create<ThemeState>()(
+  persist(
+    (set, get) => ({
+      theme: 'light',
+      autoMode: false,
+      setTheme: (t) => set({ theme: t, autoMode: false }),
+      setAutoMode: (on) =>
+        set((s) => ({ autoMode: on, theme: on ? deriveAutoTheme(new Date()) : s.theme })),
+      tick: (now = new Date()) => {
+        if (!get().autoMode) return;
+        set({ theme: deriveAutoTheme(now) });
+      },
+      reset: () => set({ theme: 'light', autoMode: false }),
+    }),
+    {
+      name: 'hanoot.theme',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ theme: s.theme, autoMode: s.autoMode }),
+    },
+  ),
+);
 
 /**
  * Side-effect helper: apply the active theme to documentElement by setting

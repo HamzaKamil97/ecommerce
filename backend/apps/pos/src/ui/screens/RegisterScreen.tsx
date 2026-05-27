@@ -13,15 +13,15 @@ import './RegisterScreen.css';
 
 const DEPARTMENTS = ['All', 'Dairy', 'Bakery', 'Beverages', 'Pantry', 'Frozen'];
 
-const QUICK_TILES: Array<{ icon: string; name: string; meta: string }> = [
-  { icon: '🥛', name: 'Milk 1L · Almarai', meta: '2,750 IQD · 18 in stock' },
-  { icon: '🧈', name: 'Lurpak 100g', meta: '4,500 IQD · 6 in stock' },
-  { icon: '🧀', name: 'White Cheese', meta: '5,250 IQD · 12 in stock' },
-  { icon: '🥛', name: 'Yogurt 500g · Sara', meta: '2,000 IQD · 9 in stock' },
-  { icon: '🥚', name: 'Eggs Tray · 30', meta: '7,000 IQD · 14 in stock' },
-  { icon: '🥤', name: 'Coca-Cola 1L', meta: '1,750 IQD · 26 in stock' },
-  { icon: '💧', name: 'Water 1.5L · Aqua', meta: '750 IQD · 48 in stock' },
-  { icon: '🍵', name: 'Tea · Al-Afour', meta: '3,200 IQD · 22 in stock' },
+const QUICK_TILES: Array<{ variant_id: string; icon: string; name: string; price_minor: number; meta: string }> = [
+  { variant_id: 'qt_milk_almarai', icon: '🥛', name: 'Milk 1L · Almarai', price_minor: 2750, meta: '2,750 IQD · 18 in stock' },
+  { variant_id: 'qt_lurpak_100',   icon: '🧈', name: 'Lurpak 100g',       price_minor: 4500, meta: '4,500 IQD · 6 in stock' },
+  { variant_id: 'qt_white_cheese', icon: '🧀', name: 'White Cheese',      price_minor: 5250, meta: '5,250 IQD · 12 in stock' },
+  { variant_id: 'qt_yogurt_sara',  icon: '🥛', name: 'Yogurt 500g · Sara', price_minor: 2000, meta: '2,000 IQD · 9 in stock' },
+  { variant_id: 'qt_eggs_30',      icon: '🥚', name: 'Eggs Tray · 30',     price_minor: 7000, meta: '7,000 IQD · 14 in stock' },
+  { variant_id: 'qt_cola_1l',      icon: '🥤', name: 'Coca-Cola 1L',       price_minor: 1750, meta: '1,750 IQD · 26 in stock' },
+  { variant_id: 'qt_water_15',     icon: '💧', name: 'Water 1.5L · Aqua',  price_minor:  750, meta: '750 IQD · 48 in stock' },
+  { variant_id: 'qt_tea_afour',    icon: '🍵', name: 'Tea · Al-Afour',     price_minor: 3200, meta: '3,200 IQD · 22 in stock' },
 ];
 
 type TabKey = 'departments' | 'favorites' | 'orders';
@@ -71,6 +71,16 @@ export function RegisterScreen() {
   const cashierRole = useSession((s) => s.role);
 
   const { isPhone } = useResponsive();
+
+  const handleTileClick = useCallback((tile: typeof QUICK_TILES[number]) => {
+    useCart.getState().addLineFromScan({
+      variant_id: tile.variant_id,
+      name: tile.name,
+      unit_price_minor: tile.price_minor,
+      qty: 1,
+    });
+    try { new Audio('/beep.wav').play().catch(() => {}); } catch { /* noop */ }
+  }, []);
 
   const handleScan = useCallback(async (code: string) => {
     setError(null);
@@ -268,7 +278,7 @@ export function RegisterScreen() {
 
             <div className="tile-grid">
               {QUICK_TILES.map((t) => (
-                <button key={t.name} type="button" className="tile">
+                <button key={t.name} type="button" className="tile" onClick={() => handleTileClick(t)}>
                   <div className="tile-icon" aria-hidden="true">{t.icon}</div>
                   <div className="tile-name">{t.name}</div>
                   <div className="tile-meta">{t.meta}</div>

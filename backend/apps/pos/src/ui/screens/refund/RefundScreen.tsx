@@ -60,8 +60,14 @@ export function RefundScreen({ onClose }: Props) {
     try {
       const sale = await fetchSale(id);
       refund.setSale(sale);
-    } catch {
-      setLocalError('Could not load sale');
+    } catch (e) {
+      const err = e as { payload?: { error?: string; message?: string }; message?: string };
+      setLocalError(
+        err?.payload?.error ??
+          err?.payload?.message ??
+          err?.message ??
+          'Could not load sale',
+      );
     } finally {
       setSearching(false);
     }

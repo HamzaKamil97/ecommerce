@@ -38,7 +38,13 @@ export const router = createBrowserRouter([
   },
   {
     path: '/stock-count',
-    element: <RequireCashier><StockCountScreen onClose={() => window.history.back()} /></RequireCashier>,
+    element: (
+      <RequireCashier>
+        <ManagerPinGate>
+          <StockCountScreen onClose={() => window.history.back()} />
+        </ManagerPinGate>
+      </RequireCashier>
+    ),
   },
   {
     path: '/manager',

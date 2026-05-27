@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useTheme, deriveAutoTheme } from '../src/state/theme';
 
 describe('theme store', () => {
-  beforeEach(() => useTheme.getState().reset());
+  beforeEach(() => {
+    localStorage.clear();
+    useTheme.getState().reset();
+  });
 
   it('default is light', () => {
     expect(useTheme.getState().theme).toBe('light');
