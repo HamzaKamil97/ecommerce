@@ -1,0 +1,149 @@
+/* Phone-specific layout for refund 3-step wizard. */
+.refund-phone {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--ivory);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.refund-phone-header {
+  padding: 14px 18px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.refund-phone-back {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--ink);
+}
+.refund-phone-header h1 {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0;
+}
+.refund-phone-step-meta {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.refund-phone-body {
+  padding: 6px 18px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* step 1 — option cards */
+.refund-opt {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 16px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 52px 1fr 14px;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  font-family: inherit;
+  color: var(--ink);
+  width: 100%;
+}
+.refund-opt:hover {
+  border-color: var(--gold-2);
+}
+.refund-opt .ic {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--bg-warn);
+  color: var(--gold-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.refund-opt .title {
+  font-weight: 800;
+  font-size: 14px;
+}
+.refund-opt .sub {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 3px;
+}
+.refund-opt .arrow {
+  color: var(--gold-3);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.refund-input-card {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 14px;
+  padding: 14px;
+}
+.refund-input-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.refund-input {
+  width: 100%;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--paper);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  color: var(--ink);
+}
+.refund-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 58, 0.18);
+}
+.refund-input-action {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.refund-phone-foot {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: auto;
+}

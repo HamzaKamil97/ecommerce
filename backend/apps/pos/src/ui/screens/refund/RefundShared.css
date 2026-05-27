@@ -1,0 +1,554 @@
+/* Refund shared tokens + primitives (used by phone + tablet). */
+.refund-root {
+  --ivory: #f4ede1;
+  --paper: #faf6ee;
+  --paper-2: #fff;
+  --ink: #1f1c18;
+  --ink-2: #2a2520;
+  --ink-3: #6f6859;
+  --line: #b9af9b;
+  --line-2: #d4ccba;
+  --line-3: #e5dfd0;
+  --line-4: #f0e9d8;
+  --gold: #b88a3a;
+  --gold-2: #c89844;
+  --gold-3: #8a6228;
+  --emerald: #2f6a55;
+  --emerald-2: #387762;
+  --burgundy: #862a3a;
+  --burgundy-2: #9d3548;
+  --bg-warn: rgba(184, 138, 58, 0.12);
+  --bg-danger: rgba(134, 42, 58, 0.12);
+  --bg-success: rgba(47, 106, 85, 0.12);
+  --shadow-sm: 0 1px 2px rgba(31, 28, 24, 0.06);
+  --shadow-md: 0 4px 12px rgba(31, 28, 24, 0.08);
+  --shadow-lg: 0 8px 24px rgba(31, 28, 24, 0.12);
+  --shadow-inset: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  font-family: Manrope, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--ivory);
+  font-size: 13px;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+}
+
+.refund-root *,
+.refund-root *::before,
+.refund-root *::after {
+  box-sizing: border-box;
+}
+
+.refund-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+}
+
+/* dot-stepper */
+.refund-progress {
+  padding: 14px 18px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.refund-dot-step {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 11px;
+}
+.refund-dot-step.done {
+  background: var(--emerald);
+  color: #fff;
+}
+.refund-dot-step.current {
+  background: var(--gold);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(184, 138, 58, 0.2);
+}
+.refund-dot-step.upcoming {
+  background: var(--line-4);
+  color: var(--ink-3);
+  border: 1px solid var(--line-3);
+}
+.refund-line-step {
+  flex: 1;
+  height: 2px;
+  background: var(--line-3);
+  border-radius: 999px;
+}
+.refund-line-step.done {
+  background: var(--emerald);
+}
+
+/* receipt-card */
+.refund-receipt {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.refund-receipt-head {
+  padding: 12px 14px;
+  border-bottom: 1px dashed var(--line-2);
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+}
+.refund-receipt-head .shop-name {
+  font-weight: 800;
+  font-size: 13px;
+}
+.refund-receipt-head .shop-meta {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.refund-receipt-head .sale-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--gold-3);
+  margin-top: 4px;
+}
+
+.refund-line {
+  display: grid;
+  grid-template-columns: 28px 36px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-4);
+  cursor: pointer;
+}
+.refund-line:last-child {
+  border-bottom: 0;
+}
+.refund-line:hover {
+  background: var(--paper);
+}
+.refund-line.checked {
+  background: var(--bg-warn);
+}
+.refund-cb {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: var(--paper-2);
+  color: var(--ink-3);
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.refund-cb.on {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+.refund-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--line-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.refund-line-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+.refund-line small {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.refund-line-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* reason chip row */
+.refund-reason-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 14px 12px 60px;
+  background: var(--bg-warn);
+  border-bottom: 1px solid var(--line-4);
+}
+.refund-reason-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  width: 100%;
+  margin-bottom: 4px;
+}
+.refund-reason-chip {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-family: inherit;
+}
+.refund-reason-chip:hover {
+  border-color: var(--gold-2);
+  color: var(--ink);
+}
+.refund-reason-chip.selected {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+.refund-reason-chip.danger.selected {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+}
+
+/* sticky foot — overridden per surface */
+.refund-foot {
+  background: var(--paper-2);
+  border-top: 1px solid var(--line-3);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 -4px 12px rgba(31, 28, 24, 0.06);
+}
+.refund-foot-summary {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.refund-foot-summary .lab {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.refund-foot-summary .amt {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--burgundy);
+}
+
+.refund-btn {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 0;
+  color: var(--ink);
+}
+.refund-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.refund-btn-primary {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+  color: #fff;
+  box-shadow: var(--shadow-inset), 0 4px 12px rgba(184, 138, 58, 0.3);
+}
+.refund-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.refund-btn-danger {
+  background: linear-gradient(135deg, var(--burgundy-2), var(--burgundy));
+  color: #fff;
+  box-shadow: var(--shadow-inset), 0 4px 12px rgba(134, 42, 58, 0.3);
+}
+.refund-btn-danger:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.refund-btn-ghost {
+  background: transparent;
+  color: var(--ink-3);
+}
+.refund-btn-soft {
+  background: var(--paper);
+  border: 1px solid var(--line-2);
+  color: var(--ink-2);
+}
+
+/* card primitive */
+.refund-card {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.refund-card h3 {
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+/* PIN dots + keypad */
+.refund-pin-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 6px;
+}
+.refund-pin-dots {
+  display: flex;
+  gap: 10px;
+}
+.refund-pin-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: transparent;
+}
+.refund-pin-dot.filled {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+.refund-pin-meta {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.refund-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 240px;
+  margin: 6px auto 0;
+}
+.refund-k {
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border: 1px solid var(--line-2);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  border-radius: 10px;
+  padding: 12px 0;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 100ms;
+}
+.refund-k:hover {
+  background: linear-gradient(180deg, var(--paper-2), var(--bg-warn));
+  border-color: var(--gold-2);
+}
+.refund-k:active {
+  transform: scale(0.96);
+}
+.refund-k.empty {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  cursor: default;
+  visibility: hidden;
+}
+.refund-k.bksp {
+  color: var(--burgundy);
+  font-size: 16px;
+}
+
+.refund-pin-approved {
+  margin-top: 10px;
+  background: var(--bg-success);
+  border: 1px solid rgba(47, 106, 85, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.refund-approved-check {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--emerald);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.refund-approved-title {
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--emerald);
+}
+.refund-approved-meta {
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* summary card rows */
+.refund-sum-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line-4);
+  font-size: 12px;
+}
+.refund-sum-row:last-of-type {
+  border-bottom: 0;
+}
+.refund-sum-row .key {
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.refund-sum-row .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+}
+.refund-sum-total {
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px dashed var(--line-2);
+}
+.refund-sum-total .key {
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 13px;
+}
+.refund-sum-total .val {
+  color: var(--burgundy);
+  font-size: 18px;
+  font-weight: 800;
+}
+.refund-sum-audit {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--line-4);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* radio rows */
+.refund-radio-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.refund-radio {
+  background: var(--paper);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  font-family: inherit;
+  color: var(--ink);
+}
+.refund-radio:hover {
+  border-color: var(--gold-2);
+}
+.refund-radio.selected {
+  border-color: var(--gold);
+  background: var(--bg-warn);
+}
+.refund-radio .ic {
+  font-size: 22px;
+}
+.refund-radio .name {
+  font-weight: 800;
+  font-size: 13px;
+}
+.refund-radio .sub {
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* error banner */
+.refund-error {
+  background: var(--bg-danger);
+  border: 1px solid rgba(134, 42, 58, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--burgundy);
+  font-weight: 700;
+}
+
+/* success splash */
+.refund-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 24px;
+  text-align: center;
+}
+.refund-success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  background: var(--emerald);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 800;
+}
+.refund-success-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--burgundy);
+}
+.refund-success-meta {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refund-root *,
+  .refund-root *::before,
+  .refund-root *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
