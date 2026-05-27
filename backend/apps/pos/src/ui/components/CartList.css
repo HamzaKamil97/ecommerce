@@ -1,0 +1,200 @@
+/* CartList — H-3.2b cart rows + summary
+ * Tokens from tokens.css. Used inside .cart-list inside RegisterScreen.
+ */
+
+.cart-list {
+  flex: 1;
+  background: var(--paper);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cart-list-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-3);
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+}
+.cart-list-header .title {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ink);
+}
+.cart-list-header .count {
+  background: var(--bg-warn);
+  color: var(--gold-3);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+}
+.cart-list-header .clear {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+}
+.cart-list-header .clear:hover { color: var(--burgundy); }
+.cart-list-header .clear:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cart-rows {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.cart-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto auto 24px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-4);
+  background: var(--paper);
+  transition: background 150ms, transform 200ms;
+  animation: cart-row-fade-in 300ms ease-out backwards;
+}
+.cart-row:last-child { border-bottom: 0; }
+.cart-row:hover { background: var(--paper-2); }
+
+.cart-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--line-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 1px solid var(--line-3);
+}
+
+.cart-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.cart-name small {
+  display: block;
+  font-weight: 500;
+  color: var(--ink-3);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  overflow: hidden;
+}
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 100ms;
+}
+.qty-btn:hover { background: var(--bg-warn); }
+.qty-btn:active { transform: scale(0.96); }
+.qty-val {
+  min-width: 28px;
+  text-align: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.cart-line-total {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.row-more {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-3);
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.row-more:hover { background: var(--line-4); color: var(--ink); }
+
+/* Phone variant — simplified row (no inline stepper / row-more) */
+.cart-list.is-phone .cart-row {
+  grid-template-columns: 36px 1fr auto;
+  padding: 10px 14px;
+  gap: 10px;
+}
+.cart-list.is-phone .cart-thumb {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+.cart-list.is-phone .cart-name { font-size: 12px; }
+.cart-list.is-phone .cart-name small { font-size: 10px; }
+
+.cart-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.cart-right .qty {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.cart-right .total {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+@keyframes cart-row-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-row { animation: none; }
+}
