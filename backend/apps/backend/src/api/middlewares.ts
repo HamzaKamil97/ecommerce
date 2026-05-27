@@ -70,5 +70,10 @@ export default defineMiddlewares({
       method: ['POST'],
       middlewares: [requirePermission('pos.end_of_day')],
     },
+    {
+      matcher: '/pos/inventory-count/*/apply',
+      method: ['POST'],
+      middlewares: [requirePermission('catalog.stock_count')],
+    },
   ],
 })
