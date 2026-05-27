@@ -1,0 +1,109 @@
+/* DenominationGrid */
+
+.denom-grid {
+  width: 100%;
+}
+
+.denom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.denom-table thead th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-3);
+}
+.denom-table thead th.num-h {
+  text-align: right;
+}
+.denom-table tbody tr td {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line-4);
+}
+.denom-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.denom-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ink);
+}
+.denom-swatch {
+  width: 48px;
+  height: 30px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.06em;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.denom-swatch.s-50k { background: linear-gradient(135deg, #6a4f86, #4f3a66); }
+.denom-swatch.s-25k { background: linear-gradient(135deg, var(--emerald), #225047); }
+.denom-swatch.s-10k { background: linear-gradient(135deg, var(--burgundy), #6a1f2d); }
+.denom-swatch.s-5k  { background: linear-gradient(135deg, var(--gold), var(--gold-3)); }
+.denom-swatch.s-1k  { background: linear-gradient(135deg, #4a5d6e, #344452); }
+.denom-swatch.s-250 { background: linear-gradient(135deg, #6e5e3a, #4a3f28); }
+
+.denom-count-cell {
+  text-align: right;
+}
+.denom-cnt-input {
+  width: 90px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--ink);
+}
+.denom-cnt-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 58, 0.18);
+}
+
+.denom-subtotal {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 14px;
+  text-align: right;
+  color: var(--ink);
+}
+
+.denom-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid var(--ink);
+}
+.denom-foot-label {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--ink);
+}
+.denom-foot-val {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+}

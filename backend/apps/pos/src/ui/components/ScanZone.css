@@ -1,0 +1,45 @@
+/* ScanZone */
+
+.scan-zone {
+  background: var(--paper);
+  border: 2px dashed var(--gold);
+  border-radius: var(--radius-2xl);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scan-zone-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(33, 208, 122, 0.18);
+}
+
+.scan-zone-active .scan-zone-dot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.scan-zone-idle {
+  border-color: var(--line-2);
+}
+.scan-zone-idle .scan-zone-dot {
+  background: var(--line);
+  box-shadow: none;
+}
+
+.scan-zone-text {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+.scan-zone-text small {
+  display: block;
+  color: var(--ink-3);
+  font-weight: 500;
+  font-size: 11px;
+  margin-top: 2px;
+}
