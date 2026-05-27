@@ -35,5 +35,6 @@ module.exports = defineConfig({
     { resolve: "./src/modules/audit_log" },
     { resolve: "./src/modules/_system_migrations" },
     { resolve: "./src/modules/cash_session" },
+    { resolve: "./src/modules/inventory_count" },
   ],
 })
