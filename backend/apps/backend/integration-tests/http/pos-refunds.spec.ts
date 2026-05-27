@@ -119,6 +119,91 @@ medusaIntegrationTestRunner({
       expect(r.data.code).toBe('INVALID_REFUND');
     });
 
+    it('I1: refund line snapshots the ORIGINAL sale line name (not refund:reason)', async () => {
+      const posSvc: any = getContainer().resolve('posTerminalService');
+      const mgr = await posSvc.createCashier({
+        vendor_id: 'v_i1', name: 'Mgr', pin: '0000', role: 'manager',
+      });
+      const wms: any = getContainer().resolve('wmsService');
+      await wms.incrementStock({
+        vendor_id: 'v_i1', variant_id: 'v_i1_item', qty: 10,
+        type: 'restock', actor_id: 'seed',
+      });
+
+      // First record a real sale via the service (avoids admin-auth bootstrap)
+      // so we have an original sale_line with a name_snapshot.
+      const saleResult = await posSvc.recordSale({
+        client_id: 'sale_i1', vendor_id: 'v_i1', cashier_id: mgr.id, terminal_id: 't',
+        lines: [{
+          variant_id: 'v_i1_item', name_snapshot: 'Lurpak Butter 100g',
+          qty: 2, unit_price_minor: 4500,
+        }],
+        paid_amount_minor: 9000, currency_code: 'iqd',
+        client_created_at: new Date().toISOString(),
+      });
+      const saleId = saleResult.sale_id;
+
+      // Look up the original sale_line id via the service.
+      const [origLines] = await posSvc.listAndCountSaleLines({ sale_id: saleId });
+      expect(origLines.length).toBe(1);
+      const originalLineId = origLines[0].id;
+
+      // Now refund using the real original_sale_line_id.
+      const refundR = await api.post('/pos/refunds', {
+        vendor_id: 'v_i1', cashier_id: mgr.id, manager_id: mgr.id,
+        terminal_id: 't', original_sale_id: saleId, client_id: 'refund_i1', method: 'cash',
+        lines: [{
+          original_sale_line_id: originalLineId, variant_id: 'v_i1_item',
+          qty: 1, unit_price_minor: 4500, reason: 'changed_mind',
+        }],
+      }, { headers: { 'x-cashier-id': mgr.id } });
+      expect(refundR.status).toBe(200);
+
+      // Fetch the refund and inspect lines — name_snapshot must be the original product name.
+      const getR = await api.get(`/pos/refunds/${refundR.data.refund.refund_sale_id}`);
+      expect(getR.data.lines[0].name_snapshot).toBe('Lurpak Butter 100g');
+      expect(getR.data.lines[0].name_snapshot).not.toMatch(/^refund:/);
+    });
+
+    it('I2: idempotent refund with same client_id returns the same refund without double-restocking', async () => {
+      const posSvc: any = getContainer().resolve('posTerminalService');
+      const mgr = await posSvc.createCashier({
+        vendor_id: 'v_i2', name: 'Mgr', pin: '0000', role: 'manager',
+      });
+      const wms: any = getContainer().resolve('wmsService');
+      await wms.incrementStock({
+        vendor_id: 'v_i2', variant_id: 'v_i2_item', qty: 5,
+        type: 'restock', actor_id: 'seed',
+      });
+
+      const body = {
+        vendor_id: 'v_i2', cashier_id: mgr.id, manager_id: mgr.id,
+        terminal_id: 't', original_sale_id: 's', client_id: 'idem_i2', method: 'cash',
+        lines: [{
+          original_sale_line_id: 'sl_x', variant_id: 'v_i2_item',
+          qty: 1, unit_price_minor: 1000, reason: 'changed_mind',
+        }],
+      };
+
+      const r1 = await api.post('/pos/refunds', body, { headers: { 'x-cashier-id': mgr.id } });
+      expect(r1.status).toBe(200);
+      const firstRefundId = r1.data.refund.refund_sale_id;
+
+      // After first refund: stock = 5 + 1 = 6
+      let stock = await wms.getStock('v_i2', 'v_i2_item');
+      expect(Number(stock.on_hand)).toBe(6);
+
+      // Retry with same client_id
+      const r2 = await api.post('/pos/refunds', body, { headers: { 'x-cashier-id': mgr.id } });
+      expect(r2.status).toBe(200);
+      expect(r2.data.refund.refund_sale_id).toBe(firstRefundId);
+      expect(r2.data.refund.refund_total_minor).toBe(1000);
+
+      // Stock did NOT double-increment — still 6
+      stock = await wms.getStock('v_i2', 'v_i2_item');
+      expect(Number(stock.on_hand)).toBe(6);
+    });
+
     it('GET /pos/refunds/:id returns the refund sale + lines', async () => {
       const posSvc: any = getContainer().resolve('posTerminalService');
       const mgr = await posSvc.createCashier({

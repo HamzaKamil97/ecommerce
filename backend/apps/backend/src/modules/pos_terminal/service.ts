@@ -336,7 +336,7 @@ export class PosTerminalService extends PosTerminalServiceBase
       }
     }
 
-    // Compute totals + classify
+    // Compute totals + classify (used both on fresh path and as fallback)
     let total = 0;
     let damaged = 0;
     let returned = 0;
@@ -346,47 +346,159 @@ export class PosTerminalService extends PosTerminalServiceBase
       else returned += l.qty;
     }
 
-    // Persist the refund as a voided pos_sale row
-    const created = await (this as any).createSales({
-      vendor_id: input.vendor_id,
-      cashier_id: input.cashier_id,
-      terminal_id: input.terminal_id,
-      client_id: input.client_id,
-      total_minor: total,
-      paid_amount_minor: 0,
-      change_due_minor: 0,
-      currency_code: 'iqd',
-      status: 'voided',
-      voided_at: new Date(),
-      channel: 'offline',
-      client_created_at: new Date(),
-    });
-    const refundRow: any = Array.isArray(created) ? created[0] : created;
+    // ---------------------------------------------------------------------
+    // I2: idempotency short-circuit on client_id
+    // Mirrors recordSale's raw-SQL pre-check pattern. A retried POST with the
+    // same client_id returns the original refund row without re-dispatching
+    // stock. NOTE: damaged/returned classification is NOT persisted on sale
+    // lines, so on retry we return 0 for those counters — the wms_movement
+    // log remains the source of truth for stock impact.
+    // ---------------------------------------------------------------------
+    const pg: any =
+      (this as any).__container__[ContainerRegistrationKeys.PG_CONNECTION] ??
+      (this as any).__container__['__pg_connection__'];
+    if (pg) {
+      const existingSel = await pg.raw(
+        `SELECT id, total_minor::numeric AS total_minor
+           FROM pos_sale
+          WHERE client_id = ? AND deleted_at IS NULL
+          LIMIT 1`,
+        [input.client_id],
+      );
+      const existingRows: any[] = existingSel?.rows ?? existingSel ?? [];
+      if (existingRows.length) {
+        const refundExisting = existingRows[0];
+        return {
+          refund_sale_id: refundExisting.id,
+          refund_total_minor: Number(refundExisting.total_minor),
+          stock_damaged_units: 0,
+          stock_returned_units: 0,
+        };
+      }
+    }
 
-    // Write sale lines with NEGATIVE qty (refund convention)
-    await (this as any).createSaleLines(
-      input.lines.map((l) => ({
-        sale_id: refundRow.id,
-        variant_id: l.variant_id,
-        qty: -l.qty,
-        unit_price_minor: l.unit_price_minor,
-        name_snapshot: `refund:${l.reason}`,
-      })),
-    );
-
-    // Stock dispatch: returned items go back to stock; damaged/expired written off
-    const wms: any = (this as any).__container__['wmsService'];
+    // ---------------------------------------------------------------------
+    // I1: snapshot the ORIGINAL line name (not "refund:<reason>") so receipt
+    // reprints show product names. Defensive fallback to the legacy
+    // "refund:<reason>" string when the original line can't be looked up.
+    // ---------------------------------------------------------------------
+    const nameSnapshots: string[] = [];
     for (const l of input.lines) {
-      if (l.reason === 'damaged' || l.reason === 'expired') continue;
-      await wms.incrementStock({
+      let originalName: string | null = null;
+      try {
+        const [origRows] = await (this as any).listAndCountSaleLines({
+          id: l.original_sale_line_id,
+        });
+        if (origRows.length) originalName = origRows[0].name_snapshot ?? null;
+      } catch {
+        /* swallow — fall back to refund: prefix */
+      }
+      nameSnapshots.push(originalName ?? `refund:${l.reason}`);
+    }
+
+    // ---------------------------------------------------------------------
+    // I3: stock dispatch FIRST, sale row SECOND.
+    // Mirrors recordSale's "stock-first, sale-second with rollback" ordering.
+    // If a wms increment fails partway through, we manually compensate the
+    // ones that succeeded (no shared txn across modules) before throwing. No
+    // pos_sale row ever exists referencing partial wms_movements — caller can
+    // retry cleanly with the SAME client_id (idempotency check will not find
+    // anything since we rolled back) or a new one.
+    // ---------------------------------------------------------------------
+    const wms: any = (this as any).__container__['wmsService'];
+    const succeeded: Array<{ variant_id: string; qty: number; reason: string }> = [];
+    try {
+      for (const l of input.lines) {
+        if (l.reason === 'damaged' || l.reason === 'expired') continue;
+        await wms.incrementStock({
+          vendor_id: input.vendor_id,
+          variant_id: l.variant_id,
+          qty: l.qty,
+          type: 'restock',
+          source_id: input.client_id,
+          actor_id: input.cashier_id,
+          note: `refund:${l.reason}`,
+        });
+        succeeded.push({ variant_id: l.variant_id, qty: l.qty, reason: l.reason });
+      }
+    } catch (e) {
+      for (const s of succeeded) {
+        try {
+          await wms.decrementStock({
+            vendor_id: input.vendor_id, variant_id: s.variant_id, qty: s.qty,
+            type: 'adjustment', source_id: input.client_id, actor_id: input.cashier_id,
+            note: 'pos_refund rollback',
+          });
+        } catch { /* best effort */ }
+      }
+      throw e;
+    }
+
+    // Persist the refund as a voided pos_sale row
+    let refundRow: any;
+    try {
+      const created = await (this as any).createSales({
         vendor_id: input.vendor_id,
-        variant_id: l.variant_id,
-        qty: l.qty,
-        type: 'restock',
-        source_id: refundRow.id,
-        actor_id: input.cashier_id,
-        note: `refund:${l.reason}`,
+        cashier_id: input.cashier_id,
+        terminal_id: input.terminal_id,
+        client_id: input.client_id,
+        total_minor: total,
+        paid_amount_minor: 0,
+        change_due_minor: 0,
+        currency_code: 'iqd',
+        status: 'voided',
+        voided_at: new Date(),
+        channel: 'offline',
+        client_created_at: new Date(),
       });
+      refundRow = Array.isArray(created) ? created[0] : created;
+    } catch (e: any) {
+      // Compensate the restocks before propagating.
+      for (const s of succeeded) {
+        try {
+          await wms.decrementStock({
+            vendor_id: input.vendor_id, variant_id: s.variant_id, qty: s.qty,
+            type: 'adjustment', source_id: input.client_id, actor_id: input.cashier_id,
+            note: 'pos_refund createSales rollback',
+          });
+        } catch { /* best effort */ }
+      }
+      if (isUniqueClientIdViolation(e)) {
+        // Concurrent duplicate — recurse to hit idempotency short-circuit.
+        return this.processReturn(input);
+      }
+      throw e;
+    }
+
+    // Write sale lines with NEGATIVE qty (refund convention) using the
+    // original-line name snapshots computed above.
+    try {
+      await (this as any).createSaleLines(
+        input.lines.map((l, idx) => ({
+          sale_id: refundRow.id,
+          variant_id: l.variant_id,
+          qty: -l.qty,
+          unit_price_minor: l.unit_price_minor,
+          name_snapshot: nameSnapshots[idx],
+        })),
+      );
+    } catch (e: any) {
+      // Soft-delete the sale row so client_id frees up and idempotency check
+      // (WHERE deleted_at IS NULL) won't find it on retry.
+      try {
+        await (this as any).softDeleteSales([refundRow.id]);
+      } catch { /* best effort */ }
+      // Compensate restocks.
+      for (const s of succeeded) {
+        try {
+          await wms.decrementStock({
+            vendor_id: input.vendor_id, variant_id: s.variant_id, qty: s.qty,
+            type: 'adjustment', source_id: input.client_id, actor_id: input.cashier_id,
+            note: 'pos_refund createSaleLines rollback',
+          });
+        } catch { /* best effort */ }
+      }
+      throw e;
     }
 
     return {
