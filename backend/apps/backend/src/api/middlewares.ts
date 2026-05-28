@@ -85,5 +85,10 @@ export default defineMiddlewares({
       method: ['GET'],
       middlewares: [requirePermission('reports.view')],
     },
+    {
+      matcher: '/admin/staff/*/capabilities',
+      method: ['PUT'],
+      middlewares: [requirePermission('staff.manage')],
+    },
   ],
 })
