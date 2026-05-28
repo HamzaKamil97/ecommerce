@@ -90,5 +90,10 @@ export default defineMiddlewares({
       method: ['PUT'],
       middlewares: [requirePermission('staff.manage')],
     },
+    {
+      matcher: '/admin/approvals/refunds/bulk',
+      method: ['POST'],
+      middlewares: [requirePermission('pos.refund_or_void')],
+    },
   ],
 })
