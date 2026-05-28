@@ -80,5 +80,10 @@ export default defineMiddlewares({
       method: ['POST'],
       middlewares: [requirePermission('pos.refund_or_void')],
     },
+    {
+      matcher: '/admin/audit-log*',
+      method: ['GET'],
+      middlewares: [requirePermission('reports.view')],
+    },
   ],
 })
