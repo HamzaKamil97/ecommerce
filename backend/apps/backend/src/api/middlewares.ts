@@ -95,5 +95,10 @@ export default defineMiddlewares({
       method: ['POST'],
       middlewares: [requirePermission('pos.refund_or_void')],
     },
+    {
+      matcher: '/admin/departments/reorder',
+      method: ['PUT'],
+      middlewares: [requirePermission('catalog.manage_departments')],
+    },
   ],
 })
