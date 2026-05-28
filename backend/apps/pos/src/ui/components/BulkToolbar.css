@@ -1,0 +1,126 @@
+/* BulkToolbar — dark variant from docs/mockups/h3-2c/bulk-actions.html .bulk-toolbar,
+   paper variant from docs/mockups/h3-2c/approvals-tray.html .bulk-paper.
+   All selectors scoped under .bulk-toolbar.{dark,paper}. */
+
+.bulk-toolbar {
+  position: sticky;
+  top: 0;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+  animation: bulk-slide-down 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes bulk-slide-down {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Shared count pill — gold gradient in both variants */
+.bulk-toolbar .count-pill {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-inset), var(--shadow-brand);
+}
+.bulk-toolbar .count-pill .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+
+.bulk-toolbar .spacer { flex: 1; }
+
+/* ─── Dark variant (catalog bulk-actions toolbar) ─── */
+.bulk-toolbar.dark {
+  background: linear-gradient(180deg, #0E0D0B, #1a1815);
+  color: #F7F2E5;
+  border-bottom: 1px solid #2a2520;
+  box-shadow: var(--shadow-lg);
+}
+.bulk-toolbar.dark .bulk-action {
+  background: rgba(247, 242, 229, .06);
+  border: 1px solid #2a2520;
+  color: #F7F2E5;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 150ms, border-color 150ms;
+  font-family: inherit;
+}
+.bulk-toolbar.dark .bulk-action:hover {
+  background: rgba(247, 242, 229, .1);
+  border-color: var(--gold-2);
+}
+.bulk-toolbar.dark .bulk-action.danger { color: #ffb6c1; }
+.bulk-toolbar.dark .bulk-action.danger:hover {
+  background: rgba(157, 53, 72, .2);
+  border-color: var(--burgundy-2);
+}
+.bulk-toolbar.dark .bulk-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(247, 242, 229, .06);
+  border: 1px solid #2a2520;
+  color: #F7F2E5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* ─── Paper variant (approvals-tray toolbar) ─── */
+.bulk-toolbar.paper {
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border-bottom: 1px solid var(--line-3);
+  box-shadow: var(--shadow-md);
+}
+.bulk-toolbar.paper .bulk-action {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 150ms, box-shadow 150ms;
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+}
+.bulk-toolbar.paper .bulk-action:hover { transform: translateY(-1px); }
+.bulk-toolbar.paper .bulk-action.danger {
+  background: linear-gradient(135deg, var(--burgundy-2), var(--burgundy));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+  border: 0;
+}
+.bulk-toolbar.paper .bulk-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}

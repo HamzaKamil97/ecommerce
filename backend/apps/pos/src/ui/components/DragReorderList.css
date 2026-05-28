@@ -1,0 +1,70 @@
+/* DragReorderList — selectors copied from docs/mockups/h3-2c/departments.html
+   .dept-row + .grip + .drop-zone, scoped under .drag-reorder-list. */
+
+.drag-reorder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drag-reorder-list .dr-row {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  cursor: grab;
+  transition: transform 150ms, box-shadow 150ms, border-color 150ms;
+}
+
+.drag-reorder-list .dr-row:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--gold-2);
+}
+
+.drag-reorder-list .dr-row.dragging {
+  transform: rotate(-1.5deg) translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gold);
+  cursor: grabbing;
+  opacity: .85;
+}
+
+.drag-reorder-list .dr-row.over {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 138, 58, .18), var(--shadow-md);
+  background: linear-gradient(135deg, var(--bg-warn), var(--paper-2));
+}
+
+.drag-reorder-list .grip {
+  width: 24px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: grab;
+  flex-shrink: 0;
+}
+.drag-reorder-list .grip .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.drag-reorder-list .dr-content {
+  flex: 1;
+  min-width: 0;
+}

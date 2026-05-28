@@ -1,0 +1,44 @@
+/* CapabilityPill — copied from docs/mockups/h3-2c/pin-reset.html .cap.* selectors,
+   rebadged under .cap-pill to scope safely. */
+
+.cap-pill {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cap-pill.allow {
+  background: var(--bg-success);
+  color: var(--emerald);
+}
+
+.cap-pill.pin {
+  background: var(--bg-warn);
+  color: var(--gold-3);
+}
+
+.cap-pill.deny {
+  background: var(--line-4);
+  color: var(--ink-3);
+  text-decoration: line-through;
+  opacity: .7;
+}
+
+.cap-pill.override-on {
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}
+
+.cap-pill.override-off {
+  background: linear-gradient(135deg, var(--burgundy-2), var(--burgundy));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}

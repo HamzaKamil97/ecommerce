@@ -1,0 +1,70 @@
+/* AiSuggestionBanner — copied from docs/mockups/h3-2c/tags.html .ai-card selectors,
+   renamed to .ai-banner to scope the component cleanly. */
+
+.ai-banner {
+  background: linear-gradient(135deg, rgba(47, 106, 85, .08), var(--paper-2));
+  border: 1px solid rgba(47, 106, 85, .25);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.ai-banner .ai-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-inset);
+  flex-shrink: 0;
+}
+
+.ai-banner .ai-body { flex: 1; }
+.ai-banner .ai-body h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--emerald-2);
+  margin: 0 0 4px;
+}
+.ai-banner .ai-body .ai-text {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ai-banner .ai-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.ai-banner .ai-actions button {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ai-banner .ai-actions .ai-accept {
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}
+.ai-banner .ai-actions .ai-dismiss {
+  background: transparent;
+  color: var(--ink-3);
+  font-weight: 700;
+}

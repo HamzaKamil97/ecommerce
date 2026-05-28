@@ -1,0 +1,54 @@
+/* DiffView — copied from docs/mockups/h3-2c/audit-log.html .diff selectors,
+   scoped under .diff-view. */
+
+.diff-view {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  background: var(--paper);
+  border: 1px solid var(--line-3);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.diff-view.diff-empty {
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.diff-view .diff-key-block + .diff-key-block {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--line-3);
+}
+
+.diff-view .diff-line {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.diff-view .diff-line.pre {
+  color: var(--burgundy);
+}
+.diff-view .diff-line.pre::before {
+  content: '−';
+  margin-right: 4px;
+  opacity: .7;
+}
+
+.diff-view .diff-line.post {
+  color: var(--emerald-2);
+}
+.diff-view .diff-line.post::before {
+  content: '+';
+  margin-right: 4px;
+  opacity: .7;
+}
+
+.diff-view .diff-line .key {
+  color: var(--ink-3);
+  font-weight: 700;
+}
