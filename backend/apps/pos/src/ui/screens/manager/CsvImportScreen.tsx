@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { importCsv } from '../../../api/pos';
 import { VENDOR_ID } from '../../../env';
@@ -30,6 +30,11 @@ interface CsvImportScreenProps {
   forceState?: ScreenState;
 }
 
+// Fixture data for the forced-success preview (Storybook / tests).
+const DEMO_IMPORT_COUNT = 411;
+const DEMO_ELAPSED_SEC = 47;
+const DEMO_ERROR: RowError = { row: 24, column: 'price_minor', reason: 'not an integer' };
+
 // ── Confetti ───────────────────────────────────────────────────────────────
 const CONFETTI_COLORS = [
   '#b88a3a', '#c89844', '#2f6a55', '#387762',
@@ -37,15 +42,20 @@ const CONFETTI_COLORS = [
 ];
 
 function Confetti() {
-  const pieces = Array.from({ length: 60 }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    delay: Math.random() * 800,
-    duration: 2000 + Math.random() * 1500,
-    width: 4 + Math.random() * 6,
-    height: 8 + Math.random() * 10,
-  }));
+  // Generate once per mount — re-randomizing on every render would restart the animation.
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 60 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        delay: Math.random() * 800,
+        duration: 2000 + Math.random() * 1500,
+        width: 4 + Math.random() * 6,
+        height: 8 + Math.random() * 10,
+      })),
+    [],
+  );
 
   return (
     <div className="csv-import-screen__confetti" aria-hidden="true">
@@ -74,12 +84,13 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState('');
   const [imported, setImported] = useState<number>(
-    forceState === 'success' ? 411 : 0,
+    forceState === 'success' ? DEMO_IMPORT_COUNT : 0,
+  );
+  const [elapsedSec, setElapsedSec] = useState<number>(
+    forceState === 'success' ? DEMO_ELAPSED_SEC : 0,
   );
   const [errors, setErrors] = useState<RowError[]>(
-    forceState === 'success'
-      ? [{ row: 24, column: 'price_minor', reason: 'not an integer' }]
-      : [],
+    forceState === 'success' ? [DEMO_ERROR] : [],
   );
   const [dragOver, setDragOver] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -89,17 +100,26 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
     if (forceState) {
       setState(forceState);
       if (forceState === 'success') {
-        setImported(411);
-        setErrors([{ row: 24, column: 'price_minor', reason: 'not an integer' }]);
+        setImported(DEMO_IMPORT_COUNT);
+        setElapsedSec(DEMO_ELAPSED_SEC);
+        setErrors([DEMO_ERROR]);
       }
     }
   }, [forceState]);
+
+  // Clear the fake-progress interval if we unmount mid-upload.
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   async function onFile(f: File) {
     setFileName(f.name);
     setState('uploading');
     setProgress(10);
 
+    const startedAt = Date.now();
     const text = await f.text();
 
     intervalRef.current = setInterval(() => {
@@ -111,6 +131,7 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setProgress(100);
       setImported(r.created);
+      setElapsedSec(Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
       setErrors(r.errors.map(e => ({ row: e.row, reason: e.reason })));
       setState('success');
     } catch {
@@ -123,6 +144,7 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
     setProgress(0);
     setFileName('');
     setImported(0);
+    setElapsedSec(0);
     setErrors([]);
     setState('idle');
   }
@@ -139,7 +161,11 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
           </div>
         </div>
         <div className="csv-import-screen__header-spacer" />
-        <button className="csv-import-screen__header-action" type="button">
+        <button
+          className="csv-import-screen__header-action"
+          type="button"
+          onClick={() => alert('Download CSV template — coming soon')}
+        >
           📄 Download template
         </button>
       </header>
@@ -255,7 +281,9 @@ export function CsvImportScreen({ forceState }: CsvImportScreenProps) {
             <Confetti />
 
             <div className="csv-import-screen__check">✓</div>
-            <h2 className="csv-import-screen__success-title">Imported in 47 seconds</h2>
+            <h2 className="csv-import-screen__success-title">
+              Imported in {elapsedSec} second{elapsedSec === 1 ? '' : 's'}
+            </h2>
             <p className="csv-import-screen__summary">
               <strong>{imported} products</strong> added to your catalog.
               {errors.length > 0 && (
