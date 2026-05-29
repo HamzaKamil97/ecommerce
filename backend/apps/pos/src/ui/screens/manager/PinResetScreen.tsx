@@ -10,11 +10,16 @@ const CAP_KEYS = ['pos.refund_or_void', 'pos.return_process', 'pos.end_of_day'] 
 
 type CapKey = (typeof CAP_KEYS)[number];
 
-// Default capability values for cashier role (also used for data_entry / picker fallback)
-const ROLE_DEFAULTS_CASHIER: Record<CapKey, 'pin' | boolean> = {
-  'pos.refund_or_void': 'pin',
-  'pos.return_process': 'pin',
-  'pos.end_of_day': true,
+// Per-role defaults for the three PoS capabilities shown here. Mirrors the
+// backend ROLE_DEFAULTS (backend/apps/backend/src/permissions/capabilities.ts):
+// data_entry / picker have NO PoS capabilities, so they resolve to Denied.
+// `true` = allowed, 'pin' = allowed with re-prompt, absent/false = denied.
+const ROLE_DEFAULTS: Record<StaffRow['role'], Partial<Record<CapKey, 'pin' | true>>> = {
+  owner: { 'pos.refund_or_void': true, 'pos.return_process': true, 'pos.end_of_day': true },
+  manager: { 'pos.refund_or_void': true, 'pos.return_process': true, 'pos.end_of_day': true },
+  cashier: { 'pos.refund_or_void': 'pin', 'pos.return_process': 'pin', 'pos.end_of_day': true },
+  data_entry: {},
+  picker: {},
 };
 
 type PillVariant = 'allow' | 'pin' | 'deny' | 'override-on' | 'override-off';
@@ -34,13 +39,8 @@ function resolveLabel(row: StaffRow, key: CapKey): CapPill {
     return { variant: 'override-off', label: '⛔ Override OFF' };
   }
 
-  // No override — use role default
-  if (row.role === 'owner' || row.role === 'manager') {
-    return { variant: 'allow', label: 'Allowed' };
-  }
-
-  // cashier / data_entry / picker — use ROLE_DEFAULTS_CASHIER
-  const def = ROLE_DEFAULTS_CASHIER[key];
+  // No override — use the role default for this capability.
+  const def = ROLE_DEFAULTS[row.role]?.[key];
   if (def === 'pin') return { variant: 'pin', label: 'PIN required' };
   if (def === true) return { variant: 'allow', label: 'Allowed' };
   return { variant: 'deny', label: 'Denied' };
@@ -101,21 +101,25 @@ interface PinModalProps {
 function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
   const [pin, setPin] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const sequential = isSequential(pin);
   const repeated = isRepeated(pin);
   const canSave = pin.length === 4 && !sequential && !repeated;
 
   function handleDigit(d: string) {
+    setSaveError(null);
     if (pin.length < 4) setPin((p) => p + d);
   }
 
   function handleBackspace() {
+    setSaveError(null);
     setPin((p) => p.slice(0, -1));
   }
 
   function handleRandomize() {
     // Generate random 4-digit pin (may be sequential/repeated — that's shown as error)
+    setSaveError(null);
     const digits = Array.from({ length: 4 }, () => String(Math.floor(Math.random() * 10)));
     setPin(digits.join(''));
   }
@@ -123,9 +127,12 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
   async function handleSave() {
     if (!canSave) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await onSave(staffRow.id, pin);
       onClose();
+    } catch (e: any) {
+      setSaveError(e?.message ?? 'Could not reset PIN. Try again.');
     } finally {
       setSaving(false);
     }
@@ -136,7 +143,7 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
       <div
         className="pin-reset-screen__modal"
         role="dialog"
-        aria-label="Reset PIN"
+        aria-labelledby="pin-reset-modal-title"
         aria-modal="true"
       >
         {/* Modal header */}
@@ -145,7 +152,7 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
             {initials(staffRow.name)}
           </div>
           <div className="pin-reset-screen__modal-head-body">
-            <h3>Reset PIN — {staffRow.name}</h3>
+            <h3 id="pin-reset-modal-title">Reset PIN — {staffRow.name}</h3>
             <div className="pin-reset-screen__modal-meta">
               {staffRow.role.replace('_', ' ')}
             </div>
@@ -174,7 +181,7 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
               if (isCursor) cls += ' pin-reset-screen__pin-cell--cursor';
               return (
                 <div key={i} className={cls}>
-                  {isFilled ? pin[i] : ''}
+                  {isFilled ? '●' : ''}
                 </div>
               );
             })}
@@ -189,6 +196,11 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
           {repeated && (
             <div className="pin-reset-screen__pin-error">
               Repeated PIN not allowed (e.g. 1111)
+            </div>
+          )}
+          {saveError && (
+            <div className="pin-reset-screen__pin-error" role="alert">
+              {saveError}
             </div>
           )}
 
@@ -252,7 +264,7 @@ function PinModal({ staffRow, onClose, onSave }: PinModalProps) {
             disabled={!canSave || saving}
             onClick={handleSave}
           >
-            {canSave ? `✓ Save · ${pin.split('').join('-')}` : '✓ Save · 4-digit PIN'}
+            {canSave ? '✓ Save' : '✓ Save · 4-digit PIN'}
           </button>
         </div>
       </div>
