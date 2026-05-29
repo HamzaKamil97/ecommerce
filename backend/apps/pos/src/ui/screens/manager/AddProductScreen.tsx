@@ -494,7 +494,7 @@ export function AddProductScreen() {
             </div>
             <div className="add-product-screen__preview-price-row">
               <span className="add-product-screen__preview-price">
-                {price ? parseInt(price, 10).toLocaleString() : '—'}
+                {price ? parseInt(price, 10).toLocaleString() : '—'}{' '}
                 <small>IQD</small>
               </span>
             </div>
