@@ -6,6 +6,9 @@ import { AiSuggestionBanner } from '../../components/AiSuggestionBanner';
 import { VENDOR_ID } from '../../../env';
 import './TagsScreen.css';
 
+// Customer browse only surfaces a handful of featured tags — cap promotions at 8.
+const FEATURED_LIMIT = 8;
+
 export function TagsScreen() {
   const navigate = useNavigate();
   const vendorId = VENDOR_ID;
@@ -47,7 +50,10 @@ export function TagsScreen() {
     await reload();
   }
 
+  const featuredFull = featuredTags.length >= FEATURED_LIMIT;
+
   async function handlePromote(tag: Tag) {
+    if (featuredFull) return;
     await updateTag(tag.id, { featured: true });
     await reload();
   }
@@ -178,6 +184,8 @@ export function TagsScreen() {
                       className="tags-screen__btn-promote"
                       aria-label={`Promote ${tag.name}`}
                       onClick={() => handlePromote(tag)}
+                      disabled={featuredFull}
+                      title={featuredFull ? `Featured limit reached (${FEATURED_LIMIT})` : undefined}
                     >
                       ★ Promote
                     </button>
