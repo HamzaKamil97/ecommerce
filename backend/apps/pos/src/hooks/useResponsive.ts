@@ -32,5 +32,7 @@ export function useResponsive() {
     isPhone: kind === 'phone',
     isTablet: kind === 'tablet',
     isDesktop: kind === 'desktop' || kind === 'wide',
+    /** Reactive width comparison — jsdom-safe (no matchMedia needed). */
+    isWidthBelow: (px: number) => width < px,
   };
 }

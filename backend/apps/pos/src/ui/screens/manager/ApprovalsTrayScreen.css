@@ -1,0 +1,477 @@
+/* ApprovalsTrayScreen.css
+   ALL selectors scoped under .approvals-tray-screen to prevent CSS bleed.
+   Design reference: docs/mockups/h3-2c/approvals-tray.html
+*/
+
+.approvals-tray-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Header ─── */
+.approvals-tray-screen .at-header {
+  background: linear-gradient(180deg, #0e0d0b, #1a1815);
+  color: #f7f2e5;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.approvals-tray-screen .at-header h1 {
+  font-weight: 800;
+  font-size: 18px;
+  color: #f7f2e5;
+}
+
+.approvals-tray-screen .at-header .at-sub {
+  color: #a59f8c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.approvals-tray-screen .at-header .h-spacer {
+  flex: 1;
+}
+
+/* ─── Tabs ─── */
+.approvals-tray-screen .at-tabs {
+  background: var(--paper, #faf6ee);
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+  padding: 0 24px;
+  display: flex;
+  gap: 4px;
+}
+
+.approvals-tray-screen .at-tab {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-3, #6f6859);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.01em;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+
+.approvals-tray-screen .at-tab[aria-selected='true'] {
+  color: var(--ink, #1f1c18);
+  border-bottom-color: var(--gold, #b88a3a);
+}
+
+.approvals-tray-screen .at-tab:hover:not([aria-selected='true']) {
+  color: var(--ink, #1f1c18);
+}
+
+.approvals-tray-screen .at-tab .pill {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(184, 138, 58, 0.12);
+  color: var(--gold-3, #8a6228);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.approvals-tray-screen .at-tab[aria-selected='true'] .pill {
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+}
+
+.approvals-tray-screen .at-tab .pill.zero {
+  background: var(--line-4, #f0e9d8);
+  color: var(--ink-3, #6f6859);
+}
+
+/* ─── Shell: split layout ─── */
+.approvals-tray-screen .at-shell {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  min-height: calc(100vh - 121px);
+  position: relative;
+}
+
+/* ─── Queue (left pane) ─── */
+.approvals-tray-screen .at-queue {
+  padding: 16px 20px;
+  border-right: 1px solid var(--line-3, #e5dfd0);
+  background: var(--ivory, #f4ede1);
+}
+
+.approvals-tray-screen .at-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approvals-tray-screen .at-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+}
+
+/* ─── Queue card ─── */
+.approvals-tray-screen .queue-card {
+  background: var(--paper-2, #fff);
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-left-width: 4px;
+  border-left-color: var(--line-2, #d4ccba);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(31, 28, 24, 0.06);
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 150ms;
+}
+
+.approvals-tray-screen .queue-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 28, 24, 0.08);
+}
+
+.approvals-tray-screen .queue-card.selected {
+  border-color: var(--gold, #b88a3a);
+  border-left-color: var(--gold, #b88a3a);
+  box-shadow: 0 0 0 3px rgba(184, 138, 58, 0.12), 0 4px 12px rgba(31, 28, 24, 0.08);
+}
+
+.approvals-tray-screen .queue-card .qc-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.approvals-tray-screen .queue-card .qc-checkbox-wrap {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+/* Visually-styled checkbox backed by a real <input type=checkbox> */
+.approvals-tray-screen .queue-card .qc-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  accent-color: var(--gold-3, #8a6228);
+}
+
+.approvals-tray-screen .queue-card .qc-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.approvals-tray-screen .queue-card .qc-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+}
+
+.approvals-tray-screen .queue-card .qc-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 2px 0 4px;
+}
+
+.approvals-tray-screen .queue-card .qc-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+}
+
+.approvals-tray-screen .queue-card .qc-amount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.approvals-tray-screen .queue-card .qc-amount .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--burgundy, #862a3a);
+}
+
+.approvals-tray-screen .queue-card .qc-amount .val small {
+  font-size: 10px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.approvals-tray-screen .queue-card .qc-amount .lbl {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--ink-3, #6f6859);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Detail panel (right pane / sheet) ─── */
+.approvals-tray-screen .at-detail {
+  background: var(--paper-2, #fff);
+  padding: 24px;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 121px);
+}
+
+.approvals-tray-screen .at-detail .detail-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+  margin-bottom: 18px;
+}
+
+.approvals-tray-screen .at-detail .detail-head h2 {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+
+.approvals-tray-screen .at-detail .detail-head .meta {
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.approvals-tray-screen .at-detail .detail-head .label-cap {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3, #6f6859);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.approvals-tray-screen .at-detail .close-x {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--paper, #faf6ee);
+  border: 1px solid var(--line-3, #e5dfd0);
+  color: var(--ink-3, #6f6859);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  font-family: inherit;
+}
+
+/* Info rows */
+.approvals-tray-screen .at-detail .info-rows {
+  background: var(--paper, #faf6ee);
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.approvals-tray-screen .at-detail .info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 7px 0;
+}
+
+.approvals-tray-screen .at-detail .info-row + .info-row {
+  border-top: 1px solid var(--line-3, #e5dfd0);
+}
+
+.approvals-tray-screen .at-detail .info-row .lbl {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3, #6f6859);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 110px;
+  padding-top: 2px;
+}
+
+.approvals-tray-screen .at-detail .info-row .val {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1f1c18);
+}
+
+/* Override CTA */
+.approvals-tray-screen .at-detail .override-cta {
+  background: linear-gradient(135deg, rgba(47, 106, 85, 0.06), var(--paper-2, #fff));
+  border: 1px solid rgba(47, 106, 85, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.approvals-tray-screen .at-detail .override-cta .oc-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--emerald-2, #387762), var(--emerald, #2f6a55));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.approvals-tray-screen .at-detail .override-cta .oc-body {
+  flex: 1;
+}
+
+.approvals-tray-screen .at-detail .override-cta .oc-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--emerald-2, #387762);
+  margin-bottom: 4px;
+}
+
+.approvals-tray-screen .at-detail .override-cta .oc-desc {
+  font-size: 12px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.approvals-tray-screen .at-detail .override-cta .oc-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.approvals-tray-screen .at-detail .override-cta .btn-grant {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--emerald-2, #387762), var(--emerald, #2f6a55));
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+/* Detail actions */
+.approvals-tray-screen .at-detail .detail-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-3, #e5dfd0);
+}
+
+.approvals-tray-screen .at-detail .detail-actions .btn {
+  flex: 1;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 12px 0;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.approvals-tray-screen .at-detail .detail-actions .btn:hover {
+  transform: translateY(-1px);
+}
+
+.approvals-tray-screen .at-detail .detail-actions .btn.approve {
+  background: linear-gradient(135deg, var(--emerald-2, #387762), var(--emerald, #2f6a55));
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+.approvals-tray-screen .at-detail .detail-actions .btn.decline {
+  background: linear-gradient(135deg, var(--burgundy-2, #9d3548), var(--burgundy, #862a3a));
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+/* ─── Empty detail placeholder ─── */
+.approvals-tray-screen .at-detail-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ─── Responsive sheet: below 1100px drill-down becomes a slide-in overlay ─── */
+@media (max-width: 1099px) {
+  .approvals-tray-screen .at-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .approvals-tray-screen .at-detail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(440px, 92vw);
+    box-shadow: -16px 0 40px rgba(31, 28, 24, 0.18);
+    z-index: 50;
+    animation: at-slide-in-r 350ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 1px solid var(--line-3, #e5dfd0);
+    height: 100vh;
+  }
+
+  @keyframes at-slide-in-r {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+  }
+
+  .approvals-tray-screen .at-detail::before {
+    content: '';
+    position: fixed;
+    inset: 0 min(440px, 92vw) 0 0;
+    background: rgba(20, 18, 15, 0.45);
+    backdrop-filter: blur(3px);
+    z-index: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .approvals-tray-screen *,
+  .approvals-tray-screen *::before,
+  .approvals-tray-screen *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
