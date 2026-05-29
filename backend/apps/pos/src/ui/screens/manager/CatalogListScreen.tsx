@@ -204,7 +204,7 @@ export function CatalogListScreen() {
 
       {/* Phone chip rail */}
       {isPhone && (
-        <div className="catalog-list-screen .chip-rail" role="tablist" aria-label="Departments">
+        <div className="chip-rail" role="tablist" aria-label="Departments">
           {departments.map((dept) => (
             <button
               key={dept.id}
