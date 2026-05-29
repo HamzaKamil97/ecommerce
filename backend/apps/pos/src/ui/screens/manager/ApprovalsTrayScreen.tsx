@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BulkToolbar } from '../../components/BulkToolbar';
 import {
   listPendingRefunds,
@@ -251,20 +251,31 @@ export function ApprovalsTrayScreen() {
     return 0;
   };
 
+  // Switching tabs abandons any cross-tab selection so the bulk toolbar can't
+  // act on cards the user can no longer see.
+  const switchTab = useCallback((tabId: TabId) => {
+    setActiveTab(tabId);
+    setSelected(new Set());
+    setActiveDetail(null);
+  }, []);
+
   // Bulk toolbar actions
-  const bulkActions = [
-    {
-      id: 'approve',
-      label: `✓ Approve all ${selected.size}`,
-      onClick: approveSelected,
-    },
-    {
-      id: 'decline',
-      label: `✕ Decline all ${selected.size}`,
-      onClick: declineSelected,
-      danger: true,
-    },
-  ];
+  const bulkActions = useMemo(
+    () => [
+      {
+        id: 'approve',
+        label: `✓ Approve all ${selected.size}`,
+        onClick: approveSelected,
+      },
+      {
+        id: 'decline',
+        label: `✕ Decline all ${selected.size}`,
+        onClick: declineSelected,
+        danger: true,
+      },
+    ],
+    [selected.size, approveSelected, declineSelected],
+  );
 
   return (
     <div className={`approvals-tray-screen${sheetMode ? ' sheet-mode' : ''}`}>
@@ -281,12 +292,13 @@ export function ApprovalsTrayScreen() {
           return (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
               role="tab"
               type="button"
               className="at-tab"
               aria-selected={activeTab === tab.id}
               aria-controls={`tabpanel-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => switchTab(tab.id)}
             >
               <span>{tab.label}</span>
               <span className={`pill${count === 0 ? ' zero' : ''}`}>{count}</span>
@@ -310,7 +322,7 @@ export function ApprovalsTrayScreen() {
         className="at-shell"
         role="tabpanel"
         id={`tabpanel-${activeTab}`}
-        aria-labelledby={activeTab}
+        aria-labelledby={`tab-${activeTab}`}
       >
         {/* Queue */}
         <div className="at-queue">
