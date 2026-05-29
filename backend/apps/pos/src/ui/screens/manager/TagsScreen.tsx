@@ -70,7 +70,11 @@ export function TagsScreen() {
             Featured tags surface in customer browse · AI suggestions · promote / demote
           </div>
         </div>
-        <button type="button" className="tags-screen__bulk-btn">
+        <button
+          type="button"
+          className="tags-screen__bulk-btn"
+          onClick={() => alert('Bulk apply tags — coming soon')}
+        >
           ⚙ Bulk apply
         </button>
       </div>
