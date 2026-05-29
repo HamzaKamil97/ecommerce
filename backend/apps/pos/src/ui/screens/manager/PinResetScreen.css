@@ -1,0 +1,651 @@
+/* ============================================================
+   PinResetScreen.css
+   ALL selectors scoped under .pin-reset-screen to prevent
+   bleed to other screens (Vite imports CSS globally).
+   ============================================================ */
+
+/* ── Design tokens (local fallbacks) ─────────────────────── */
+.pin-reset-screen {
+  --ivory: #f4ede1;
+  --paper: #faf6ee;
+  --paper-2: #fff;
+  --ink: #1f1c18;
+  --ink-2: #2a2520;
+  --ink-3: #6f6859;
+  --line: #b9af9b;
+  --line-2: #d4ccba;
+  --line-3: #e5dfd0;
+  --line-4: #f0e9d8;
+  --gold: #b88a3a;
+  --gold-2: #c89844;
+  --gold-3: #8a6228;
+  --emerald: #2f6a55;
+  --emerald-2: #387762;
+  --burgundy: #862a3a;
+  --burgundy-2: #9d3548;
+  --bg-success: rgba(47, 106, 85, 0.12);
+  --bg-warn: rgba(184, 138, 58, 0.12);
+  --bg-danger: rgba(134, 42, 58, 0.12);
+  --shadow-sm: 0 1px 2px rgba(31, 28, 24, 0.06);
+  --shadow-md: 0 4px 12px rgba(31, 28, 24, 0.08);
+  --shadow-lg: 0 8px 24px rgba(31, 28, 24, 0.12);
+  --shadow-inset: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  --shadow-brand: 0 4px 12px rgba(184, 138, 58, 0.3);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ivory);
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.pin-reset-screen__header {
+  background: linear-gradient(180deg, #0e0d0b, #1a1815);
+  color: #f7f2e5;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pin-reset-screen__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f7f2e5;
+  margin: 0;
+}
+
+.pin-reset-screen__subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a59f8c;
+  margin-top: 2px;
+}
+
+/* ── Shell ───────────────────────────────────────────────── */
+
+.pin-reset-screen__shell {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+  width: 100%;
+}
+
+/* ── Scope note ──────────────────────────────────────────── */
+
+.pin-reset-screen__scope-note {
+  background: linear-gradient(135deg, rgba(184, 138, 58, 0.08), var(--paper-2));
+  border: 1px solid rgba(184, 138, 58, 0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pin-reset-screen__scope-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.pin-reset-screen__scope-body h3 {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--gold-3);
+  margin: 0 0 2px;
+}
+
+.pin-reset-screen__scope-body p {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Staff card ──────────────────────────────────────────── */
+
+.pin-reset-screen__staff-card {
+  background: var(--paper-2);
+  border: 1px solid var(--line-3);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.pin-reset-screen__staff-head {
+  padding: 14px 18px;
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border-bottom: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pin-reset-screen__staff-head h2 {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+  flex: 1;
+}
+
+.pin-reset-screen__count {
+  background: var(--line-4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.pin-reset-screen__count strong {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink);
+}
+
+.pin-reset-screen__loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+/* ── Staff list ──────────────────────────────────────────── */
+
+.pin-reset-screen__staff-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+
+.pin-reset-screen__staff-row-wrap {
+  padding: 4px 0 8px;
+  border-radius: 10px;
+  transition: background 150ms;
+}
+
+.pin-reset-screen__staff-row-wrap:hover {
+  background: var(--paper);
+}
+
+.pin-reset-screen__staff-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+/* ── Avatar ──────────────────────────────────────────────── */
+
+.pin-reset-screen__av {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-inset);
+  flex-shrink: 0;
+}
+
+.pin-reset-screen__av--gold {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+}
+
+.pin-reset-screen__av--emerald {
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+}
+
+.pin-reset-screen__av--neutral {
+  background: linear-gradient(135deg, var(--ink-3), var(--ink-2));
+}
+
+/* ── Staff info ──────────────────────────────────────────── */
+
+.pin-reset-screen__staff-info {
+  min-width: 0;
+}
+
+.pin-reset-screen__nm {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.pin-reset-screen__meta {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pin-reset-screen__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line-2);
+  display: inline-block;
+}
+
+/* ── Role pill ───────────────────────────────────────────── */
+
+.pin-reset-screen__role-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pin-reset-screen__role-pill--owner {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}
+
+.pin-reset-screen__role-pill--manager {
+  background: var(--bg-warn);
+  color: var(--gold-3);
+}
+
+.pin-reset-screen__role-pill--cashier {
+  background: var(--bg-success);
+  color: var(--emerald);
+}
+
+.pin-reset-screen__role-pill--data_entry,
+.pin-reset-screen__role-pill--picker {
+  background: rgba(212, 161, 78, 0.18);
+  color: #a07636;
+}
+
+/* ── Reset button ────────────────────────────────────────── */
+
+.pin-reset-screen__reset-btn {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border: 1px solid var(--line-2);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.pin-reset-screen__reset-btn:hover {
+  border-color: var(--gold-2);
+}
+
+/* ── Capability pills row ────────────────────────────────── */
+
+.pin-reset-screen__cap-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 12px 4px 76px;
+  margin-top: -4px;
+}
+
+.pin-reset-screen__cap {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pin-reset-screen__cap-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+  display: inline-block;
+}
+
+.pin-reset-screen__cap--allow {
+  background: var(--bg-success);
+  color: var(--emerald);
+}
+
+.pin-reset-screen__cap--pin {
+  background: var(--bg-warn);
+  color: var(--gold-3);
+}
+
+.pin-reset-screen__cap--deny {
+  background: var(--line-4);
+  color: var(--ink-3);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.pin-reset-screen__cap--override-on {
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}
+
+.pin-reset-screen__cap--override-off {
+  background: linear-gradient(135deg, var(--burgundy-2), var(--burgundy));
+  color: #fff;
+  box-shadow: var(--shadow-inset);
+}
+
+/* ── Legend ──────────────────────────────────────────────── */
+
+.pin-reset-screen__legend {
+  background: linear-gradient(135deg, var(--paper), var(--paper-2));
+  border: 1px solid var(--line-3);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pin-reset-screen__legend-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bg-success), var(--paper-2));
+  border: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: var(--emerald-2);
+}
+
+.pin-reset-screen__legend-body h3 {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.pin-reset-screen__legend-body p {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ── Modal backdrop ──────────────────────────────────────── */
+
+.pin-reset-screen__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 15, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: pin-reset-screen__dim-in 250ms ease-out;
+}
+
+@keyframes pin-reset-screen__dim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal ───────────────────────────────────────────────── */
+
+.pin-reset-screen__modal {
+  background: var(--paper-2);
+  border-radius: 20px;
+  width: 460px;
+  max-width: 92vw;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: pin-reset-screen__pop 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pin-reset-screen__pop {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+.pin-reset-screen__modal-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line-3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pin-reset-screen__modal-head .pin-reset-screen__av {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+
+.pin-reset-screen__modal-head-body {
+  flex: 1;
+}
+
+.pin-reset-screen__modal-head-body h3 {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.pin-reset-screen__modal-meta {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.pin-reset-screen__modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--line-3);
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ── Modal body ──────────────────────────────────────────── */
+
+.pin-reset-screen__modal-body {
+  padding: 24px 22px;
+  text-align: center;
+}
+
+.pin-reset-screen__label-cap {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+
+/* ── PIN display ─────────────────────────────────────────── */
+
+.pin-reset-screen__pin-display {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.pin-reset-screen__pin-cell {
+  width: 60px;
+  height: 70px;
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border: 2px solid var(--line-2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--ink);
+  box-shadow: var(--shadow-inset);
+}
+
+.pin-reset-screen__pin-cell--filled {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--bg-warn), var(--paper-2));
+}
+
+.pin-reset-screen__pin-cell--cursor {
+  border-color: var(--gold);
+  animation: pin-reset-screen__blink 1s step-start infinite;
+}
+
+@keyframes pin-reset-screen__blink {
+  50% { border-color: var(--line-2); }
+}
+
+/* ── PIN error ───────────────────────────────────────────── */
+
+.pin-reset-screen__pin-error {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--burgundy);
+  margin-bottom: 12px;
+}
+
+/* ── Keypad ──────────────────────────────────────────────── */
+
+.pin-reset-screen__keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 280px;
+  margin: 0 auto 18px;
+}
+
+.pin-reset-screen__key {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 22px;
+  background: linear-gradient(180deg, var(--paper-2), var(--paper));
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 16px 0;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 100ms, box-shadow 150ms;
+}
+
+.pin-reset-screen__key:hover {
+  border-color: var(--gold-2);
+}
+
+.pin-reset-screen__key:active {
+  transform: scale(0.96);
+}
+
+.pin-reset-screen__key--dice {
+  font-family: inherit;
+  font-size: 18px;
+  background: linear-gradient(135deg, var(--emerald-2), var(--emerald));
+  color: #fff;
+  border-color: var(--emerald-2);
+  box-shadow: var(--shadow-inset);
+}
+
+.pin-reset-screen__key--back {
+  font-size: 16px;
+  color: var(--ink-3);
+}
+
+/* ── Hint text ───────────────────────────────────────────── */
+
+.pin-reset-screen__hint {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Modal actions ───────────────────────────────────────── */
+
+.pin-reset-screen__modal-actions {
+  padding: 14px 22px 22px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--line-3);
+  background: var(--paper);
+}
+
+.pin-reset-screen__btn {
+  flex: 1;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 12px 0;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+}
+
+.pin-reset-screen__btn--cancel {
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+  color: var(--ink);
+}
+
+.pin-reset-screen__btn--save {
+  background: linear-gradient(135deg, var(--gold-2), var(--gold-3));
+  color: #fff;
+  box-shadow: var(--shadow-inset), var(--shadow-brand);
+}
+
+.pin-reset-screen__btn--save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
