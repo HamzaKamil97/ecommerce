@@ -28,11 +28,26 @@ export async function listProducts(vendorId: string): Promise<Product[]> {
   return r.products ?? r.rows ?? [];
 }
 
+type MerchCategory = {
+  id: string;
+  handle: string;
+  name: string;
+  position: number;
+  icon_url?: string | null;
+};
+
 export async function listDepartments(tenantId: string): Promise<Department[]> {
-  const r = await apiGet<any>(
-    `/admin/departments?tenant_id=${encodeURIComponent(tenantId)}`,
+  const r = await apiGet<{ merch_categories?: MerchCategory[] }>(
+    `/admin/tenants/${encodeURIComponent(tenantId)}/merch-categories`,
   );
-  return r.departments ?? r.rows ?? [];
+  return (r.merch_categories ?? []).map((mc) => ({
+    id: mc.id,
+    handle: mc.handle,
+    name: mc.name,
+    position: mc.position,
+    icon_url: mc.icon_url ?? null,
+    // product_count omitted — not returned by the merch route.
+  }));
 }
 
 export type CreateProductInput = {
