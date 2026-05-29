@@ -7,6 +7,8 @@ import './AddProductScreen.css';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
+const CURRENCY = 'iqd';
+
 function computeMargin(price: number, cost: number): string | null {
   if (!price || !cost || cost >= price) return null;
   const pct = Math.round(((price - cost) / price) * 1000) / 10;
@@ -29,12 +31,11 @@ export function AddProductScreen() {
       .then((depts) => {
         const sorted = [...depts].sort((a, b) => a.position - b.position);
         setDepartments(sorted);
-        if (sorted.length > 0 && !deptId) {
-          setDeptId(sorted[0]!.id);
-        }
+        // Default to the first department only if nothing is selected yet.
+        // Functional updater avoids a stale-closure read of `deptId`.
+        if (sorted.length > 0) setDeptId((cur) => cur || sorted[0]!.id);
       })
       .catch(() => setDepartments([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vendorId]);
 
   // Required fields
@@ -74,13 +75,36 @@ export function AddProductScreen() {
   // Derived: selected department name
   const selectedDept = departments.find((d) => d.id === deptId);
 
-  // Derived: ready state (title + price filled)
-  const isReady = title.trim().length > 0 && price.trim().length > 0 && parseFloat(price) > 0;
+  // Derived: ready state (title + a positive integer price). Uses parseInt to
+  // stay consistent with the submit guard — otherwise "0.5" reads ready but fails save.
+  const priceMinor = parseInt(price, 10);
+  const isReady = title.trim().length > 0 && !isNaN(priceMinor) && priceMinor > 0;
 
-  async function handleSave() {
+  // Reset every field for the "Save & add another" flow. Department selection is
+  // intentionally preserved so the next item lands in the same place.
+  function resetForm() {
+    setTitle('');
+    setPrice('');
+    setDescription('');
+    setBrand('');
+    setSupplier('');
+    setCostPrice('');
+    setLowStockThreshold('');
+    setInitialOnHand('');
+    setSku('');
+    setBarcode('');
+    setTags('');
+    setInternalNotes('');
+    setBestBefore('');
+    setPackSize('');
+    setCountryOfOrigin('');
+    setMoreOpen(false);
+  }
+
+  async function submitProduct(resetAfter: boolean) {
     if (!title.trim()) { setErr('Title is required'); return; }
     const priceVal = parseInt(price, 10);
-    if (!price || isNaN(priceVal) || priceVal <= 0) { setErr('Price is required'); return; }
+    if (isNaN(priceVal) || priceVal <= 0) { setErr('Price is required'); return; }
 
     setBusy(true);
     setErr(null);
@@ -94,7 +118,7 @@ export function AddProductScreen() {
         vendor_id: vendorId,
         title: title.trim(),
         price_minor: priceVal,
-        currency_code: 'iqd',
+        currency_code: CURRENCY,
         merch_category_id: deptId || null,
         sku: sku.trim() || null,
         barcode: barcode.trim() || null,
@@ -112,7 +136,8 @@ export function AddProductScreen() {
           country_of_origin: countryOfOrigin.trim() || undefined,
         },
       });
-      navigate('/manager/catalog');
+      if (resetAfter) resetForm();
+      else navigate('/manager/catalog');
     } catch (e: any) {
       setErr(e?.message ?? 'Save failed');
     } finally {
@@ -120,64 +145,8 @@ export function AddProductScreen() {
     }
   }
 
-  async function handleSaveAndAnother() {
-    if (!title.trim()) { setErr('Title is required'); return; }
-    const priceVal = parseInt(price, 10);
-    if (!price || isNaN(priceVal) || priceVal <= 0) { setErr('Price is required'); return; }
-
-    setBusy(true);
-    setErr(null);
-    try {
-      const tagList = tags
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
-
-      await createProduct({
-        vendor_id: vendorId,
-        title: title.trim(),
-        price_minor: priceVal,
-        currency_code: 'iqd',
-        merch_category_id: deptId || null,
-        sku: sku.trim() || null,
-        barcode: barcode.trim() || null,
-        initial_on_hand: initialOnHand ? parseInt(initialOnHand, 10) : null,
-        cost_price_minor: costPrice ? parseInt(costPrice, 10) : null,
-        brand: brand.trim() || null,
-        supplier_name: supplier.trim() || null,
-        description: description.trim() || null,
-        tags: tagList.length > 0 ? tagList : undefined,
-        low_stock_threshold: lowStockThreshold ? parseInt(lowStockThreshold, 10) : null,
-        internal_notes: internalNotes.trim() || null,
-        schema_fields: {
-          best_before: bestBefore.trim() || undefined,
-          pack_size: packSize.trim() || undefined,
-          country_of_origin: countryOfOrigin.trim() || undefined,
-        },
-      });
-      // Reset form for the next product
-      setTitle('');
-      setPrice('');
-      setDescription('');
-      setBrand('');
-      setSupplier('');
-      setCostPrice('');
-      setLowStockThreshold('');
-      setInitialOnHand('');
-      setSku('');
-      setBarcode('');
-      setTags('');
-      setInternalNotes('');
-      setBestBefore('');
-      setPackSize('');
-      setCountryOfOrigin('');
-      setMoreOpen(false);
-    } catch (e: any) {
-      setErr(e?.message ?? 'Save failed');
-    } finally {
-      setBusy(false);
-    }
-  }
+  const handleSave = () => submitProduct(false);
+  const handleSaveAndAnother = () => submitProduct(true);
 
   return (
     <div className="add-product-screen">
