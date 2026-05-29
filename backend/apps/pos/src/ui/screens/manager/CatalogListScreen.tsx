@@ -36,6 +36,7 @@ export function CatalogListScreen() {
   const { isPhone } = useResponsive();
 
   const vendorId = VENDOR_ID;
+  // Same value in a single-tenant install. Extract a TENANT_ID env var when multi-tenancy ships.
   const tenantId = VENDOR_ID;
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -143,13 +144,17 @@ export function CatalogListScreen() {
     }
   }
 
-  const bulkActions = [
-    { id: 'price', label: '💰 Change price', onClick: () => alert('Change price') },
-    { id: 'dept', label: '📦 Move dept', onClick: () => alert('Move dept') },
-    { id: 'tags', label: '🏷 Add tags', onClick: () => alert('Add tags') },
-    { id: 'stock', label: '📊 Adjust stock', onClick: () => alert('Adjust stock') },
-    { id: 'delete', label: '🗑 Delete', onClick: () => alert('Delete'), danger: true },
-  ];
+  // Placeholder action handlers — bulk-edit sheets wired in a later task.
+  const bulkActions = useMemo(
+    () => [
+      { id: 'price', label: '💰 Change price', onClick: () => alert('Change price') },
+      { id: 'dept', label: '📦 Move dept', onClick: () => alert('Move dept') },
+      { id: 'tags', label: '🏷 Add tags', onClick: () => alert('Add tags') },
+      { id: 'stock', label: '📊 Adjust stock', onClick: () => alert('Adjust stock') },
+      { id: 'delete', label: '🗑 Delete', onClick: () => alert('Delete'), danger: true },
+    ],
+    [],
+  );
 
   return (
     <div className="catalog-list-screen">
