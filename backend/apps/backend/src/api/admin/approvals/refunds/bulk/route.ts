@@ -69,20 +69,42 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(400).json({ error: 'approver_id required' });
   }
 
+  // Upfront per-item shape validation — reject the whole batch BEFORE any
+  // mutation so a malformed item at index N can't leave items 0..N-1
+  // processed-then-rolled-back. We only validate the envelope here (object +
+  // vendor_id, which the mixed-vendor guard and audit attribution depend on);
+  // deeper validity (e.g. non-empty lines) is processReturn's responsibility
+  // and is exercised through the rollback/compensation path.
+  for (let i = 0; i < refunds.length; i++) {
+    const r = refunds[i];
+    if (!r || typeof r !== 'object') {
+      return res.status(400).json({ error: `refunds[${i}] must be an object` });
+    }
+    if (typeof r.vendor_id !== 'string' || !r.vendor_id) {
+      return res.status(400).json({ error: `refunds[${i}].vendor_id required` });
+    }
+  }
+
+  // Mixed-vendor guard — the audit row is attributed to a single vendor_id, so a
+  // batch must not span vendors (it would mis-attribute the audit trail and cross
+  // tenant boundaries). Reject before mutating.
+  const batchVendor = refunds[0].vendor_id as string;
+  if (refunds.some((r: any) => r.vendor_id !== batchVendor)) {
+    return res.status(400).json({ error: 'all refunds in a batch must share the same vendor_id' });
+  }
+
   const pos: any = req.scope.resolve('posTerminalService');
   const wms: any = req.scope.resolve('wmsService');
   const pg: any = (req.scope as any).resolve(ContainerRegistrationKeys.PG_CONNECTION);
 
-  // Attribute the audit row to the first refund's vendor_id (all items in
-  // one batch should belong to the same vendor in practice).
-  const firstVendor = refunds[0]?.vendor_id;
-  if (firstVendor) {
-    (req as any).audit_context = { vendor_id: firstVendor };
-  }
+  // Attribute the audit row to the batch vendor (guaranteed uniform above).
+  (req as any).audit_context = { vendor_id: batchVendor };
 
-  // Decline = no-op for Path B (no pending record exists to mark declined).
-  // We still return processed: refunds.length so the caller can display
-  // "N declined" in the UI.
+  // Decline = a pure no-op on the server for Path B: there is NO pending-refund
+  // record to mark "declined" (see the Path B note above). The decision to
+  // discard a staff refund request is therefore entirely client-side — the UI
+  // simply drops the request from its local tray and never calls processReturn.
+  // We echo back processed: refunds.length only so the caller can show "N declined".
   if (decision === 'decline') {
     return res.json({ processed: refunds.length, failed: [], results: [] });
   }

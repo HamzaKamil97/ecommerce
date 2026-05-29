@@ -35,7 +35,6 @@ export async function PUT(req: MedusaRequest, res: MedusaResponse) {
     }
     throw e;
   }
-  if (!cashier) return res.status(404).json({ error: 'cashier not found' });
 
   const overrides = { ...(cashier.permission_overrides ?? {}) } as Record<string, unknown>;
   if (value === null) delete overrides[key];

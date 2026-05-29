@@ -11,7 +11,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const pos: any = req.scope.resolve('posTerminalService');
   try {
     const cashier = await pos.retrieveCashier(id);
-    if (!cashier) return res.status(404).json({ error: 'cashier not found' });
     return res.json({ cashier });
   } catch (e: any) {
     // Medusa's retrieve throws NotFound — translate to 404
