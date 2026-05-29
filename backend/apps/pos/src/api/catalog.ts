@@ -1,4 +1,4 @@
-import { apiGet } from './client';
+import { apiGet, apiPost } from './client';
 
 export type Product = {
   id: string;
@@ -33,4 +33,27 @@ export async function listDepartments(tenantId: string): Promise<Department[]> {
     `/admin/departments?tenant_id=${encodeURIComponent(tenantId)}`,
   );
   return r.departments ?? r.rows ?? [];
+}
+
+export type CreateProductInput = {
+  vendor_id: string;
+  title: string;
+  price_minor: number;
+  currency_code: string;
+  merch_category_id?: string | null;
+  sku?: string | null;
+  barcode?: string | null;
+  initial_on_hand?: number | null;
+  cost_price_minor?: number | null;
+  brand?: string | null;
+  supplier_name?: string | null;
+  description?: string | null;
+  tags?: string[];
+  low_stock_threshold?: number | null;
+  internal_notes?: string | null;
+  schema_fields?: Record<string, any>;
+};
+
+export async function createProduct(input: CreateProductInput) {
+  return apiPost('/admin/products', input);
 }
