@@ -52,12 +52,13 @@ export function AddProductSearchScreen() {
       setOffHits([]);
       return;
     }
+    let cancelled = false;
     const id = setTimeout(() => {
       searchOpenFoodFacts(query)
-        .then(setOffHits)
-        .catch(() => setOffHits([]));
+        .then((hits) => { if (!cancelled) setOffHits(hits); })
+        .catch(() => { if (!cancelled) setOffHits([]); });
     }, 250);
-    return () => clearTimeout(id);
+    return () => { cancelled = true; clearTimeout(id); };
   }, [query]);
 
   const catalogMatches = filterCatalog(products, query);
