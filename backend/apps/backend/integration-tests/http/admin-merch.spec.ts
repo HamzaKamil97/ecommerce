@@ -94,6 +94,67 @@ medusaIntegrationTestRunner({
         expect(list.data.merch_categories[0].name).toBe("Pizzas")
       })
 
+      it("renames a merch category via PATCH and persists it", async () => {
+        const tenantSvc = getContainer().resolve(TENANT_MODULE) as any
+        const [t] = await tenantSvc.createTenants([{
+          slug: `am-patch-${Date.now()}`,
+          name: "Patch Shop",
+          approval_status: "approved",
+        }])
+
+        const create = await api.post(
+          `/admin/tenants/${t.id}/merch-categories`,
+          { name: "Drinks" },
+          { headers: adminHeaders }
+        )
+        const id = create.data.merch_category.id
+
+        // Regression: the PATCH handler must use the MedusaService object form
+        // updateMerchCategories({ id, ...fields }). Passing the id positionally
+        // makes Medusa resolve id="" → 404 "MerchCategory with id '' not found".
+        const patch = await api
+          .patch(
+            `/admin/tenants/${t.id}/merch-categories/${id}`,
+            { name: "Cold Drinks" },
+            { headers: adminHeaders }
+          )
+          .catch((e: any) => e.response)
+        expect(patch.status).toBe(200)
+        expect(patch.data.merch_category.name).toBe("Cold Drinks")
+
+        const list = await api.get(
+          `/admin/tenants/${t.id}/merch-categories`,
+          { headers: adminHeaders }
+        )
+        expect(list.data.merch_categories[0].name).toBe("Cold Drinks")
+      })
+
+      it("deletes a merch category via DELETE", async () => {
+        const tenantSvc = getContainer().resolve(TENANT_MODULE) as any
+        const [t] = await tenantSvc.createTenants([{
+          slug: `am-del-${Date.now()}`,
+          name: "Del Shop",
+          approval_status: "approved",
+        }])
+        const create = await api.post(
+          `/admin/tenants/${t.id}/merch-categories`,
+          { name: "Temp" },
+          { headers: adminHeaders }
+        )
+        const id = create.data.merch_category.id
+
+        const del = await api
+          .delete(`/admin/tenants/${t.id}/merch-categories/${id}`, { headers: adminHeaders })
+          .catch((e: any) => e.response)
+        expect(del.status).toBe(204)
+
+        const list = await api.get(
+          `/admin/tenants/${t.id}/merch-categories`,
+          { headers: adminHeaders }
+        )
+        expect(list.data.merch_categories).toHaveLength(0)
+      })
+
       it("returns 409 on duplicate handle", async () => {
         const tenantSvc = getContainer().resolve(TENANT_MODULE) as any
         const [t] = await tenantSvc.createTenants([{

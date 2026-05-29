@@ -13,7 +13,10 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
   if (typeof body.name === "string") allowed.name = body.name
   if (typeof body.position === "number") allowed.position = body.position
   if ("icon_url" in body) allowed.icon_url = body.icon_url
-  const updated = await merch.updateMerchCategories(req.params.id, allowed)
+  // MedusaService update expects the object form { id, ...fields }; passing the
+  // id as a positional string is ignored (id resolves to "" → not found).
+  // Matches the pattern used by the sibling tenants/[id] route (updateTenants).
+  const updated = await merch.updateMerchCategories({ id: req.params.id, ...allowed })
   res.json({ merch_category: updated })
 }
 
