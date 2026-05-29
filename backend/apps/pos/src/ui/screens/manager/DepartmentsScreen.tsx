@@ -217,7 +217,11 @@ export function DepartmentsScreen() {
             </div>
           </div>
         </div>
-        <button type="button" className="departments-screen__reset-btn">
+        <button
+          type="button"
+          className="departments-screen__reset-btn"
+          onClick={() => alert('Reset to industry default — coming soon')}
+        >
           ↺ Reset to industry default
         </button>
       </div>
