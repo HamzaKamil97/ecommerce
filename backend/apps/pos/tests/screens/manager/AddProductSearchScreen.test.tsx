@@ -6,11 +6,9 @@ import * as catalog from '../../../src/api/catalog';
 
 vi.mock('../../../src/api/catalog', () => ({
   listProducts: vi.fn(),
-  listDepartments: vi.fn(),
 }));
 
 beforeEach(() => {
-  vi.mocked(catalog.listDepartments).mockResolvedValue([]);
   vi.mocked(catalog.listProducts).mockResolvedValue([
     {
       id: 'prod-1',

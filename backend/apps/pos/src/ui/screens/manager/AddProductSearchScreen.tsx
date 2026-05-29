@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listProducts } from '../../../api/catalog';
 import type { Product } from '../../../api/catalog';
@@ -13,6 +13,8 @@ function formatPrice(minor: number): string {
   return minor.toLocaleString();
 }
 
+const MAX_CATALOG_RESULTS = 8;
+
 function filterCatalog(products: Product[], q: string): Product[] {
   if (!q.trim()) return [];
   const lower = q.trim().toLowerCase();
@@ -22,7 +24,7 @@ function filterCatalog(products: Product[], q: string): Product[] {
         p.title.toLowerCase().includes(lower) ||
         (p.sku ?? '').toLowerCase().includes(lower),
     )
-    .slice(0, 8);
+    .slice(0, MAX_CATALOG_RESULTS);
 }
 
 // ─── main component ─────────────────────────────────────────────────────────
@@ -34,17 +36,11 @@ export function AddProductSearchScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState('');
   const [offHits, setOffHits] = useState<OffHit[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Load full catalog on mount for dedup filtering
   useEffect(() => {
     listProducts(vendorId).then(setProducts).catch(console.error);
   }, [vendorId]);
-
-  // Auto-focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   // Debounced OpenFoodFacts search (~250ms), cancel on cleanup
   useEffect(() => {
@@ -103,7 +99,6 @@ export function AddProductSearchScreen() {
         <div className="add-product-search__search-bar">
           <div className="add-product-search__search-icon">🔍</div>
           <input
-            ref={inputRef}
             className="add-product-search__search-input"
             type="text"
             autoFocus
@@ -123,7 +118,7 @@ export function AddProductSearchScreen() {
         </div>
 
         <div className="add-product-search__search-hint">
-          Type to search · <kbd>Tab</kbd> to scan · barcode lookup pre-fills from OpenFoodFacts
+          Type to search · barcode lookup pre-fills from OpenFoodFacts
         </div>
 
         {/* Empty state — shown when no query */}
@@ -154,16 +149,11 @@ export function AddProductSearchScreen() {
             </div>
 
             {catalogMatches.map((product) => (
-              <div
+              <button
                 key={product.id}
+                type="button"
                 className="add-product-search__result"
                 onClick={() => navigate(`/manager/catalog/${product.id}/edit`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ')
-                    navigate(`/manager/catalog/${product.id}/edit`);
-                }}
               >
                 <div className="add-product-search__result-thumb">
                   {product.thumb_emoji ?? '📦'}
@@ -178,17 +168,10 @@ export function AddProductSearchScreen() {
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="add-product-search__pill add-product-search__pill--edit"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/manager/catalog/${product.id}/edit`);
-                  }}
-                >
+                <span className="add-product-search__pill add-product-search__pill--edit">
                   ✎ Edit
-                </button>
-              </div>
+                </span>
+              </button>
             ))}
           </section>
         )}
@@ -208,18 +191,13 @@ export function AddProductSearchScreen() {
             </div>
 
             {offHits.map((hit) => (
-              <div
+              <button
                 key={hit.id}
+                type="button"
                 className="add-product-search__result"
                 onClick={() =>
                   navigate(`/manager/catalog/new?off=${encodeURIComponent(hit.id)}`)
                 }
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ')
-                    navigate(`/manager/catalog/new?off=${encodeURIComponent(hit.id)}`);
-                }}
               >
                 <div className="add-product-search__result-thumb">
                   {hit.imageUrl ? (
@@ -235,17 +213,10 @@ export function AddProductSearchScreen() {
                     {hit.barcode && <span> · {hit.barcode}</span>}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="add-product-search__pill add-product-search__pill--add"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/manager/catalog/new?off=${encodeURIComponent(hit.id)}`);
-                  }}
-                >
+                <span className="add-product-search__pill add-product-search__pill--add">
                   ＋ Add
-                </button>
-              </div>
+                </span>
+              </button>
             ))}
           </section>
         )}
