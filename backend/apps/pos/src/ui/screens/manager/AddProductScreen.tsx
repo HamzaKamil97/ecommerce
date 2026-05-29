@@ -418,10 +418,9 @@ export function AddProductScreen() {
                 <input
                   id="aps-best-before"
                   aria-label="Best-before date"
-                  type="text"
+                  type="date"
                   value={bestBefore}
                   onChange={(e) => setBestBefore(e.target.value)}
-                  placeholder="YYYY-MM-DD"
                   className="add-product-screen__mono"
                 />
                 <div className="add-product-screen__hint">Drives expiry alerts &amp; FIFO at the register</div>
