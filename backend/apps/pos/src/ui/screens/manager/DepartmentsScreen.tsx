@@ -65,7 +65,7 @@ export function DepartmentsScreen() {
     if (!draftName.trim()) return cancelEdit();
     setSaving(true);
     try {
-      await updateDepartment(id, { name: draftName.trim() });
+      await updateDepartment(vendorId, id, { name: draftName.trim() });
       setEditingId(null);
       setDraftName('');
       await loadDepartments();

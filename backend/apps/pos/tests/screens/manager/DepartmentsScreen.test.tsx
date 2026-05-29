@@ -32,7 +32,9 @@ beforeEach(() => {
       product_count: 28,
     },
   ]);
-  vi.mocked(deptApi.updateDepartment).mockResolvedValue({ ok: true });
+  vi.mocked(deptApi.updateDepartment).mockResolvedValue({
+    id: 'd1', tenant_id: 'tenant-1', handle: 'dairy', name: 'Dairy', position: 1, icon_url: null,
+  });
   vi.mocked(deptApi.reorderDepartments).mockResolvedValue({ updated: 2 });
   vi.mocked(deptApi.createDepartment).mockResolvedValue({
     id: 'd3',
@@ -85,6 +87,7 @@ describe('DepartmentsScreen', () => {
     // updateDepartment should be called with the new name
     await waitFor(() => {
       expect(deptApi.updateDepartment).toHaveBeenCalledWith(
+        'v_test',
         'd1',
         expect.objectContaining({ name: 'Dairy & Yoghurt' }),
       );
