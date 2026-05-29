@@ -1,0 +1,489 @@
+/* ============================================================
+   CatalogListScreen.css
+   ALL selectors are scoped under .catalog-list-screen to
+   prevent bleed to other screens (Vite imports CSS globally).
+   ============================================================ */
+
+.catalog-list-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ivory, #f4ede1);
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink, #1f1c18);
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.catalog-list-screen__header {
+  background: linear-gradient(180deg, #0e0d0b, #1a1815);
+  color: #f7f2e5;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid #2a2520;
+  flex-wrap: wrap;
+}
+
+.catalog-list-screen__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.catalog-list-screen__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f7f2e5;
+  margin: 0;
+}
+
+.catalog-list-screen__subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a59f8c;
+}
+
+.catalog-list-screen__header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Search box (opens spotlight) ────────────────────────── */
+
+.catalog-list-screen__search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(247, 242, 229, 0.06);
+  border: 1px solid #2a2520;
+  border-radius: 999px;
+  padding: 9px 16px;
+  color: #a59f8c;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+  min-width: 220px;
+}
+
+.catalog-list-screen__search-box:hover {
+  border-color: var(--gold, #b88a3a);
+  background: rgba(247, 242, 229, 0.1);
+}
+
+.catalog-list-screen__search-placeholder {
+  flex: 1;
+  text-align: left;
+}
+
+.catalog-list-screen__kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(247, 242, 229, 0.08);
+  color: var(--gold, #b88a3a);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+
+.catalog-list-screen__btn {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--line-2, #d4ccba);
+  background: linear-gradient(180deg, #fff, var(--paper, #faf6ee));
+  color: var(--ink, #1f1c18);
+  transition: transform 150ms, box-shadow 150ms;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-list-screen__btn:hover {
+  transform: translateY(-1px);
+}
+
+.catalog-list-screen__btn--primary {
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  border-color: var(--gold-3, #8a6228);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 4px 12px rgba(184, 138, 58, 0.3);
+}
+
+/* ── Phone chip rail ─────────────────────────────────────── */
+
+.catalog-list-screen .chip-rail {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--ivory, #f4ede1);
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.catalog-list-screen .chip-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.catalog-list-screen__chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper-2, #fff);
+  border: 1px solid var(--line-3, #e5dfd0);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink, #1f1c18);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+}
+
+.catalog-list-screen__chip.active {
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  border-color: var(--gold-3, #8a6228);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 4px 12px rgba(184, 138, 58, 0.3);
+}
+
+.catalog-list-screen__chip-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--line-4, #f0e9d8);
+  color: var(--ink-3, #6f6859);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.catalog-list-screen__chip.active .catalog-list-screen__chip-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* ── Body layout ─────────────────────────────────────────── */
+
+.catalog-list-screen__body {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 767px) {
+  .catalog-list-screen__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Desktop rail ────────────────────────────────────────── */
+
+.catalog-list-screen__rail {
+  background: var(--paper-2, #fff);
+  border-right: 1px solid var(--line-3, #e5dfd0);
+  padding: 16px 12px;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: calc(100vh - 121px);
+  overflow-y: auto;
+}
+
+.catalog-list-screen__rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1f1c18);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 150ms;
+  position: relative;
+}
+
+.catalog-list-screen__rail-item:hover {
+  background: var(--paper, #faf6ee);
+}
+
+.catalog-list-screen__rail-item.active {
+  background: linear-gradient(135deg, rgba(184, 138, 58, 0.12), #fff);
+  color: var(--ink, #1f1c18);
+  box-shadow: 0 1px 2px rgba(31, 28, 24, 0.06);
+}
+
+.catalog-list-screen__rail-item.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+}
+
+.catalog-list-screen__rail-name {
+  flex: 1;
+}
+
+.catalog-list-screen__rail-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3, #6f6859);
+  background: var(--line-4, #f0e9d8);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.catalog-list-screen__rail-item.active .catalog-list-screen__rail-count {
+  background: var(--paper-2, #fff);
+  color: var(--gold-3, #8a6228);
+}
+
+/* ── Main content ────────────────────────────────────────── */
+
+.catalog-list-screen__main {
+  min-width: 0;
+  padding: 0;
+}
+
+.catalog-list-screen__loading {
+  padding: 40px 24px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+}
+
+/* ── Dept section ────────────────────────────────────────── */
+
+.catalog-list-screen__dept-section {
+  padding: 0;
+}
+
+.catalog-list-screen__dept-header {
+  position: sticky;
+  top: 0;
+  background: var(--ivory, #f4ede1);
+  z-index: 5;
+  padding: 16px 24px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+}
+
+.catalog-list-screen__dept-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold-2, #c89844), var(--gold-3, #8a6228));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+.catalog-list-screen__dept-name {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.catalog-list-screen__dept-meta {
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+}
+
+.catalog-list-screen__dept-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Product grid ────────────────────────────────────────── */
+
+.catalog-list-screen .product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 16px 24px 24px;
+}
+
+@media (max-width: 767px) {
+  .catalog-list-screen .product-grid {
+    grid-template-columns: 1fr;
+    padding: 8px 16px 16px;
+  }
+}
+
+/* ── Product card ────────────────────────────────────────── */
+
+.catalog-list-screen .product-card {
+  background: var(--paper-2, #fff);
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 22px 64px 1fr;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 150ms, border-color 150ms;
+  box-shadow: 0 1px 2px rgba(31, 28, 24, 0.06);
+  position: relative;
+  align-items: start;
+}
+
+.catalog-list-screen .product-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 28, 24, 0.08);
+  border-color: var(--gold-2, #c89844);
+}
+
+.catalog-list-screen .product-card.selected {
+  border-color: var(--gold, #b88a3a);
+  background: linear-gradient(135deg, rgba(184, 138, 58, 0.12), #fff);
+}
+
+.catalog-list-screen .product-card__check-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+  cursor: pointer;
+}
+
+.catalog-list-screen .product-card__check-label input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--gold-3, #8a6228);
+}
+
+.catalog-list-screen .product-card .thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--paper, #faf6ee), var(--line-4, #f0e9d8));
+  border: 1px solid var(--line-3, #e5dfd0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.catalog-list-screen .product-card .info {
+  min-width: 0;
+}
+
+.catalog-list-screen .product-card .name {
+  font-weight: 800;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  line-height: 1.25;
+}
+
+.catalog-list-screen .product-card .meta-row {
+  font-size: 10.5px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 600;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.catalog-list-screen .product-card .meta-row .mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+}
+
+.catalog-list-screen .product-card .bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.catalog-list-screen .product-card .price {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.catalog-list-screen .product-card .price small {
+  font-size: 9px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* ── Stock badges ────────────────────────────────────────── */
+
+.catalog-list-screen .stock-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.catalog-list-screen .stock-badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.catalog-list-screen .stock-badge.ok {
+  background: rgba(47, 106, 85, 0.12);
+  color: var(--emerald, #2f6a55);
+}
+
+.catalog-list-screen .stock-badge.low {
+  background: rgba(184, 138, 58, 0.12);
+  color: var(--gold-3, #8a6228);
+}
+
+.catalog-list-screen .stock-badge.oos {
+  background: rgba(134, 42, 58, 0.12);
+  color: var(--burgundy, #862a3a);
+}
