@@ -11,7 +11,7 @@ export type Department = {
 };
 
 export async function listDepartments(tenantId: string): Promise<Department[]> {
-  const r = await apiGet<any>(
+  const r = await apiGet<{ departments?: Department[]; rows?: Department[] }>(
     `/admin/departments?tenant_id=${encodeURIComponent(tenantId)}`,
   );
   return r.departments ?? r.rows ?? [];

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   listDepartments,
@@ -36,18 +36,18 @@ export function DepartmentsScreen() {
   const [addName, setAddName] = useState('');
   const [saving, setSaving] = useState(false);
 
-  function loadDepartments() {
+  const loadDepartments = useCallback(() => {
     return listDepartments(vendorId)
       .then((rows) => {
         const sorted = [...rows].sort((a, b) => a.position - b.position);
         setDepartments(sorted);
       })
       .finally(() => setLoading(false));
-  }
+  }, [vendorId]);
 
   useEffect(() => {
     loadDepartments();
-  }, [vendorId]);
+  }, [loadDepartments]);
 
   // ── inline edit handlers ─────────────────────────────────────────────────
 
@@ -86,6 +86,9 @@ export function DepartmentsScreen() {
   // ── reorder handler ──────────────────────────────────────────────────────
 
   async function handleReorder(newOrderIds: string[]) {
+    // Drop any in-flight inline edit so an unsaved draft can't collide with the
+    // reorder write (which restamps every row's position).
+    if (editingId) cancelEdit();
     // Optimistic local update
     const reordered = newOrderIds
       .map((id) => departments.find((d) => d.id === id))
@@ -163,9 +166,7 @@ export function DepartmentsScreen() {
               </div>
             </>
           ) : (
-            <>
-              <div className="departments-screen__dept-ttl">{dept.name}</div>
-            </>
+            <div className="departments-screen__dept-ttl">{dept.name}</div>
           )}
         </div>
 
@@ -228,6 +229,8 @@ export function DepartmentsScreen() {
 
       <div className="departments-screen__shell">
         {/* Industry header */}
+        {/* TODO: source the industry name/icon from tenant config — hardcoded to
+            grocery for the single-tenant pilot. */}
         <div className="departments-screen__industry-header">
           <div className="departments-screen__industry-ic">🛒</div>
           <div>
