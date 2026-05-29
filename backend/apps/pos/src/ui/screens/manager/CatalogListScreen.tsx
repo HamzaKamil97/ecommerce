@@ -242,6 +242,30 @@ export function CatalogListScreen() {
         <main className="catalog-list-screen__main">
           {loading ? (
             <div className="catalog-list-screen__loading">Loading catalog…</div>
+          ) : departments.length === 0 ? (
+            <div className="catalog-list-screen__empty">
+              <div className="catalog-list-screen__empty-ic" aria-hidden>📦</div>
+              <h2 className="catalog-list-screen__empty-title">No products yet</h2>
+              <p className="catalog-list-screen__empty-body">
+                Add your first product or bulk-import a CSV to start building your catalog.
+              </p>
+              <div className="catalog-list-screen__empty-actions">
+                <button
+                  type="button"
+                  className="catalog-list-screen__btn catalog-list-screen__btn--primary"
+                  onClick={() => navigate('/manager/catalog/search')}
+                >
+                  ＋ Add product
+                </button>
+                <button
+                  type="button"
+                  className="catalog-list-screen__btn"
+                  onClick={() => navigate('/manager/import')}
+                >
+                  📥 Import CSV
+                </button>
+              </div>
+            </div>
           ) : (
             departments.map((dept) => {
               const deptProducts = productsByDept.get(dept.id) ?? [];

@@ -486,3 +486,38 @@
   background: rgba(134, 42, 58, 0.12);
   color: var(--burgundy, #862a3a);
 }
+
+/* ── Empty state (no products/departments) ─────────────────── */
+.catalog-list-screen__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 64px 24px;
+  margin: 0 auto;
+  max-width: 420px;
+}
+.catalog-list-screen__empty-ic {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.85;
+}
+.catalog-list-screen__empty-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink, #1f1c18);
+  margin: 0 0 8px;
+}
+.catalog-list-screen__empty-body {
+  font-size: 14px;
+  color: var(--ink-3, #6f6859);
+  line-height: 1.55;
+  margin: 0 0 20px;
+}
+.catalog-list-screen__empty-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
