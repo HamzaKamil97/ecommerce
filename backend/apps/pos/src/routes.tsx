@@ -4,8 +4,14 @@ import { LoginScreen } from './ui/screens/LoginScreen';
 import { ManagerLayout } from './ui/screens/manager/ManagerLayout';
 import { ManagerPinGate } from './ui/screens/manager/ManagerPinGate';
 import { CatalogListScreen } from './ui/screens/manager/CatalogListScreen';
+import { AddProductSearchScreen } from './ui/screens/manager/AddProductSearchScreen';
 import { AddProductScreen } from './ui/screens/manager/AddProductScreen';
+import { DepartmentsScreen } from './ui/screens/manager/DepartmentsScreen';
+import { TagsScreen } from './ui/screens/manager/TagsScreen';
 import { CsvImportScreen } from './ui/screens/manager/CsvImportScreen';
+import { ApprovalsTrayScreen } from './ui/screens/manager/ApprovalsTrayScreen';
+import { PinResetScreen } from './ui/screens/manager/PinResetScreen';
+import { AuditLogScreen } from './ui/screens/manager/AuditLogScreen';
 import { OrderInboxScreen } from './ui/screens/OrderInboxScreen';
 import { OrderDetailScreen } from './ui/screens/OrderDetailScreen';
 import { EndOfDayScreen } from './ui/screens/EndOfDayScreen';
@@ -52,8 +58,14 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="catalog" replace /> },
       { path: 'catalog', element: <CatalogListScreen /> },
+      { path: 'catalog/search', element: <AddProductSearchScreen /> },
       { path: 'catalog/new', element: <AddProductScreen /> },
+      { path: 'departments', element: <DepartmentsScreen /> },
+      { path: 'tags', element: <TagsScreen /> },
       { path: 'import', element: <CsvImportScreen /> },
+      { path: 'approvals', element: <ApprovalsTrayScreen /> },
+      { path: 'pin-reset', element: <PinResetScreen /> },
+      { path: 'audit-log', element: <AuditLogScreen /> },
     ],
   },
 ]);
