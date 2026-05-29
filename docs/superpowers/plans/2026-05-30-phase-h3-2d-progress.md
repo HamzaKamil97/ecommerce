@@ -27,9 +27,33 @@
 - Each re-point has an **api-client-level test** that mocks the `./client` transport and asserts the exact path/method + the response→type mapping. This is the binding DoD: the screen unit tests mock these clients, so a wrong URL/shape would NOT fail them — the new transport tests close that gap.
 - Two-stage review (spec compliance → code quality) run per task; all PASS. Only cosmetic minors noted (no blockers).
 
-## DoD note — live verification DEFERRED
+## Live verification — DONE 2026-05-30 (Playwright, full scenarios)
 
-Live Playwright verification (running pg + backend :9000 + pos :9200, manager login QA Manager / 4242 in `v_test`) was **deferred to the end-of-phase manual browser walk** (after Pass 4), per the plan's "AND/OR" clause. The api-client tests are the binding gate for Pass 1. When the live walk runs, confirm: Departments list/add/rename/reorder hits `/admin/tenants/v_test/merch-categories` + `/admin/departments/reorder` (no `/admin/departments*` 404s); catalog rail populates from merch categories; PIN-reset staff list renders cashiers with role-default capability pills and no crash.
+Per the user's "full scenario testing" directive, the deferred live walk was run immediately (not at end-of-phase). Stack was already up (backend :9000 `medusa develop`, pos :9200, pg :5433). Logged in QA Manager / 4242 → manager mode.
+
+**Departments — fully exercised, all green:**
+- list → `GET /admin/tenants/v_test/merch-categories` 200 (no `/admin/departments*` 404)
+- add "Dairy" (Enter-key submit) → `POST …/merch-categories` 201, row appears, count 0→1
+- rename "Dairy"→"Dairy & Eggs" → `PATCH …/merch-categories/:id` **200** (see bug below), persists
+- reorder via drag → `PUT /admin/departments/reorder` 200, Bakery moved above Dairy, persisted
+- empty state + theme (paper/gold/dark header) visually correct (screenshot `h3-2d-departments-empty.png`)
+
+**Catalog rail — green:** `catalog.ts listDepartments` re-point populates the dept tab-rail (Bakery / Dairy & Eggs) + grouped "0 products" sections with "+ Add to X" CTAs.
+
+**PIN reset — green:** `GET /admin/pos-terminal/cashiers?vendor_id=v_test` 200 → "1 active", QA Manager row, 3 capability pills all "Allowed" (manager role defaults). **Validates the `permission_overrides: {}` default live** — `resolveLabel` reads `row.permission_overrides[key]` with no crash. Reset modal UI renders (keypad + dice + backspace, screenshot `h3-2d-pinreset-modal.png`). Reset *action* is Pass 2 (endpoint not built) — not exercised.
+
+### 🐛 BUG FOUND + FIXED during the walk — merch-category PATCH (commit `59a5e76`)
+Rename 404'd live: `MerchCategory with id "" not found`. Root cause (proved with a temporary `req.params` echo — params were fine): the PATCH handler called `merch.updateMerchCategories(req.params.id, allowed)` **positionally**; MedusaService `update` expects the **object form** `{ id, ...fields }` (as the sibling `tenants/[id]` route already does), so id resolved to `""`. Fixed + added PATCH-rename & DELETE regression tests to `admin-merch.spec.ts` (suite previously only covered create/list/duplicate). `admin-merch.spec.ts` 4/4 green. *(DELETE was always fine — `deleteMerchCategories(string)` is the correct positional signature.)*
+
+### ⚠ Pass 2 blocker discovered live
+`catalog.ts listProducts` → `GET /admin/products?vendor_id=v_test` returns **200, not 404** — `/admin/products` is a **built-in Medusa core route** returning core products (empty), NOT the vendor's manager catalog. So Pass 2 CANNOT add a route at `/admin/products` (collides with core). Use a distinct path (e.g. `/admin/catalog/products` or `/admin/tenants/:id/products`) and re-point `listProducts` there.
+
+### Minor nits (non-blocking, already-approved surfaces)
+- ManagerLayout "Exit Manager" / "Back to Register" render as unstyled native buttons.
+- PinModal doesn't close on Escape (only ✕ / Cancel).
+- Pre-existing CORS error on `GET /pos/alerts?vendor_id=v_test` from :9200 (alerts feature, unrelated to H-3.2d).
+
+Test data left in `v_test`: 2 merch categories (Bakery, Dairy & Eggs) — harmless, useful for Pass 2 catalog testing.
 
 ## Carry-forwards into Pass 2
 
