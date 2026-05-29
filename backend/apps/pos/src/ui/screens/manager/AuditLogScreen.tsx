@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { listAuditLog, exportAuditLogUrl } from '../../../api/auditLog';
 import type { AuditRow, AuditFilter } from '../../../api/auditLog';
+import { DiffView } from '../../components/DiffView';
 import { VENDOR_ID } from '../../../env';
 import './AuditLogScreen.css';
 
@@ -50,63 +51,6 @@ function entryIcon(r: AuditRow): string {
   if (m.includes('wms') || m.includes('inventory')) return '📦';
   if (m.includes('cash')) return '💵';
   return '●';
-}
-
-/** Compute flat list of changed keys between before and after objects. */
-function diffEntries(before: any, after: any): { key: string; before: string; after: string }[] {
-  if (!before && !after) return [];
-  const b = before ?? {};
-  const a = after ?? {};
-  const keys = new Set([...Object.keys(b), ...Object.keys(a)]);
-  const result: { key: string; before: string; after: string }[] = [];
-  for (const key of keys) {
-    const bv = b[key];
-    const av = a[key];
-    if (JSON.stringify(bv) !== JSON.stringify(av)) {
-      result.push({
-        key,
-        before: bv !== undefined ? String(bv) : '—',
-        after: av !== undefined ? String(av) : '—',
-      });
-    }
-  }
-  return result;
-}
-
-// ─── DiffView ─────────────────────────────────────────────────────────────────
-
-function DiffView({ before, after }: { before: any; after: any }) {
-  const diffs = diffEntries(before, after);
-  if (diffs.length === 0) {
-    // Show raw snapshot when no before/after comparison possible
-    const snap = after ?? before;
-    if (!snap) return null;
-    return (
-      <div className="al-diff">
-        {Object.entries(snap).map(([k, v]) => (
-          <div key={k} className="diff-line post">
-            <span className="key">{k}:</span> {String(v)}
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return (
-    <div className="al-diff">
-      {diffs.map((d) => (
-        <div key={d.key}>
-          {before && (
-            <div className="diff-line pre">
-              <span className="key">{d.key}:</span> {d.before}
-            </div>
-          )}
-          <div className="diff-line post">
-            <span className="key">{d.key}:</span> {d.after}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 // ─── Timeline Entry ───────────────────────────────────────────────────────────

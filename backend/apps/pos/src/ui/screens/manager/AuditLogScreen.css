@@ -395,46 +395,9 @@
   white-space: nowrap;
 }
 
-/* ─── Diff view ─── */
-.audit-log-screen .al-diff {
+/* ─── Diff view (shared DiffView component handles its own +/− line styling) ─── */
+.audit-log-screen .diff-view {
   margin: 0 14px 12px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  line-height: 1.55;
-  background: var(--paper, #faf6ee);
-  border: 1px solid var(--line-3, #e5dfd0);
-  border-radius: 6px;
-  padding: 8px 12px;
-}
-
-.audit-log-screen .al-diff .diff-line {
-  display: flex;
-  gap: 6px;
-}
-
-.audit-log-screen .al-diff .diff-line.pre {
-  color: var(--burgundy, #862a3a);
-}
-
-.audit-log-screen .al-diff .diff-line.pre::before {
-  content: '−';
-  margin-right: 4px;
-  opacity: 0.7;
-}
-
-.audit-log-screen .al-diff .diff-line.post {
-  color: var(--emerald-2, #387762);
-}
-
-.audit-log-screen .al-diff .diff-line.post::before {
-  content: '+';
-  margin-right: 4px;
-  opacity: 0.7;
-}
-
-.audit-log-screen .al-diff .key {
-  color: var(--ink-3, #6f6859);
-  font-weight: 700;
 }
 
 /* ─── Footer count ─── */
