@@ -36,7 +36,7 @@ function formatTime(iso: string): string {
 function entryClass(r: AuditRow): string {
   const a = r.action.toLowerCase();
   if (a.includes('security') || a.includes('pin') || a.includes('block')) return 'security';
-  if (a.includes('create') || a.includes('create')) return 'create';
+  if (a.includes('create') || a.includes('add')) return 'create';
   if (a.includes('delete') || a.includes('remove')) return 'delete';
   if (a.includes('update') || a.includes('edit') || a.includes('adjust')) return 'update';
   return '';
@@ -231,12 +231,7 @@ export function AuditLogScreen() {
                 </button>
               </div>
             )}
-            <a
-              href={csvUrl}
-              download
-              className="al-export"
-              role="link"
-            >
+            <a href={csvUrl} download className="al-export">
               📥 Export CSV
             </a>
           </div>
