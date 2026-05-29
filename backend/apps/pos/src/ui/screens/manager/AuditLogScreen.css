@@ -1,0 +1,456 @@
+/* AuditLogScreen.css
+   ALL selectors scoped under .audit-log-screen to prevent CSS bleed.
+   Design reference: docs/mockups/h3-2c/audit-log.html
+*/
+
+/* ─── Root ─── */
+.audit-log-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ivory, #f4ede1);
+  color: var(--ink, #1f1c18);
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Header ─── */
+.audit-log-screen .al-header {
+  background: linear-gradient(180deg, #0e0d0b, #1a1815);
+  color: #f7f2e5;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.audit-log-screen .al-header h1 {
+  font-weight: 800;
+  font-size: 18px;
+  color: #f7f2e5;
+  margin: 0;
+}
+
+.audit-log-screen .al-header .al-sub {
+  color: #a59f8c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.audit-log-screen .al-header .h-spacer {
+  flex: 1;
+}
+
+/* ─── Shell (sidebar + main) ─── */
+.audit-log-screen .al-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ─── Sidebar ─── */
+.audit-log-screen .al-side {
+  background: #fff;
+  border-right: 1px solid var(--line-3, #e5dfd0);
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.audit-log-screen .al-side-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3, #6f6859);
+  padding: 12px 6px 6px;
+}
+
+.audit-log-screen .al-side-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--ink, #1f1c18);
+  transition: background 150ms;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.audit-log-screen .al-side-row:hover {
+  background: var(--paper, #faf6ee);
+}
+
+.audit-log-screen .al-side-row.on {
+  background: linear-gradient(135deg, rgba(184,138,58,.12), #fff);
+  box-shadow: 0 1px 2px rgba(31,28,24,.06);
+}
+
+.audit-log-screen .al-side-row .av {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #c89844, #8a6228);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.audit-log-screen .al-side-row .av.mod {
+  background: var(--paper, #faf6ee);
+  border: 1px solid var(--line-3, #e5dfd0);
+  color: var(--ink-3, #6f6859);
+  font-size: 12px;
+}
+
+.audit-log-screen .al-side-row .count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3, #6f6859);
+  background: var(--line-4, #f0e9d8);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.audit-log-screen .al-side-row.on .count {
+  background: #fff;
+  color: var(--gold-3, #8a6228);
+}
+
+.audit-log-screen .al-side-divider {
+  height: 1px;
+  background: var(--line-3, #e5dfd0);
+  margin: 8px 6px;
+}
+
+/* ─── Main column ─── */
+.audit-log-screen .al-main {
+  padding: 0;
+  min-width: 0;
+}
+
+/* ─── Chip / top bar ─── */
+.audit-log-screen .al-topbar {
+  padding: 14px 24px;
+  background: var(--paper, #faf6ee);
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.audit-log-screen .al-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #1f1c18;
+  border: 1px solid #1f1c18;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.audit-log-screen .al-chip .x {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.audit-log-screen .al-export {
+  margin-left: auto;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2, #d4ccba);
+  background: linear-gradient(180deg, #fff, var(--paper, #faf6ee));
+  color: var(--ink, #1f1c18);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.audit-log-screen .al-export:hover {
+  border-color: var(--gold-2, #c89844);
+}
+
+/* ─── Summary strip ─── */
+.audit-log-screen .al-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(184,138,58,.04), var(--ivory, #f4ede1));
+  border-bottom: 1px solid var(--line-3, #e5dfd0);
+}
+
+.audit-log-screen .stat-tile {
+  background: #fff;
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 2px rgba(31,28,24,.06);
+}
+
+.audit-log-screen .stat-tile .lbl {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-3, #6f6859);
+}
+
+.audit-log-screen .stat-tile .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: var(--ink, #1f1c18);
+}
+
+.audit-log-screen .stat-tile .val.ok  { color: var(--emerald-2, #387762); }
+.audit-log-screen .stat-tile .val.warn { color: var(--gold-3, #8a6228); }
+.audit-log-screen .stat-tile .val.crit { color: var(--burgundy, #862a3a); }
+
+.audit-log-screen .stat-tile .trend {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3, #6f6859);
+}
+
+/* ─── Timeline ─── */
+.audit-log-screen .al-timeline {
+  padding: 18px 24px 48px;
+  max-width: 920px;
+  margin: 0 auto;
+  list-style: none;
+}
+
+/* ─── Entry ─── */
+.audit-log-screen .al-entry {
+  background: #fff;
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-left-width: 4px;
+  border-left-color: var(--line-2, #d4ccba);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.audit-log-screen .al-entry.create { border-left-color: var(--emerald, #2f6a55); }
+.audit-log-screen .al-entry.update { border-left-color: var(--gold, #b88a3a); }
+.audit-log-screen .al-entry.delete { border-left-color: var(--burgundy, #862a3a); }
+.audit-log-screen .al-entry.security {
+  border-left-color: var(--burgundy, #862a3a);
+  background: linear-gradient(135deg, rgba(134,42,58,.08), #fff);
+}
+
+.audit-log-screen .entry-head {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  padding: 12px 14px;
+  align-items: flex-start;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: background 150ms;
+}
+
+.audit-log-screen .entry-head:hover {
+  background: rgba(31,28,24,.02);
+}
+
+.audit-log-screen .entry-ic {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--paper, #faf6ee), var(--line-4, #f0e9d8));
+  border: 1px solid var(--line-3, #e5dfd0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.audit-log-screen .al-entry.create .entry-ic {
+  background: linear-gradient(135deg, rgba(47,106,85,.12), #fff);
+  border-color: rgba(47,106,85,.25);
+  color: var(--emerald-2, #387762);
+}
+
+.audit-log-screen .al-entry.update .entry-ic {
+  background: linear-gradient(135deg, rgba(184,138,58,.12), #fff);
+  border-color: rgba(184,138,58,.25);
+  color: var(--gold-3, #8a6228);
+}
+
+.audit-log-screen .al-entry.delete .entry-ic {
+  background: linear-gradient(135deg, rgba(134,42,58,.12), #fff);
+  border-color: rgba(134,42,58,.25);
+  color: var(--burgundy, #862a3a);
+}
+
+.audit-log-screen .al-entry.security .entry-ic {
+  background: linear-gradient(135deg, #9d3548, #862a3a);
+  color: #fff;
+  border-color: #862a3a;
+}
+
+.audit-log-screen .entry-body {
+  min-width: 0;
+}
+
+.audit-log-screen .who-what {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1f1c18);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.audit-log-screen .verb-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(184,138,58,.12);
+  color: var(--gold-3, #8a6228);
+}
+
+.audit-log-screen .al-entry.create .verb-tag {
+  background: rgba(47,106,85,.12);
+  color: var(--emerald, #2f6a55);
+}
+
+.audit-log-screen .al-entry.delete .verb-tag {
+  background: rgba(134,42,58,.12);
+  color: var(--burgundy, #862a3a);
+}
+
+.audit-log-screen .al-entry.security .verb-tag {
+  background: rgba(255,255,255,.22);
+  color: #fff;
+}
+
+.audit-log-screen .target {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  background: var(--paper, #faf6ee);
+  border: 1px solid var(--line-3, #e5dfd0);
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.audit-log-screen .entry-when {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
+  font-size: 11px;
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── Diff view ─── */
+.audit-log-screen .al-diff {
+  margin: 0 14px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  background: var(--paper, #faf6ee);
+  border: 1px solid var(--line-3, #e5dfd0);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.audit-log-screen .al-diff .diff-line {
+  display: flex;
+  gap: 6px;
+}
+
+.audit-log-screen .al-diff .diff-line.pre {
+  color: var(--burgundy, #862a3a);
+}
+
+.audit-log-screen .al-diff .diff-line.pre::before {
+  content: '−';
+  margin-right: 4px;
+  opacity: 0.7;
+}
+
+.audit-log-screen .al-diff .diff-line.post {
+  color: var(--emerald-2, #387762);
+}
+
+.audit-log-screen .al-diff .diff-line.post::before {
+  content: '+';
+  margin-right: 4px;
+  opacity: 0.7;
+}
+
+.audit-log-screen .al-diff .key {
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+}
+
+/* ─── Footer count ─── */
+.audit-log-screen .al-footer {
+  padding: 16px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3, #6f6859);
+  border-top: 1px solid var(--line-3, #e5dfd0);
+  text-align: center;
+}
+
+/* ─── Loading / empty states ─── */
+.audit-log-screen .al-loading {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--ink-3, #6f6859);
+  font-weight: 700;
+}
