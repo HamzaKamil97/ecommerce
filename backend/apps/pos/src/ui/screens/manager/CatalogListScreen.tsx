@@ -122,16 +122,6 @@ export function CatalogListScreen() {
   }, [query, products]);
 
   // Selection helpers
-  function toggleSelect(id: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
   function clearSelection() {
     setSelectedIds(new Set());
   }
@@ -328,8 +318,8 @@ export function CatalogListScreen() {
                             </div>
                             <div className="bottom">
                               <span className="price">
-                                {formatPrice(product.price_minor)}
-                                <small>{product.currency_code}</small>
+                                {formatPrice(product.price_minor)}{' '}
+                                <small>{product.currency_code.toUpperCase()}</small>
                               </span>
                               <StockBadge qty={product.stock_qty} />
                             </div>
