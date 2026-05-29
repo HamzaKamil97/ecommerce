@@ -68,4 +68,13 @@ describe('useResponsive', () => {
     expect(typeof result.current.width).toBe('number');
     expect(result.current.width).toBe(800);
   });
+
+  it('isWidthBelow reflects the current width and reacts to resize', () => {
+    setViewport(900);
+    const { result } = renderHook(() => useResponsive());
+    expect(result.current.isWidthBelow(1100)).toBe(true);
+    expect(result.current.isWidthBelow(800)).toBe(false);
+    act(() => setViewport(1280));
+    expect(result.current.isWidthBelow(1100)).toBe(false);
+  });
 });
