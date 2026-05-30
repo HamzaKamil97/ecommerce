@@ -129,6 +129,8 @@ const placeStep = createStep(
     const cart = createCartResult.result
     const cartId = cart.id
 
+    // createCartWorkflow's result type doesn't expose `items` in the SDK types, but the
+    // flow populates them at runtime — cast to read the priced line snapshot.
     const cartItems: any[] = (cart as any).items ?? []
     const snapshotLines = cartItems.map((i: any) => ({
       variant_id: i.variant_id,
@@ -203,7 +205,7 @@ const placeStep = createStep(
       const displayId = o.display_id?.toString() ?? o.id.slice(-6).toUpperCase()
 
       const fbLines = (c.items ?? []).map((i: any) => ({
-        variant_id: i.variant_id, title: i.title ?? "Item",
+        variant_id: i.variant_id, title: i.title ?? i.product_title ?? "Item",
         quantity: i.quantity, unit_price: Number(i.unit_price ?? 0),
       }))
       return new StepResponse({
@@ -231,6 +233,7 @@ const createOnlineOrderStep = createStep(
     { container },
   ): Promise<StepResponse<{ online_order_id: string | null }, string | null>> => {
     const ooSvc = container.resolve(ONLINE_ORDER_MODULE) as any
+    const logger: any = container.resolve("logger")
     const payload = buildOnlineOrderPayload(
       { id: data.payload_ctx.vendor_id, commission_rate_bps: data.payload_ctx.commission_rate_bps },
       data.payload_ctx.lines,
@@ -244,8 +247,21 @@ const createOnlineOrderStep = createStep(
         delivery_address: data.payload_ctx.delivery_address,
       },
     )
-    const row = await ooSvc.createOrder(payload)
-    return new StepResponse({ online_order_id: row.id }, row.id)
+    if (payload.lines.length === 0) {
+      logger.warn(`[place-cod] online_order for medusa order ${data.order_id} has 0 lines — cart snapshot was empty`)
+    }
+    // Best-effort policy: completeCart already committed the Medusa order by this point,
+    // so a failure here must NOT 400 the customer and orphan their paid order. Log loudly
+    // with the medusa_order_id for reconciliation and return null. The happy path is
+    // verified end-to-end, so a systematic break surfaces immediately as a missing
+    // OrderInbox row rather than being silently swallowed in normal operation.
+    try {
+      const row = await ooSvc.createOrder(payload)
+      return new StepResponse({ online_order_id: row.id }, row.id)
+    } catch (e: any) {
+      logger.error(`[place-cod] FAILED to create online_order for medusa order ${data.order_id} (vendor ${data.payload_ctx.vendor_id}): ${e?.message ?? e}`)
+      return new StepResponse({ online_order_id: null }, null)
+    }
   },
   // Compensation: soft-delete the online_order if a later step fails.
   async (onlineOrderId: string | null, { container }) => {
