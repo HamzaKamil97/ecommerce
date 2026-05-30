@@ -4,13 +4,14 @@
 **Plan(s):** Pass 1 → [2026-05-30-phase-h3-2d-pass1-repoint-clients.md](2026-05-30-phase-h3-2d-pass1-repoint-clients.md)
 **As of:** 2026-05-30
 
-## Status — Pass 3 of 4 COMPLETE
+## Status — ALL 4 PASSES COMPLETE ✅
 
 | Pass | Scope | Status |
 |---|---|---|
 | **1** | Re-point clients to existing endpoints (3 screens) | ✅ **DONE** |
 | **2** | Build missing endpoints (manager products list, product-create reconcile, tags CRUD, staff reset-pin) | ✅ **DONE** |
 | **3** | Approvals model — Option A `pos_refund_request` store + wire manager tray | ✅ **DONE** |
+| **4** | Session persistence + audit PIN-redaction | ✅ **DONE** |
 | 3 | Approvals model decision (A: pos_refund_request table · B: audit-log view → design gate) | ⏳ |
 | 4 | Session + audit hygiene (persist cashier→localStorage / manager→sessionStorage; strip PIN from audit after_json) | ⏳ |
 
@@ -108,6 +109,33 @@ Plan: [2026-05-30-phase-h3-2d-pass3-approvals-model.md](2026-05-30-phase-h3-2d-p
 **Verification:** pos vitest **228 green** (221 + 7 new approvals client tests), tsc 0. Backend: module test 2/2, `admin-approvals-refunds` 3/3, `admin-approvals-refunds-bulk` 8/8 (all individually). P3-3 got full two-stage review; others combined review; whole flow live-verified.
 
 **DEFERRED (needs the design gate):** wiring the **cashier** refund flow (`RefundFlowPhone`/`RefundScreen`) to call `createRefundRequest` when a refund escalates, + the "refund request sent for approval" state on that cashier surface. New cashier-facing UI → [[feedback_design_first_gate]]. The backend create endpoint + `createRefundRequest` client helper already exist, so this is purely the cashier-side UI wiring. Do it as a separate design-gated step (after Pass 4). Test data left in `v_test`: 2 pending refund requests + 1 approved + 1 declined from prior runs.
+
+## Pass 4 — DONE 2026-05-30 (live-verified)
+
+Plan: [2026-05-30-phase-h3-2d-pass4-session-audit-hygiene.md](2026-05-30-phase-h3-2d-pass4-session-audit-hygiene.md). Backend/state-only, no design gate.
+
+| Task | Commit | What | Live verified |
+|---|---|---|---|
+| P4-1 | `ad3c360` | persist `useSession`→localStorage, `useManagerSession`→sessionStorage (zustand persist, theme.ts pattern) + cross-test leakage guard | reload → cashier stays logged in (Register, no re-login); storage split confirmed (cashier in localStorage, manager in **sessionStorage** NOT localStorage) |
+| P4-2 | `e55e280` | recursive `redactSensitive` in audit-log middleware strips pin/password/pin_hash/etc. from `after_json` (clone only — req.body untouched so real pin still hashes) | created cashier pin 9931 → audit `after_json` = `{"pin":"[REDACTED]","name":...}`, raw pin absent, name preserved |
+
+**Why the storage split:** localStorage survives a browser restart (convenient for the till = cashier); sessionStorage clears on browser close, so a manager's back-office access requires re-PIN after a restart (security). Verified both live.
+
+**Verification:** pos vitest 231 green (+3 persist tests), tsc 0. Backend: `audit-log-pin-redaction` 1/1 + regression (`admin-audit-log` 3/3, `admin-cashier-reset-pin` 3/3). P4-2 test proven red-before-green. Each task reviewed + live-verified.
+
+This also fixed the in-memory-session logout that forced a full re-login on every reload during testing.
+
+---
+
+# ✅ PHASE H-3.2d COMPLETE — all 4 passes done + live-verified
+
+Manager mode is now functional end-to-end: catalog (list+add products), departments (CRUD+reorder), tags (CRUD+feature), PIN reset, approvals (real refund workflow), audit log — all wired to real backends + walked live in the browser. ~30 commits on `phase-h3-2c-manager-surfaces` (H-3.2c UI + H-3.2d wiring). pos vitest 231 green, tsc 0; all new backend HTTP/module suites green individually.
+
+**Next:** manual browser walk (done incrementally during each pass) → `superpowers:finishing-a-development-branch` to merge H-3.2c+d into main.
+
+**Known follow-ups (NOT blocking the merge; see memory):**
+- Register feature gaps ([[project_register_feature_gaps_2026-05-30]]): POS register catalog is hardcoded demo data (manager-added products don't appear for the cashier); Add-Product has no photo upload; `/pos/alerts` route missing → console error-flood.
+- Cashier-initiates-refund-request UI (the "sent for approval" state on the cashier refund screen) — backend + client helper exist; needs the design gate.
 
 ## Carry-forwards into Pass 2
 
