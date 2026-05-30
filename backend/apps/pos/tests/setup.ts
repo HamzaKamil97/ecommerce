@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import 'fake-indexeddb/auto';
+import { afterEach } from 'vitest';
 
 // jsdom in this vitest version ships an incomplete localStorage (missing
 // .clear / sometimes .setItem). Provide a deterministic in-memory polyfill
@@ -28,3 +29,11 @@ function installMemoryStorage(target: 'localStorage' | 'sessionStorage') {
 
 installMemoryStorage('localStorage');
 installMemoryStorage('sessionStorage');
+
+// Cross-test leakage guard: persisted Zustand stores rehydrate from storage on
+// import, so a sign-in in one test can bleed into another. Clearing both storages
+// after each test ensures every test starts from a clean slate.
+afterEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
