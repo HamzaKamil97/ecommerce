@@ -9,22 +9,9 @@ import { findByBarcode } from '../../db/catalog-sync';
 import { fetchAlerts, type AlertRow } from '../../api/alerts';
 import { PaymentScreen } from './PaymentScreen';
 import { SettingsScreen } from './SettingsScreen';
+import { CatalogBrowser } from './register/CatalogBrowser';
+import type { CatalogRow } from '../../db/dexie';
 import './RegisterScreen.css';
-
-const DEPARTMENTS = ['All', 'Dairy', 'Bakery', 'Beverages', 'Pantry', 'Frozen'];
-
-const QUICK_TILES: Array<{ variant_id: string; icon: string; name: string; price_minor: number; meta: string }> = [
-  { variant_id: 'qt_milk_almarai', icon: '🥛', name: 'Milk 1L · Almarai', price_minor: 2750, meta: '2,750 IQD · 18 in stock' },
-  { variant_id: 'qt_lurpak_100',   icon: '🧈', name: 'Lurpak 100g',       price_minor: 4500, meta: '4,500 IQD · 6 in stock' },
-  { variant_id: 'qt_white_cheese', icon: '🧀', name: 'White Cheese',      price_minor: 5250, meta: '5,250 IQD · 12 in stock' },
-  { variant_id: 'qt_yogurt_sara',  icon: '🥛', name: 'Yogurt 500g · Sara', price_minor: 2000, meta: '2,000 IQD · 9 in stock' },
-  { variant_id: 'qt_eggs_30',      icon: '🥚', name: 'Eggs Tray · 30',     price_minor: 7000, meta: '7,000 IQD · 14 in stock' },
-  { variant_id: 'qt_cola_1l',      icon: '🥤', name: 'Coca-Cola 1L',       price_minor: 1750, meta: '1,750 IQD · 26 in stock' },
-  { variant_id: 'qt_water_15',     icon: '💧', name: 'Water 1.5L · Aqua',  price_minor:  750, meta: '750 IQD · 48 in stock' },
-  { variant_id: 'qt_tea_afour',    icon: '🍵', name: 'Tea · Al-Afour',     price_minor: 3200, meta: '3,200 IQD · 22 in stock' },
-];
-
-type TabKey = 'departments' | 'favorites' | 'orders';
 
 /** Full thousands-separator format (e.g. "13,500"). Used ONLY by the Charge button
  *  amount so it is the single canonical place where the exact total appears.
@@ -44,8 +31,6 @@ export function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [payOpen, setPayOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabKey>('departments');
-  const [activeDept, setActiveDept] = useState<string>('All');
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
   const vendor_id = (import.meta as any).env?.VITE_VENDOR_ID ?? 'v_test';
@@ -72,11 +57,11 @@ export function RegisterScreen() {
 
   const { isPhone } = useResponsive();
 
-  const handleTileClick = useCallback((tile: typeof QUICK_TILES[number]) => {
+  const handlePick = useCallback((row: CatalogRow) => {
     useCart.getState().addLineFromScan({
-      variant_id: tile.variant_id,
-      name: tile.name,
-      unit_price_minor: tile.price_minor,
+      variant_id: row.variant_id,
+      name: row.name,
+      unit_price_minor: row.price_minor,
       qty: 1,
     });
     try { new Audio('/beep.wav').play().catch(() => {}); } catch { /* noop */ }
@@ -236,57 +221,8 @@ export function RegisterScreen() {
           )}
         </section>
 
-        {/* RIGHT — quick-actions side (tablet+ only) */}
-        {!isPhone && (
-          <aside className="actions-side">
-            <div className="actions-tabs">
-              <button
-                type="button"
-                className={`actions-tab${activeTab === 'departments' ? ' active' : ''}`}
-                onClick={() => setActiveTab('departments')}
-              >
-                Departments
-              </button>
-              <button
-                type="button"
-                className={`actions-tab${activeTab === 'favorites' ? ' active' : ''}`}
-                onClick={() => setActiveTab('favorites')}
-              >
-                Favorites
-              </button>
-              <button
-                type="button"
-                className={`actions-tab${activeTab === 'orders' ? ' active' : ''}`}
-                onClick={() => setActiveTab('orders')}
-              >
-                Orders
-              </button>
-            </div>
-
-            <div className="dept-rail-mini">
-              {DEPARTMENTS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  className={`dept-chip${activeDept === d ? ' active' : ''}`}
-                  onClick={() => setActiveDept(d)}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-
-            <div className="tile-grid">
-              {QUICK_TILES.map((t) => (
-                <button key={t.name} type="button" className="tile" onClick={() => handleTileClick(t)}>
-                  <div className="tile-icon" aria-hidden="true">{t.icon}</div>
-                  <div className="tile-name">{t.name}</div>
-                  <div className="tile-meta">{t.meta}</div>
-                </button>
-              ))}
-            </div>
-          </aside>
-        )}
+        {/* RIGHT — catalog browser (tablet+ only) */}
+        {!isPhone && <CatalogBrowser vendorId={vendor_id} onPick={handlePick} />}
       </div>
 
       {/* Phone sticky charge bar */}
