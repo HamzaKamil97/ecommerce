@@ -23,9 +23,9 @@ export type Department = {
 
 export async function listProducts(vendorId: string): Promise<Product[]> {
   const r = await apiGet<any>(
-    `/admin/products?vendor_id=${encodeURIComponent(vendorId)}&limit=500`,
+    `/admin/catalog/manager-products?vendor_id=${encodeURIComponent(vendorId)}`,
   );
-  return r.products ?? r.rows ?? [];
+  return r.products ?? [];
 }
 
 type MerchCategory = {
