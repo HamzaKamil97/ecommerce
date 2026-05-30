@@ -57,6 +57,14 @@ medusaIntegrationTestRunner({
 
         expect(r.status).toBe(400)
       })
+
+      it("404 on nonexistent cashier id", async () => {
+        const r = await api
+          .post(`/admin/pos-terminal/cashiers/psc_does_not_exist/reset-pin`, { pin: "5678" }, { headers: adminHeaders })
+          .catch((e: any) => e.response)
+
+        expect(r.status).toBe(404)
+      })
     })
   },
 })

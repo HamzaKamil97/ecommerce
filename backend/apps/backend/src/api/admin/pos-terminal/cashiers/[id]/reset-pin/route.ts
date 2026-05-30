@@ -14,10 +14,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   let vendor_id: string | undefined
   try {
     const [rows] = await svc.listAndCountCashiers({ id })
-    vendor_id = rows?.[0]?.vendor_id
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: "cashier not found" })
+    }
+    vendor_id = rows[0].vendor_id
   } catch {
     // non-fatal — audit row will have no vendor_id but the reset still proceeds
   }
+  // NOTE: req.body still carries the raw pin into the audit middleware's after_json snapshot; Pass 4 strips sensitive keys (pin) from audit writes globally.
   ;(req as any).audit_context = { vendor_id }
 
   const result = await svc.resetCashierPin(id, pin)
