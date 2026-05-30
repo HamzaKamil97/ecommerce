@@ -15,3 +15,7 @@ export async function findByBarcode(barcode: string): Promise<CatalogRow | undef
   if (!barcode) return undefined;
   return db.catalog.where('barcode').equals(barcode).first();
 }
+
+export async function loadCatalogFromDb(): Promise<CatalogRow[]> {
+  return db.catalog.toArray();
+}
