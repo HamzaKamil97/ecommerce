@@ -1,5 +1,6 @@
 import { ExecArgs } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { linkSalesChannelsToApiKeyWorkflow } from "@medusajs/medusa/core-flows"
 import { TENANT_MODULE } from "../modules/tenant"
 import { WMS_MODULE } from "../modules/wms"
 import { POS_TERMINAL_MODULE } from "../modules/pos_terminal"
@@ -35,6 +36,9 @@ export default async function seedLoopTest({ container }: ExecArgs) {
   )
   const variantIds: string[] = (variantResult?.rows ?? variantResult ?? []).map((r: any) => r.id)
   logger.info(`  ${SLUG}: ${variantIds.length} variants`)
+  if (variantIds.length === 0) {
+    logger.warn(`  ${SLUG}: no variants in sales channel — WMS step is a no-op. Are products linked to this channel?`)
+  }
 
   // 2) WMS stock — top up to TARGET_ON_HAND (idempotent)
   for (const vid of variantIds) {
@@ -56,14 +60,13 @@ export default async function seedLoopTest({ container }: ExecArgs) {
     filters: { type: "publishable" } as any,
   })
   const pk = pks[0]
-  if (pk) {
+  if (!pk) {
+    logger.warn(`  No publishable API key found — storefront channel link skipped (storefront browse may fail)`)
+  } else {
     const already = (pk.sales_channels ?? []).some(
       (sc: any) => sc.id === tenant.sales_channel_id,
     )
     if (!already) {
-      const { linkSalesChannelsToApiKeyWorkflow } = await import(
-        "@medusajs/medusa/core-flows"
-      )
       await linkSalesChannelsToApiKeyWorkflow(container).run({
         input: { id: pk.id, add: [tenant.sales_channel_id] },
       })
