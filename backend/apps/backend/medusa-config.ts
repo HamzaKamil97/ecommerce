@@ -19,6 +19,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/approval" },
     { resolve: "./src/modules/tenant" },
     { resolve: "./src/modules/merch" },
+    { resolve: "./src/modules/pos_tag" },
     { resolve: "./src/modules/ai" },
 
     { resolve: "./src/modules/delivery" },

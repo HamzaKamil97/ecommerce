@@ -110,5 +110,20 @@ export default defineMiddlewares({
       method: ['PUT'],
       middlewares: [requirePermission('catalog.manage_departments')],
     },
+    {
+      matcher: '/admin/tags',
+      method: ['GET'],
+      middlewares: [requirePermission('catalog.view_products')],
+    },
+    {
+      matcher: '/admin/tags',
+      method: ['POST'],
+      middlewares: [requirePermission('catalog.add_edit_product')],
+    },
+    {
+      matcher: '/admin/tags/*',
+      method: ['PATCH', 'DELETE'],
+      middlewares: [requirePermission('catalog.add_edit_product')],
+    },
   ],
 })

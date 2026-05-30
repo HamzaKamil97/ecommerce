@@ -1,6 +1,3 @@
-// NOTE: /admin/tags/* routes are NOT part of this phase's backend — the screen
-// fail-softs to empty lists until they ship.
-
 import { apiGet, apiPost, apiPatch } from './client';
 
 export type Tag = {
@@ -36,11 +33,13 @@ export async function listTags(vendorId: string): Promise<Tag[]> {
 }
 
 export async function createTag(input: CreateTagInput): Promise<Tag> {
-  return apiPost<Tag>('/admin/tags', input);
+  const r = await apiPost<{ tag: Tag }>('/admin/tags', input);
+  return r.tag;
 }
 
 export async function updateTag(id: string, patch: UpdateTagInput): Promise<Tag> {
-  return apiPatch<Tag>(`/admin/tags/${id}`, patch);
+  const r = await apiPatch<{ tag: Tag }>(`/admin/tags/${id}`, patch);
+  return r.tag;
 }
 
 export async function listAiSuggestions(vendorId: string): Promise<AiTagSuggestion[]> {
