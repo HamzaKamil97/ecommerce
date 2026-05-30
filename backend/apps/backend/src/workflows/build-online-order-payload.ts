@@ -22,6 +22,8 @@ export function buildOnlineOrderPayload(
   lines: PayloadLine[],
   ctx: PayloadCtx,
 ): CreateOnlineOrderInput {
+  // aisle_hint is intentionally NOT set here: it's a picker/WMS concern populated
+  // downstream during fulfilment, and is unknown at the moment a customer places.
   const mapped = lines.map((l) => {
     const unit = Math.round(l.unit_price)
     return {

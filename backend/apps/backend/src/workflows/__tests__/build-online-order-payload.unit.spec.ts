@@ -38,4 +38,11 @@ describe("buildOnlineOrderPayload", () => {
     expect(p.lines[0].unit_price_minor).toBe(333)
     expect(p.lines[0].line_total_minor).toBe(999)
   })
+
+  it("handles an empty lines array (zero totals — documents the edge case)", () => {
+    const p = buildOnlineOrderPayload(shop, [], ctx)
+    expect(p.lines).toEqual([])
+    expect(p.total_minor).toBe(0)
+    expect(p.commission_minor).toBe(0)
+  })
 })
