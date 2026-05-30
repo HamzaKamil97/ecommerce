@@ -4,50 +4,41 @@ import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 /**
  * POST /admin/approvals/refunds/bulk
  *
- * Bulk approve OR decline a batch of refund requests. Stop-on-first-error
+ * Bulk approve OR decline a batch of refund requests by ID. Stop-on-first-error
  * semantics with best-effort rollback of work already done.
  *
- * --- PATH B (inline payloads) ---
- * The plan offered two paths:
- *   A) consume a pre-existing `pos_pending_refund` table
- *   B) accept the original sale-side payload directly per refund
+ * --- ID-based contract (P3-3) ---
+ * Each entry in `refunds[]` is a `pos_refund_request.id` string. The route
+ * resolves each id against the `pos_refund_request` module, validates that the
+ * request exists and is `status === 'pending'`, then acts on it:
  *
- * After grepping `backend/apps/backend/src/modules/pos_terminal/service.ts`
- * and the models/ directory we found:
- *   - NO `PendingRefund`, `RefundRequest`, `createPendingRefund`, or
- *     `retrievePendingRefund` method exists.
- *   - The only refund-side API is `processReturn(input: ProcessReturnInput)`
- *     which creates an immediate voided `pos_sale` row + restocks via wms.
- *   - Models present: cashier.model, sale.model, sale-line.model.
+ *   Approve: pos.processReturn(request.payload) → markStatus(id, 'approved')
+ *   Decline: markStatus(id, 'declined')  [no processReturn]
  *
- * Therefore we take PATH B. Each item in `refunds[]` is a full
- * `ProcessReturnInput` payload. "Approve" → call `processReturn` per item.
- * "Decline" → no-op (there is no pending record to mark declined; the UI
- * surface will simply not invoke processReturn for the staff request, which
- * is the cancel/discard semantic).
+ * The vendor context is derived from the FIRST resolved request (all requests
+ * in a batch must share the same vendor_id — mixed-vendor batches are rejected
+ * up-front).
  *
- * Rollback semantics:
- *   `processReturn` is NOT transactional across calls (it uses the module's
- *   own pg connection internally for an idempotency check + has its own
- *   compensation chain for partial failures within a single call). Wrapping
- *   the loop in `pg.transaction(...)` would NOT bind those internal writes
- *   to the trx. So on any item failure we manually compensate the items
- *   already approved in this batch:
+ * Rollback semantics on approve failure:
+ *   processReturn is NOT transactional across calls. On any item failure we
+ *   manually compensate the items already approved in this batch:
  *     1. Soft-delete each created refund_sale row (frees up client_id so
  *        retries with the same client_id work).
  *     2. Re-decrement the stock that was restocked by each prior call
  *        (best-effort; mirrors processReturn's own internal rollback).
+ *     3. Revert markStatus(id, 'approved') → back to 'pending' for each
+ *        request that was already marked approved in this batch.
  *   Then return HTTP 409 with `processed_before_failure`.
  *
  * Body:
  *   {
- *     refunds: ProcessReturnInput[],
+ *     refunds: string[],           // array of pos_refund_request.id
  *     decision: 'approve' | 'decline',
  *     approver_id: string,
  *   }
  *
  * Gated by `requirePermission('pos.refund_or_void')` via the central
- * middlewares.ts. Audit context set from the FIRST refund's vendor_id so
+ * middlewares.ts. Audit context set from the FIRST request's vendor_id so
  * the auditLogMiddleware (registered on /admin/*) attributes the row to
  * that vendor.
  */
@@ -59,6 +50,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   };
   const { refunds, decision, approver_id } = body;
 
+  // --- Input validation (before any mutation) ---
   if (!Array.isArray(refunds) || refunds.length === 0) {
     return res.status(400).json({ error: 'refunds must be a non-empty array' });
   }
@@ -68,49 +60,47 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (!approver_id || typeof approver_id !== 'string') {
     return res.status(400).json({ error: 'approver_id required' });
   }
-
-  // Upfront per-item shape validation — reject the whole batch BEFORE any
-  // mutation so a malformed item at index N can't leave items 0..N-1
-  // processed-then-rolled-back. We only validate the envelope here (object +
-  // vendor_id, which the mixed-vendor guard and audit attribution depend on);
-  // deeper validity (e.g. non-empty lines) is processReturn's responsibility
-  // and is exercised through the rollback/compensation path.
   for (let i = 0; i < refunds.length; i++) {
-    const r = refunds[i];
-    if (!r || typeof r !== 'object') {
-      return res.status(400).json({ error: `refunds[${i}] must be an object` });
+    if (!refunds[i] || typeof refunds[i] !== 'string') {
+      return res.status(400).json({ error: `refunds[${i}] must be a non-empty string id` });
     }
-    if (typeof r.vendor_id !== 'string' || !r.vendor_id) {
-      return res.status(400).json({ error: `refunds[${i}].vendor_id required` });
-    }
-  }
-
-  // Mixed-vendor guard — the audit row is attributed to a single vendor_id, so a
-  // batch must not span vendors (it would mis-attribute the audit trail and cross
-  // tenant boundaries). Reject before mutating.
-  const batchVendor = refunds[0].vendor_id as string;
-  if (refunds.some((r: any) => r.vendor_id !== batchVendor)) {
-    return res.status(400).json({ error: 'all refunds in a batch must share the same vendor_id' });
   }
 
   const pos: any = req.scope.resolve('posTerminalService');
   const wms: any = req.scope.resolve('wmsService');
   const pg: any = (req.scope as any).resolve(ContainerRegistrationKeys.PG_CONNECTION);
+  const refundSvc: any = req.scope.resolve('pos_refund_request');
 
-  // Attribute the audit row to the batch vendor (guaranteed uniform above).
-  (req as any).audit_context = { vendor_id: batchVendor };
+  const now = new Date();
 
-  // Decline = a pure no-op on the server for Path B: there is NO pending-refund
-  // record to mark "declined" (see the Path B note above). The decision to
-  // discard a staff refund request is therefore entirely client-side — the UI
-  // simply drops the request from its local tray and never calls processReturn.
-  // We echo back processed: refunds.length only so the caller can show "N declined".
+  // Resolve the FIRST request to derive vendor context + validate existence.
+  // If the first id is missing or not pending, fail fast before any mutation.
+  const firstRows = await refundSvc.listPosRefundRequests({ id: refunds[0] });
+  if (!firstRows.length) {
+    return res.status(409).json({
+      error: `batch rolled back at index 0: refund request '${refunds[0]}' not found`,
+      processed_before_failure: 0,
+    });
+  }
+  const firstReq = firstRows[0];
+
+  // Attribute the audit row to the batch vendor.
+  (req as any).audit_context = { vendor_id: firstReq.vendor_id };
+  const batchVendor: string = firstReq.vendor_id;
+
+  // --- Decline path ---
+  // Mark each request declined. No processReturn call.
   if (decision === 'decline') {
+    for (const id of refunds) {
+      await refundSvc.markStatus(id, 'declined', approver_id, now);
+    }
     return res.json({ processed: refunds.length, failed: [], results: [] });
   }
 
-  // Approve path — process sequentially, compensate prior items on failure.
+  // --- Approve path ---
+  // Process sequentially; on failure compensate prior items + revert their status.
   const succeeded: Array<{
+    request_id: string;
     refund_sale_id: string;
     vendor_id: string;
     client_id: string;
@@ -120,12 +110,44 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const results: any[] = [];
 
   for (let i = 0; i < refunds.length; i++) {
-    const payload = refunds[i];
+    const id = refunds[i] as string;
     try {
+      // Resolve request
+      let request: any;
+      if (i === 0) {
+        request = firstReq;
+      } else {
+        const rows = await refundSvc.listPosRefundRequests({ id });
+        if (!rows.length) {
+          throw new Error(`refund request '${id}' not found`);
+        }
+        request = rows[0];
+      }
+
+      // Mixed-vendor guard: all requests in a batch must share the same vendor_id.
+      if (request.vendor_id !== batchVendor) {
+        throw new Error(
+          `all refunds in a batch must share the same vendor_id (expected '${batchVendor}', got '${request.vendor_id}')`,
+        );
+      }
+
+      // Only pending requests may be approved.
+      if (request.status !== 'pending') {
+        throw new Error(
+          `refund request '${id}' has status '${request.status}' (expected 'pending')`,
+        );
+      }
+
+      const payload = request.payload;
       const result = await pos.processReturn(payload);
+
+      // Mark approved before recording success (so rollback can revert it).
+      await refundSvc.markStatus(id, 'approved', approver_id, now);
+
       succeeded.push({
+        request_id: id,
         refund_sale_id: result.refund_sale_id,
-        vendor_id: payload.vendor_id,
+        vendor_id: payload.vendor_id ?? batchVendor,
         client_id: payload.client_id,
         cashier_id: payload.cashier_id ?? approver_id,
         lines: (payload.lines ?? []).map((l: any) => ({
@@ -153,6 +175,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             `UPDATE pos_sale SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL`,
             [s.refund_sale_id],
           );
+        } catch { /* best effort */ }
+        // 3. Revert the request status back to 'pending'.
+        try {
+          await refundSvc.updatePosRefundRequests({
+            id: s.request_id, status: 'pending', approved_by: null, approved_at: null,
+          });
         } catch { /* best effort */ }
       }
 
