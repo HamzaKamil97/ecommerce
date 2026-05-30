@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrders } from '../../state/orders';
 import type { OnlineOrder } from '../../api/onlineOrders';
+import { VENDOR_ID } from '../../env';
 import './OrderInboxScreen.css';
 
 type Tab = 'pending' | 'picking' | 'done';
@@ -14,10 +15,10 @@ const HIGH_VALUE_MINOR = 25_000_00; // 25k IQD = 2_500_000 minor? IQD is whole-u
 const HIGH_VALUE_THRESHOLD = 25_000;
 
 function getVendorId(): string {
-  // The session.ts only tracks cashier — vendor comes from env per existing pattern.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const env = (import.meta as any)?.env ?? {};
-  return env.VITE_VENDOR_ID || 'v_test';
+  // Use the env.ts VENDOR_ID constant: Vite statically replaces `import.meta.env.VITE_*`
+  // there. Reading `(import.meta as any).env` inline does NOT get replaced (the cast
+  // defeats the static match), so it was always undefined → silently fell back to v_test.
+  return VENDOR_ID || 'v_test';
 }
 
 function ageMs(placed_at: string): number {
