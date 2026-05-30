@@ -6,6 +6,8 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { ADDRESSES_MODULE } from "../modules/addresses"
 import { TENANT_MODULE } from "../modules/tenant"
+import { ONLINE_ORDER_MODULE } from "../modules/online_order"
+import { buildOnlineOrderPayload } from "./build-online-order-payload"
 
 export interface PlaceCodInput {
   customer_id: string
@@ -35,7 +37,20 @@ export interface PlaceCodInput {
 
 const placeStep = createStep(
   "place-cod-order",
-  async (input: PlaceCodInput, { container }): Promise<StepResponse<{ order_id: string; display_id: string }>> => {
+  async (input: PlaceCodInput, { container }): Promise<StepResponse<{
+    order_id: string
+    display_id: string
+    payload_ctx: {
+      vendor_id: string
+      commission_rate_bps: number | null
+      customer_id: string
+      customer_name: string | null
+      customer_phone: string | null
+      currency_code: "iqd" | "usd"
+      delivery_address: string | null
+      lines: Array<{ variant_id: string; title: string | null; quantity: number; unit_price: number }>
+    }
+  }>> => {
     const tenantSvc = container.resolve(TENANT_MODULE) as any
     const addrSvc = container.resolve(ADDRESSES_MODULE) as any
 
@@ -114,6 +129,16 @@ const placeStep = createStep(
     const cart = createCartResult.result
     const cartId = cart.id
 
+    const cartItems: any[] = (cart as any).items ?? []
+    const snapshotLines = cartItems.map((i: any) => ({
+      variant_id: i.variant_id,
+      title: i.title ?? i.product_title ?? "Item",
+      quantity: i.quantity,
+      unit_price: Number(i.unit_price ?? 0),
+    }))
+    const deliveryAddress = [address.street, address.building, address.apartment, address.city, address.region]
+      .filter(Boolean).join(", ")
+
     // 5. Apply coupon (best effort — promotions module API varies)
     if (input.coupon_code) {
       try {
@@ -130,16 +155,29 @@ const placeStep = createStep(
 
     // 6. Complete cart → order using completeCartWorkflow
     const { completeCartWorkflow } = await import("@medusajs/medusa/core-flows")
-    let orderId: string
-    let displayId: string
 
     try {
       const completeResult = await completeCartWorkflow(container).run({
         input: { id: cartId },
       })
       const order = completeResult.result
-      orderId = order.id
-      displayId = (order as any).display_id?.toString() ?? order.id.slice(-6).toUpperCase()
+      const orderId = order.id
+      const displayId = (order as any).display_id?.toString() ?? order.id.slice(-6).toUpperCase()
+
+      return new StepResponse({
+        order_id: orderId,
+        display_id: displayId,
+        payload_ctx: {
+          vendor_id: shop.id,
+          commission_rate_bps: shop.commission_rate_bps ?? null,
+          customer_id: input.customer_id,
+          customer_name: address.recipient_name ?? null,
+          customer_phone: address.phone ?? null,
+          currency_code: input.currency_code,
+          delivery_address: deliveryAddress || null,
+          lines: snapshotLines,
+        },
+      })
     } catch {
       // Fallback: build the order directly via orderSvc
       const { Modules } = await import("@medusajs/framework/utils")
@@ -161,18 +199,71 @@ const placeStep = createStep(
         metadata: c.metadata,
         status: "pending",
       }])
-      orderId = o.id
-      displayId = o.display_id?.toString() ?? o.id.slice(-6).toUpperCase()
-    }
+      const orderId = o.id
+      const displayId = o.display_id?.toString() ?? o.id.slice(-6).toUpperCase()
 
-    return new StepResponse({ order_id: orderId, display_id: displayId })
+      const fbLines = (c.items ?? []).map((i: any) => ({
+        variant_id: i.variant_id, title: i.title ?? "Item",
+        quantity: i.quantity, unit_price: Number(i.unit_price ?? 0),
+      }))
+      return new StepResponse({
+        order_id: orderId,
+        display_id: displayId,
+        payload_ctx: {
+          vendor_id: shop.id,
+          commission_rate_bps: shop.commission_rate_bps ?? null,
+          customer_id: input.customer_id,
+          customer_name: address.recipient_name ?? null,
+          customer_phone: address.phone ?? null,
+          currency_code: input.currency_code,
+          delivery_address: deliveryAddress || null,
+          lines: fbLines,
+        },
+      })
+    }
   }
+)
+
+const createOnlineOrderStep = createStep(
+  "create-online-order",
+  async (
+    data: { order_id: string; display_id: string; payload_ctx: any },
+    { container },
+  ): Promise<StepResponse<{ online_order_id: string | null }, string | null>> => {
+    const ooSvc = container.resolve(ONLINE_ORDER_MODULE) as any
+    const payload = buildOnlineOrderPayload(
+      { id: data.payload_ctx.vendor_id, commission_rate_bps: data.payload_ctx.commission_rate_bps },
+      data.payload_ctx.lines,
+      {
+        customer_id: data.payload_ctx.customer_id,
+        customer_name: data.payload_ctx.customer_name,
+        customer_phone: data.payload_ctx.customer_phone,
+        currency_code: data.payload_ctx.currency_code,
+        medusa_order_id: data.order_id,
+        display_id: data.display_id,
+        delivery_address: data.payload_ctx.delivery_address,
+      },
+    )
+    const row = await ooSvc.createOrder(payload)
+    return new StepResponse({ online_order_id: row.id }, row.id)
+  },
+  // Compensation: soft-delete the online_order if a later step fails.
+  async (onlineOrderId: string | null, { container }) => {
+    if (!onlineOrderId) return
+    const ooSvc = container.resolve(ONLINE_ORDER_MODULE) as any
+    await ooSvc.deleteOnlineOrders(onlineOrderId).catch(() => {})
+  },
 )
 
 export const placeCodOrderWorkflow = createWorkflow(
   "place-cod-order",
   (input: PlaceCodInput) => {
-    const out = placeStep(input)
-    return new WorkflowResponse(out)
+    const placed = placeStep(input)
+    const oo = createOnlineOrderStep(placed)
+    return new WorkflowResponse({
+      order_id: placed.order_id,
+      display_id: placed.display_id,
+      online_order_id: oo.online_order_id,
+    })
   }
 )
