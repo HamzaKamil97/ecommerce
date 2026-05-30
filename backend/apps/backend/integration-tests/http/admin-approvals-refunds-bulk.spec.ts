@@ -187,7 +187,7 @@ medusaIntegrationTestRunner({
       expect(rows[0].approved_by).toBe('owner');
     });
 
-    it('409 rollback: rolls back already-approved items + reverts their status to pending', async () => {
+    it('409 rollback: rolls back already-approved items + reverts their status to pending, compensation_failures is []', async () => {
       const pos: any = getContainer().resolve('posTerminalService');
       const wms: any = getContainer().resolve('wmsService');
       const refundSvc: any = getContainer().resolve('pos_refund_request');
@@ -242,6 +242,10 @@ medusaIntegrationTestRunner({
       expect(r.status).toBe(409);
       expect(r.data.error).toMatch(/rolled back/i);
       expect(r.data.processed_before_failure).toBe(1);
+
+      // [C1] Clean rollback must expose compensation_failures as an empty array.
+      expect(Array.isArray(r.data.compensation_failures)).toBe(true);
+      expect(r.data.compensation_failures).toEqual([]);
 
       // Stock must be back to 9 — the good refund's restock was compensated
       const stockAfter = await wms.getStock(vendor_id, variant_id);
@@ -298,7 +302,91 @@ medusaIntegrationTestRunner({
       ).catch((e: any) => e.response);
 
       expect(r.status).toBe(409);
-      expect(r.data.error).toMatch(/rolled back/i);
+      // [I3] The early-exit path for the first item now returns a clear "not pending" message.
+      expect(r.data.error).toMatch(/not pending/i);
+    });
+
+    // --- New tests for review fixes ---
+
+    it('[I1] 400 on duplicate id in approve batch — no processReturn called, stock unchanged', async () => {
+      const pos: any = getContainer().resolve('posTerminalService');
+      const wms: any = getContainer().resolve('wmsService');
+      const refundSvc: any = getContainer().resolve('pos_refund_request');
+
+      const vendor_id = 'v_bulk_dedup';
+      const variant_id = 'vbulk_dedup_a';
+
+      const cashier = await pos.createCashier({
+        vendor_id, name: 'Mgr', pin: '0000', role: 'manager',
+      });
+
+      const { requestId } = await seedSaleAndRefundRequest(pos, wms, refundSvc, {
+        vendor_id,
+        variant_id,
+        cashier_id: cashier.id,
+        saleSuffix: 'dedup_1',
+        reason: 'changed_mind',
+      });
+
+      // Stock after original sale: 10 - 1 = 9
+      const stockBefore = await wms.getStock(vendor_id, variant_id);
+      expect(Number(stockBefore.on_hand)).toBe(9);
+
+      // Send the same id twice — must be rejected 400 before any processReturn
+      const r = await api.post(
+        '/admin/approvals/refunds/bulk',
+        { refunds: [requestId, requestId], decision: 'approve', approver_id: 'owner' },
+        { headers: adminHeaders },
+      ).catch((e: any) => e.response);
+
+      expect(r.status).toBe(400);
+      expect(r.data.error).toMatch(/duplicate id/i);
+
+      // Stock must be unchanged — no processReturn was called
+      const stockAfter = await wms.getStock(vendor_id, variant_id);
+      expect(Number(stockAfter.on_hand)).toBe(9);
+
+      // Request must still be 'pending' — no mutation happened
+      const rows = await refundSvc.listPosRefundRequests({ id: requestId });
+      expect(rows[0].status).toBe('pending');
+    });
+
+    it('[I2] 409 when declining an already-approved request — status stays approved', async () => {
+      const pos: any = getContainer().resolve('posTerminalService');
+      const wms: any = getContainer().resolve('wmsService');
+      const refundSvc: any = getContainer().resolve('pos_refund_request');
+
+      const vendor_id = 'v_bulk_dec_approved';
+      const variant_id = 'vbulk_dec_appr';
+
+      const cashier = await pos.createCashier({
+        vendor_id, name: 'Mgr', pin: '0000', role: 'manager',
+      });
+
+      const { requestId } = await seedSaleAndRefundRequest(pos, wms, refundSvc, {
+        vendor_id,
+        variant_id,
+        cashier_id: cashier.id,
+        saleSuffix: 'dec_appr_1',
+        reason: 'changed_mind',
+      });
+
+      // Pre-mark as approved
+      await refundSvc.markStatus(requestId, 'approved', 'pre_owner', new Date());
+
+      // Attempt to decline it — must be rejected with 409
+      const r = await api.post(
+        '/admin/approvals/refunds/bulk',
+        { refunds: [requestId], decision: 'decline', approver_id: 'owner' },
+        { headers: adminHeaders },
+      ).catch((e: any) => e.response);
+
+      expect(r.status).toBe(409);
+      expect(r.data.error).toMatch(/not pending/i);
+
+      // Status must remain 'approved' — markStatus was NOT called for decline
+      const rows = await refundSvc.listPosRefundRequests({ id: requestId });
+      expect(rows[0].status).toBe('approved');
     });
   },
 });
