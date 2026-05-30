@@ -1,22 +1,25 @@
 /**
  * approvals.ts — Approval-queue API client
  *
- * ARCHITECTURE NOTE (Phase H-3.2c):
- * ─────────────────────────────────
- * The backend route POST /admin/approvals/refunds/bulk was shipped in task A3
- * as a STATELESS helper (path B of the processReturn flow). Its body shape is:
- *   { refunds: ProcessReturnInput[], decision: 'approve'|'decline', approver_id: string }
+ * ARCHITECTURE NOTE (Phase H-3.2d Pass 3):
+ * ─────────────────────────────────────────
+ * The backend now has a real `pos_pending_refund` store with three routes:
  *
- * There is NO `pos_pending_refund` store and NO GET /admin/approvals/refunds endpoint
- * yet. The ApprovalsTrayScreen in this phase is therefore a FORWARD-LOOKING UI SHELL
- * exercised only via mocks — the unit tests are the acceptance gate, not a live backend.
+ *   GET  /admin/approvals/refunds?vendor_id=&status=
+ *     → { approvals: RefundApproval[] }
  *
- * listPendingRefunds() is fail-soft against the not-yet-built GET endpoint.
+ *   POST /admin/approvals/refunds
+ *     body: CreateRefundRequestInput
+ *     → { approval: RefundApproval }
  *
- * bulkApproveRefunds / bulkDeclineRefunds take (approvalIds: string[], approverId: string).
- * We only have IDs in this phase, so we forward them under the `refunds` key with the
- * correct A3 key names. When the pending-approvals store lands, callers should resolve
- * each approval ID → its stored ProcessReturnInput before POSTing.
+ *   POST /admin/approvals/refunds/bulk
+ *     body: { refunds: string[], decision: 'approve'|'decline', approver_id: string }
+ *     → { processed: number; failed: string[] }
+ *     The server resolves each approval ID to its stored record, executes the
+ *     processReturn flow, and persists the decision. No client-side ID resolution needed.
+ *
+ * listPendingRefunds() still uses a defensive .catch(()=>[]) so a transient
+ * network error renders an empty tray rather than crashing the manager screen.
  */
 
 import { api, apiGet, apiPost } from './client';
@@ -35,11 +38,22 @@ export type RefundApproval = {
   created_at: string;
 };
 
+export type CreateRefundRequestInput = {
+  vendor_id: string;
+  original_sale_id: string;
+  total_minor: number;
+  reason: string;
+  requested_by: string;
+  requested_by_name?: string | null;
+  payload: unknown; // full ProcessReturnInput
+};
+
 // ─── API helpers ─────────────────────────────────────────────────────────────
 
 /**
  * List pending refund-approvals for a vendor.
- * Fail-soft: the GET endpoint does not exist yet — returns [] on any error.
+ * Defensive empty fallback: a transient network error returns [] instead of
+ * crashing the manager screen — the real GET endpoint exists as of H-3.2d Pass 3.
  */
 export function listPendingRefunds(vendorId: string): Promise<RefundApproval[]> {
   return apiGet<{ approvals?: RefundApproval[]; rows?: RefundApproval[] }>(
@@ -50,12 +64,18 @@ export function listPendingRefunds(vendorId: string): Promise<RefundApproval[]> 
 }
 
 /**
+ * Create a new refund-approval request.
+ * POSTs to /admin/approvals/refunds and unwraps the created approval from {approval}.
+ */
+export async function createRefundRequest(input: CreateRefundRequestInput): Promise<RefundApproval> {
+  const r = await apiPost<{ approval: RefundApproval }>('/admin/approvals/refunds', input);
+  return r.approval;
+}
+
+/**
  * Bulk-approve refunds.
- *
- * Body uses A3 keys: { refunds, decision, approver_id }.
- * NOTE: We only have IDs at this phase — forwarding them directly under `refunds`.
- * TODO: once the pending-approvals store exists, resolve each ID to its
- *       ProcessReturnInput before POSTing.
+ * Body: { refunds: approvalIds, decision: 'approve', approver_id }.
+ * The server resolves each ID to its stored record and executes the approval flow.
  */
 export function bulkApproveRefunds(
   approvalIds: string[],
