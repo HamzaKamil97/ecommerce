@@ -106,6 +106,16 @@ export default defineMiddlewares({
       middlewares: [requirePermission('staff.reset_pin')],
     },
     {
+      matcher: '/admin/approvals/refunds',
+      method: ['GET'],
+      middlewares: [requirePermission('pos.refund_or_void')],
+    },
+    {
+      matcher: '/admin/approvals/refunds',
+      method: ['POST'],
+      middlewares: [requirePermission('pos.return_process')],
+    },
+    {
       matcher: '/admin/approvals/refunds/bulk',
       method: ['POST'],
       middlewares: [requirePermission('pos.refund_or_void')],
