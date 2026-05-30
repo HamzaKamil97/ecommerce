@@ -4,6 +4,7 @@ export interface CatalogRow {
   variant_id: string; product_id: string; sku: string | null; barcode: string | null;
   name: string; price_minor: number; currency_code: string;
   image_url: string | null; on_hand: number; updated_at: string;
+  thumb_emoji: string | null; merch_category_id: string | null; category_name: string | null;
 }
 
 export interface PendingSaleRow {

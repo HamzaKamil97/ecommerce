@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>H-3.2e · Register Catalog Grid — mockup</title>
+<style>
+  /* ===== Tokens lifted verbatim from RegisterScreen.css ===== */
+  :root{
+    --reg-bg:#0f1419; --reg-panel:#1a2129; --reg-panel-2:#222b35; --reg-line:#2d3742;
+    --reg-text:#e8edf2; --reg-muted:#8b97a4; --reg-accent:#00c2a8; --reg-accent-ink:#00120e;
+    --reg-danger:#ff5a52; --reg-warn:#ffb347; --reg-radius:14px; --reg-radius-sm:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#070a0d;color:var(--reg-text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:28px;}
+  h1{font-size:18px;margin:0 0 4px;}
+  .sub{color:var(--reg-muted);font-size:13px;margin:0 0 20px;}
+  .caption{color:var(--reg-muted);font-size:12px;margin:18px 0 8px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.06em;}
+  .frame{border:1px solid var(--reg-line);border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);background:var(--reg-bg);}
+
+  /* ===== Register shell ===== */
+  .register-screen{height:760px;display:flex;flex-direction:column;background:var(--reg-bg);
+    color:var(--reg-text);overflow:hidden;}
+  .register-header{display:flex;align-items:center;gap:16px;padding:12px 20px;
+    background:var(--reg-panel);border-bottom:1px solid var(--reg-line);flex-shrink:0;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,var(--reg-accent),#00a890);display:grid;place-items:center;
+    font-weight:800;font-size:20px;color:var(--reg-accent-ink);}
+  .brand-name{font-weight:700;font-size:15px;}
+  .brand-sub{font-size:11px;color:var(--reg-muted);}
+  .cashier-chip{display:flex;align-items:center;gap:10px;padding:6px 12px;
+    background:var(--reg-panel-2);border-radius:999px;border:1px solid var(--reg-line);}
+  .cashier-avatar{width:30px;height:30px;border-radius:50%;background:var(--reg-accent);
+    color:var(--reg-accent-ink);display:grid;place-items:center;font-weight:700;font-size:13px;}
+  .cashier-name{font-size:13px;font-weight:600;}
+  .cashier-role{font-size:10px;color:var(--reg-muted);}
+  .header-spacer{flex:1;}
+  .net-total{text-align:right;}
+  .net-total .label{font-size:10px;color:var(--reg-muted);text-transform:uppercase;letter-spacing:.05em;}
+  .net-total .num{font-size:15px;font-weight:700;color:var(--reg-accent);}
+  .header-actions{display:flex;gap:8px;margin-left:12px;}
+  .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--reg-panel-2);
+    border:1px solid var(--reg-line);color:var(--reg-text);display:grid;place-items:center;cursor:pointer;}
+
+  .register-shell{flex:1;display:grid;grid-template-columns:1fr 420px;gap:1px;
+    background:var(--reg-line);overflow:hidden;}
+
+  /* ===== LEFT: cart side (abbreviated — unchanged surface) ===== */
+  .cart-side{background:var(--reg-bg);display:flex;flex-direction:column;padding:16px;gap:14px;overflow:hidden;}
+  .scanzone{border:1.5px dashed var(--reg-line);border-radius:var(--reg-radius);padding:18px;
+    text-align:center;color:var(--reg-muted);background:var(--reg-panel);}
+  .scanzone .big{color:var(--reg-text);font-weight:600;font-size:14px;margin-bottom:3px;}
+  .scanzone .small{font-size:11px;}
+  .cart-list{flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;}
+  .cart-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--reg-panel);
+    border:1px solid var(--reg-line);border-radius:var(--reg-radius-sm);}
+  .cart-row .emoji{font-size:20px;}
+  .cart-row .nm{flex:1;font-size:13px;font-weight:600;}
+  .cart-row .qty{font-size:12px;color:var(--reg-muted);}
+  .cart-row .amt{font-size:13px;font-weight:700;}
+  .cart-row.new{border-color:var(--reg-accent);box-shadow:0 0 0 1px var(--reg-accent) inset;}
+  .cart-summary{border-top:1px solid var(--reg-line);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .summary-row{display:flex;justify-content:space-between;font-size:13px;}
+  .summary-row .label{color:var(--reg-muted);}
+  .summary-total .label,.summary-total .val{font-size:15px;font-weight:700;}
+  .charge-btn{margin-top:6px;display:flex;justify-content:space-between;align-items:center;
+    padding:16px 18px;border:none;border-radius:var(--reg-radius);cursor:pointer;
+    background:linear-gradient(135deg,var(--reg-accent),#00a890);color:var(--reg-accent-ink);
+    font-weight:800;font-size:15px;}
+  .charge-btn .amount{font-size:17px;}
+
+  /* ===== RIGHT: NEW catalog browser ===== */
+  .catalog-side{background:var(--reg-panel);display:flex;flex-direction:column;overflow:hidden;}
+
+  /* tabs */
+  .cat-tabs{display:flex;gap:4px;padding:12px 14px 0;}
+  .cat-tab{flex:1;padding:9px 0;text-align:center;font-size:13px;font-weight:600;cursor:pointer;
+    color:var(--reg-muted);background:transparent;border:none;border-bottom:2px solid transparent;}
+  .cat-tab.active{color:var(--reg-text);border-bottom-color:var(--reg-accent);}
+
+  /* search */
+  .cat-search{padding:12px 14px 8px;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--reg-bg);
+    border:1px solid var(--reg-line);border-radius:var(--reg-radius-sm);padding:10px 12px;}
+  .search-box svg{flex-shrink:0;color:var(--reg-muted);}
+  .search-box input{flex:1;background:transparent;border:none;outline:none;color:var(--reg-text);
+    font-size:14px;}
+  .search-box input::placeholder{color:var(--reg-muted);}
+  .search-box.focused{border-color:var(--reg-accent);}
+  .clear-x{color:var(--reg-muted);cursor:pointer;font-size:16px;line-height:1;}
+
+  /* dept chips */
+  .dept-rail{display:flex;gap:8px;padding:2px 14px 10px;overflow-x:auto;}
+  .dept-rail::-webkit-scrollbar{height:0;}
+  .dept-chip{flex-shrink:0;padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;
+    cursor:pointer;background:var(--reg-panel-2);border:1px solid var(--reg-line);color:var(--reg-muted);
+    white-space:nowrap;}
+  .dept-chip.active{background:var(--reg-accent);border-color:var(--reg-accent);color:var(--reg-accent-ink);}
+
+  .result-meta{padding:0 16px 6px;font-size:11px;color:var(--reg-muted);}
+
+  /* grid */
+  .tile-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    padding:4px 14px 16px;overflow-y:auto;align-content:start;}
+  .tile{position:relative;background:linear-gradient(180deg,var(--reg-panel-2),var(--reg-panel));
+    border:1px solid var(--reg-line);border-radius:var(--reg-radius);padding:12px 8px 10px;
+    display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-height:118px;
+    justify-content:center;text-align:center;}
+  .tile:hover{border-color:var(--reg-accent);transform:translateY(-1px);}
+  .tile-icon{font-size:30px;line-height:1;}
+  .tile-name{font-size:12.5px;font-weight:600;line-height:1.25;}
+  .tile-price{font-size:13px;font-weight:800;color:var(--reg-accent);}
+  .tile-stock{font-size:10.5px;color:var(--reg-muted);}
+  .tile .pin{position:absolute;top:7px;right:8px;font-size:12px;color:var(--reg-warn);opacity:.85;}
+  .tile.low .tile-stock{color:var(--reg-warn);}
+  .tile.oos{opacity:.5;}
+  .tile.oos .tile-stock{color:var(--reg-danger);}
+  .tile.oos:after{content:"Out of stock";position:absolute;inset:auto 0 0;font-size:9px;
+    background:var(--reg-danger);color:#fff;padding:2px 0;font-weight:700;}
+
+  /* empty / no-result / loading */
+  .state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:30px;text-align:center;color:var(--reg-muted);}
+  .state .emoji{font-size:42px;opacity:.7;}
+  .state .title{color:var(--reg-text);font-weight:700;font-size:15px;}
+  .state .desc{font-size:12.5px;line-height:1.5;max-width:230px;}
+  .state .cta{margin-top:6px;font-size:12px;color:var(--reg-accent);font-weight:600;}
+  .skel{background:linear-gradient(180deg,var(--reg-panel-2),var(--reg-panel));
+    border:1px solid var(--reg-line);border-radius:var(--reg-radius);min-height:118px;
+    animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.45;}50%{opacity:.8;}}
+  .sync-pill{margin:0 14px 8px;display:flex;align-items:center;gap:8px;justify-content:center;
+    font-size:11.5px;color:var(--reg-muted);background:var(--reg-bg);border:1px solid var(--reg-line);
+    border-radius:999px;padding:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--reg-accent);animation:pulse 1s infinite;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:1100px){.grid-2{grid-template-columns:1fr;}}
+  .note{background:var(--reg-panel);border:1px solid var(--reg-line);border-left:3px solid var(--reg-accent);
+    border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#cdd6df;margin-top:8px;}
+  .note b{color:var(--reg-text);}
+  .note code{background:var(--reg-bg);padding:1px 5px;border-radius:4px;color:var(--reg-accent);font-size:11.5px;}
+</style>
+</head>
+<body>
+  <h1>H-3.2e · Register Catalog Grid</h1>
+  <p class="sub">Evolution of the existing dark Loyverse-grade register. Only the <b>right pane</b> changes — left cart / scan / charge stay exactly as shipped. Same tokens, same tile look.</p>
+
+  <p class="caption">State 1 · Default — real catalog, search + department chips, "Sourdough Loaf" now sells at the right price</p>
+  <div class="frame">
+    <div class="register-screen">
+      <header class="register-header">
+        <div class="brand">
+          <div class="brand-mark">H</div>
+          <div><div class="brand-name">Hanoot</div><div class="brand-sub">Register · POS-01</div></div>
+        </div>
+        <div class="cashier-chip">
+          <div class="cashier-avatar">Q</div>
+          <div><div class="cashier-name">QA Manager</div><div class="cashier-role">Manager</div></div>
+        </div>
+        <div class="header-spacer"></div>
+        <div class="net-total"><div class="label">Net today</div><div class="num">12.5k IQD</div></div>
+        <div class="header-actions">
+          <div class="icon-btn">🔔</div><div class="icon-btn">⚙️</div>
+        </div>
+      </header>
+
+      <div class="register-shell">
+        <!-- LEFT (unchanged) -->
+        <section class="cart-side">
+          <div class="scanzone">
+            <div class="big">Scan or tap an item</div>
+            <div class="small">Barcode · NFC · or pick from the catalog →</div>
+          </div>
+          <div class="cart-list">
+            <div class="cart-row new">
+              <span class="emoji">🍞</span><span class="nm">Sourdough Loaf</span>
+              <span class="qty">×1</span><span class="amt">2,500</span>
+            </div>
+            <div class="cart-row">
+              <span class="emoji">🥛</span><span class="nm">Milk 1L · Almarai</span>
+              <span class="qty">×2</span><span class="amt">5,500</span>
+            </div>
+          </div>
+          <div class="cart-summary">
+            <div class="summary-row"><span class="label">Subtotal</span><span class="val">8,000 IQD</span></div>
+            <div class="summary-row"><span class="label">Discounts</span><span class="val">− 0 IQD</span></div>
+            <div class="summary-row summary-total"><span class="label">Total due</span><span class="val">8,000 IQD</span></div>
+            <button class="charge-btn"><span>Charge · 3 items</span><span class="amount">8,000 IQD →</span></button>
+          </div>
+        </section>
+
+        <!-- RIGHT (NEW catalog browser) -->
+        <aside class="catalog-side">
+          <div class="cat-tabs">
+            <button class="cat-tab active">All items</button>
+            <button class="cat-tab">★ Favorites</button>
+            <button class="cat-tab">Orders</button>
+          </div>
+          <div class="cat-search">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input placeholder="Search products or scan…" />
+            </div>
+          </div>
+          <div class="dept-rail">
+            <div class="dept-chip active">All</div>
+            <div class="dept-chip">Bakery</div>
+            <div class="dept-chip">Dairy &amp; Eggs</div>
+            <div class="dept-chip">Beverages</div>
+            <div class="dept-chip">Pantry</div>
+          </div>
+          <div class="result-meta">37 products</div>
+          <div class="tile-grid">
+            <div class="tile">
+              <span class="pin">★</span>
+              <div class="tile-icon">🍞</div><div class="tile-name">Sourdough Loaf</div>
+              <div class="tile-price">2,500 IQD</div><div class="tile-stock">18 in stock</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">🥛</div><div class="tile-name">Milk 1L · Almarai</div>
+              <div class="tile-price">2,750 IQD</div><div class="tile-stock">42 in stock</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">🧈</div><div class="tile-name">Lurpak 100g</div>
+              <div class="tile-price">4,500 IQD</div><div class="tile-stock">6 in stock</div>
+            </div>
+            <div class="tile low">
+              <div class="tile-icon">🧀</div><div class="tile-name">White Cheese</div>
+              <div class="tile-price">5,250 IQD</div><div class="tile-stock">3 left · low</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">🥚</div><div class="tile-name">Eggs Tray · 30</div>
+              <div class="tile-price">7,000 IQD</div><div class="tile-stock">14 in stock</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">🥤</div><div class="tile-name">Coca-Cola 1L</div>
+              <div class="tile-price">1,750 IQD</div><div class="tile-stock">26 in stock</div>
+            </div>
+            <div class="tile oos">
+              <div class="tile-icon">💧</div><div class="tile-name">Water 1.5L · Aqua</div>
+              <div class="tile-price">750 IQD</div><div class="tile-stock">0</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">🍵</div><div class="tile-name">Tea · Al-Afour</div>
+              <div class="tile-price">3,200 IQD</div><div class="tile-stock">22 in stock</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon">📦</div><div class="tile-name">Rice 5kg</div>
+              <div class="tile-price">9,000 IQD</div><div class="tile-stock">11 in stock</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <p class="caption">Right-pane states — search active, favorites, empty catalog, syncing</p>
+  <div class="grid-2">
+
+    <!-- search active -->
+    <div class="frame"><div style="height:560px;display:flex;">
+      <aside class="catalog-side" style="flex:1;">
+        <div class="cat-tabs"><button class="cat-tab active">All items</button><button class="cat-tab">★ Favorites</button><button class="cat-tab">Orders</button></div>
+        <div class="cat-search"><div class="search-box focused">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input value="sour" /><span class="clear-x">✕</span>
+        </div></div>
+        <div class="dept-rail"><div class="dept-chip active">All</div><div class="dept-chip">Bakery</div><div class="dept-chip">Dairy &amp; Eggs</div></div>
+        <div class="result-meta">1 match for "sour"</div>
+        <div class="tile-grid">
+          <div class="tile"><span class="pin">★</span><div class="tile-icon">🍞</div><div class="tile-name">Sourdough Loaf</div><div class="tile-price">2,500 IQD</div><div class="tile-stock">18 in stock</div></div>
+        </div>
+      </aside>
+    </div></div>
+
+    <!-- favorites -->
+    <div class="frame"><div style="height:560px;display:flex;">
+      <aside class="catalog-side" style="flex:1;">
+        <div class="cat-tabs"><button class="cat-tab">All items</button><button class="cat-tab active">★ Favorites</button><button class="cat-tab">Orders</button></div>
+        <div class="cat-search"><div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Search favorites…" />
+        </div></div>
+        <div class="result-meta">Pinned for fast access · long-press a tile to pin/unpin</div>
+        <div class="tile-grid">
+          <div class="tile"><span class="pin">★</span><div class="tile-icon">🍞</div><div class="tile-name">Sourdough Loaf</div><div class="tile-price">2,500 IQD</div><div class="tile-stock">18 in stock</div></div>
+          <div class="tile"><span class="pin">★</span><div class="tile-icon">🥛</div><div class="tile-name">Milk 1L</div><div class="tile-price">2,750 IQD</div><div class="tile-stock">42 in stock</div></div>
+          <div class="tile"><span class="pin">★</span><div class="tile-icon">🥤</div><div class="tile-name">Coca-Cola 1L</div><div class="tile-price">1,750 IQD</div><div class="tile-stock">26 in stock</div></div>
+        </div>
+      </aside>
+    </div></div>
+
+    <!-- empty catalog -->
+    <div class="frame"><div style="height:560px;display:flex;">
+      <aside class="catalog-side" style="flex:1;">
+        <div class="cat-tabs"><button class="cat-tab active">All items</button><button class="cat-tab">★ Favorites</button><button class="cat-tab">Orders</button></div>
+        <div class="cat-search"><div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Search products or scan…" />
+        </div></div>
+        <div class="state">
+          <div class="emoji">🗂️</div>
+          <div class="title">No products yet</div>
+          <div class="desc">Items added in <b>Manager → Catalog</b> appear here automatically. You can still scan a barcode to ring up.</div>
+          <div class="cta">↻ Refresh catalog</div>
+        </div>
+      </aside>
+    </div></div>
+
+    <!-- syncing / loading -->
+    <div class="frame"><div style="height:560px;display:flex;">
+      <aside class="catalog-side" style="flex:1;">
+        <div class="cat-tabs"><button class="cat-tab active">All items</button><button class="cat-tab">★ Favorites</button><button class="cat-tab">Orders</button></div>
+        <div class="cat-search"><div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Search products or scan…" />
+        </div></div>
+        <div class="sync-pill"><span class="dot"></span> Syncing catalog…</div>
+        <div class="tile-grid">
+          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        </div>
+      </aside>
+    </div></div>
+
+  </div>
+
+  <div class="note">
+    <b>Behaviour contract (what the implementation will do):</b><br>
+    • On register mount → <code>syncCatalog(vendor_id)</code> populates Dexie <code>db.catalog</code> (offline-first; cached snapshot shows instantly on reopen, refresh in background).<br>
+    • Grid renders from <code>db.catalog</code> — <b>not</b> the hardcoded <code>QUICK_TILES</code>. Manager-added products appear automatically.<br>
+    • <b>Search</b> filters by name / sku / barcode (client-side over the cached catalog). <b>Department chips</b> filter by <code>merch_category_id</code> (newly added to the snapshot). Chips are built from the categories actually present.<br>
+    • <b>Favorites</b> = locally pinned tiles (stored in Dexie <code>config</code>), the "quick tiles" affordance for fast access. Starts empty; tap ★ / long-press to pin. <i>(Tab kept; pin interaction can be a fast-follow if you'd rather ship All-items + search first.)</i><br>
+    • Tile shows emoji/image, name, <b>correct price</b> (price bug fixed), and live stock. Out-of-stock dimmed; low-stock amber.<br>
+    • Tile tap → existing <code>useCart.addLineFromScan({variant_id,name,unit_price_minor,qty:1})</code> + beep. Cart math untouched.<br>
+    • Empty state when catalog has 0 items; "no match" state when a search returns nothing; skeleton while first sync runs.<br>
+    • Scanner keeps working too (now that Dexie is actually populated, <code>findByBarcode</code> resolves real items).
+  </div>
+</body>
+</html>

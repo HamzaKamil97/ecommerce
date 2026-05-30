@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { db, resetDbForTests } from '../src/db/dexie';
-import { syncCatalog, findByBarcode } from '../src/db/catalog-sync';
+import { syncCatalog, findByBarcode, loadCatalogFromDb } from '../src/db/catalog-sync';
 
 describe('catalog sync', () => {
   beforeEach(async () => { await resetDbForTests(); });
@@ -57,5 +57,25 @@ describe('catalog sync', () => {
 
   it('findByBarcode returns undefined for empty input', async () => {
     expect(await findByBarcode('')).toBeUndefined();
+  });
+
+  it('loadCatalogFromDb returns all cached rows', async () => {
+    (globalThis as any).fetch = vi.fn().mockResolvedValue({
+      ok: true, json: async () => ({
+        vendor_id: 'v1', generated_at: new Date().toISOString(),
+        items: [
+          { variant_id: 'v_1', product_id: 'p_1', sku: 'S1', barcode: '1', name: 'Bread',
+            price_minor: 2500, currency_code: 'iqd', image_url: null, thumb_emoji: '🍞',
+            merch_category_id: 'mc1', category_name: 'Bakery', on_hand: 5 },
+          { variant_id: 'v_2', product_id: 'p_2', sku: 'S2', barcode: '2', name: 'Milk',
+            price_minor: 2750, currency_code: 'iqd', image_url: null, thumb_emoji: '🥛',
+            merch_category_id: 'mc2', category_name: 'Dairy', on_hand: 9 },
+        ],
+      }),
+    });
+    await syncCatalog('v1');
+    const rows = await loadCatalogFromDb();
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.name).sort()).toEqual(['Bread', 'Milk']);
   });
 });

@@ -18,6 +18,12 @@ vi.mock('../../src/db/catalog-sync', () => ({
     if (code === '111') return { variant_id: 'v1', name: 'Test Item', price_minor: 13500 };
     return null;
   },
+  syncCatalog: vi.fn(async () => 0),
+  loadCatalogFromDb: vi.fn(async () => [
+    { variant_id: 'v1', product_id: 'p1', sku: 'S1', barcode: '1', name: 'Sourdough Loaf',
+      price_minor: 2500, currency_code: 'iqd', image_url: null, thumb_emoji: '🍞',
+      merch_category_id: 'mc1', category_name: 'Bakery', on_hand: 18, updated_at: 'x' },
+  ]),
 }));
 
 // Mock Audio so beep.wav doesn't fail in jsdom
@@ -61,24 +67,23 @@ describe('RegisterScreen v2', () => {
     expect(screen.getByText(/13,?500/)).toBeInTheDocument();
   });
 
-  it('renders both panes on tablet viewport', () => {
+  it('renders both panes on tablet viewport', async () => {
     setViewport(1024);
     render(<MemoryRouter><RegisterScreen /></MemoryRouter>);
-    expect(screen.getByText(/^Departments$/i)).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/Search products/i)).toBeInTheDocument();
   });
 
   it('hides quick-actions pane on phone viewport', () => {
     setViewport(375);
     render(<MemoryRouter><RegisterScreen /></MemoryRouter>);
-    const deptTab = screen.queryByText(/^Departments$/i);
-    expect(deptTab).toBeNull();
+    expect(screen.queryByPlaceholderText(/Search products/i)).toBeNull();
   });
 
-  it('clicking a quick-tile adds the item to the cart', () => {
+  it('clicking a catalog tile adds the item to the cart', async () => {
     setViewport(1280);
     render(<MemoryRouter><RegisterScreen /></MemoryRouter>);
-    fireEvent.click(screen.getByRole('button', { name: /Milk 1L/i }));
+    fireEvent.click(await screen.findByText('Sourdough Loaf'));
     expect(useCart.getState().lines.length).toBe(1);
-    expect(useCart.getState().lines[0]?.name).toMatch(/Milk 1L/);
+    expect(useCart.getState().lines[0]?.unit_price_minor).toBe(2500);
   });
 });
