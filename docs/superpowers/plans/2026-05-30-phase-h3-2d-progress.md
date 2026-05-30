@@ -4,12 +4,13 @@
 **Plan(s):** Pass 1 → [2026-05-30-phase-h3-2d-pass1-repoint-clients.md](2026-05-30-phase-h3-2d-pass1-repoint-clients.md)
 **As of:** 2026-05-30
 
-## Status — Pass 2 of 4 COMPLETE
+## Status — Pass 3 of 4 COMPLETE
 
 | Pass | Scope | Status |
 |---|---|---|
 | **1** | Re-point clients to existing endpoints (3 screens) | ✅ **DONE** |
 | **2** | Build missing endpoints (manager products list, product-create reconcile, tags CRUD, staff reset-pin) | ✅ **DONE** |
+| **3** | Approvals model — Option A `pos_refund_request` store + wire manager tray | ✅ **DONE** |
 | 3 | Approvals model decision (A: pos_refund_request table · B: audit-log view → design gate) | ⏳ |
 | 4 | Session + audit hygiene (persist cashier→localStorage / manager→sessionStorage; strip PIN from audit after_json) | ⏳ |
 
@@ -84,6 +85,29 @@ Plan: [2026-05-30-phase-h3-2d-pass2-build-endpoints.md](2026-05-30-phase-h3-2d-p
 - Raw PIN still reaches audit `after_json` (createCashier + reset-pin) — **Pass 4's explicit scope** strips it globally + adds a test. Code comment left at the reset-pin site.
 - **Operational:** every pos client re-point leaves a stale `.js` shadow that breaks Vite HMR (404 on `<file>.js` + HMR reload fail) → **restart the pos Vite dev server after each re-point** before live verify. Hit on catalog/tags/staff. Also: `medusa develop` briefly drops :9000 connections while hot-reloading route/module/config changes (transient ERR_CONNECTION_REFUSED, self-recovers).
 - Manager screens overlap header/footer controls at narrow (<~1000px) widths (responsive nit; fine at desktop — `elementFromPoint` confirms CTAs are clickable). Playwright is over-conservative clicking sticky-footer CTAs (use JS dispatch in automation; real users unaffected).
+
+## Pass 3 — DONE 2026-05-30 (subagent-driven, with full live verify)
+
+Plan: [2026-05-30-phase-h3-2d-pass3-approvals-model.md](2026-05-30-phase-h3-2d-pass3-approvals-model.md). **Decision: Option A** (real `pos_refund_request` store — NOT Option B audit-view). Chosen because it makes the Approvals tray a real cashier→manager approval workflow (Loyverse/Talabat pattern), is backend-only (the tray UI was already a complete shell → NO design gate), and completes the feature properly.
+
+| Task | Commits | What |
+|---|---|---|
+| P3-1 | `46752f7` | `pos_refund_request` module (model/service/index/migration; payload JSONB stores the ProcessReturnInput) |
+| P3-2 | `8f1b88b` | `GET`/`POST /admin/approvals/refunds` (list pending queue + create request) |
+| P3-3 | `4f7f6ea` + `bc5a6a3` | rewrote `POST /admin/approvals/refunds/bulk` from inline-payloads to **approval-ID contract** → resolves ids, `processReturn(stored payload)` on approve, markStatus; full rollback (stock re-decrement + soft-delete refund sale + status revert) |
+| P3-4 | `34ffebe` + `41bc924` | wired `approvals.ts` client (real list + bulk + `createRefundRequest`) + fixed the `original_sale_id`→`sale_id` display mapping |
+
+**Caps:** GET queue → `pos.refund_or_void` (manager-granted); POST create → `pos.return_process`; bulk → `pos.refund_or_void`.
+
+**Live verification (full workflow, Playwright):** seeded a real sale (Sourdough Loaf, stock 20→18) + 2 pending refund requests via the API → manager Approvals tray showed both cards (`Refunds 2`) → opened detail (reason/requester/amount + escalation explainer + grant-override CTA) → **Approve** the `damaged` one: `POST /bulk => 200`, request status → `approved`, `processReturn` executed (stock stayed 18 — correct: damaged goods are written off, not restocked), card vanished (`Refunds 1`) → **Decline** the `changed_mind` one: status → `declined`, no refund, `Refunds 0` empty state. Screenshot `h3-2d-approvals-tray.png`.
+
+**Bugs found + fixed in Pass 3:**
+- P3-3 (money path, caught in quality review): item could escape rollback if `markStatus` threw after `processReturn` (orphaned stock+sale) → push-to-succeeded reordered before markStatus. Silent partial-rollback → now surfaces `compensation_failures[]` in the 409. Duplicate-id in batch → now 400. Decline path had no existence/pending/vendor guards → could overwrite `approved` with `declined` → guarded. (+2 new tests; bulk suite 8/8.)
+- P3-4 (caught LIVE): tray showed blank sale id + "Select undefined" because backend returns `original_sale_id` but the tray reads `sale_id` → mapped in `listPendingRefunds`.
+
+**Verification:** pos vitest **228 green** (221 + 7 new approvals client tests), tsc 0. Backend: module test 2/2, `admin-approvals-refunds` 3/3, `admin-approvals-refunds-bulk` 8/8 (all individually). P3-3 got full two-stage review; others combined review; whole flow live-verified.
+
+**DEFERRED (needs the design gate):** wiring the **cashier** refund flow (`RefundFlowPhone`/`RefundScreen`) to call `createRefundRequest` when a refund escalates, + the "refund request sent for approval" state on that cashier surface. New cashier-facing UI → [[feedback_design_first_gate]]. The backend create endpoint + `createRefundRequest` client helper already exist, so this is purely the cashier-side UI wiring. Do it as a separate design-gated step (after Pass 4). Test data left in `v_test`: 2 pending refund requests + 1 approved + 1 declined from prior runs.
 
 ## Carry-forwards into Pass 2
 
