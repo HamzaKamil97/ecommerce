@@ -1,6 +1,19 @@
-import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from '@medusajs/framework/http';
+﻿import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from '@medusajs/framework/http';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const SENSITIVE_KEYS = new Set(['pin', 'new_pin', 'old_pin', 'password', 'pin_hash', 'pin_salt', 'secret', 'token']);
+function redactSensitive(value: any): any {
+  if (Array.isArray(value)) return value.map(redactSensitive);
+  if (value && typeof value === 'object') {
+    const out: any = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = SENSITIVE_KEYS.has(k) ? '[REDACTED]' : redactSensitive(v);
+    }
+    return out;
+  }
+  return value;
+}
 
 /**
  * Emits one platform_audit_log row per successful (2xx) mutating request.
@@ -8,7 +21,7 @@ const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
  *
  * Captures actor from req.user (set by Medusa auth middleware) when available.
  * Captures vendor_id, in priority order:
- *   1. (req as any).audit_context.vendor_id  — opt-in, set by the route handler
+ *   1. (req as any).audit_context.vendor_id  â€” opt-in, set by the route handler
  *      AFTER it has resolved the vendor (e.g. via a service lookup). Read at
  *      response-finish time, so handlers may set it any time before they call
  *      res.json/res.end.
@@ -27,14 +40,14 @@ export async function auditLogMiddleware(
 ): Promise<void> {
   if (!MUTATING_METHODS.has(req.method ?? '')) return next();
 
-  // Capture body snapshot upfront — handlers may mutate req.body
+  // Capture body snapshot upfront â€” handlers may mutate req.body
   const path = req.path;
   const method = req.method;
   const module = path.split('/').filter(Boolean)[1] ?? 'unknown';  // /admin/<module>/...
   const action = method === 'DELETE' ? 'delete'
     : method === 'PATCH' || method === 'PUT' ? 'update'
     : 'create';
-  const body_snapshot = req.body ? JSON.parse(JSON.stringify(req.body)) : null;
+  const body_snapshot = req.body ? redactSensitive(JSON.parse(JSON.stringify(req.body))) : null;
 
   // Resolve vendor_id at finish time so route handlers have a chance to set
   // (req as any).audit_context = { vendor_id } after a service lookup.
@@ -53,7 +66,7 @@ export async function auditLogMiddleware(
       const user: any = (req as any).user;
       const actor_id = user?.id ?? user?.userId ?? null;
       const actor_type = actor_id ? 'user' : 'system';
-      // Fire and forget — audit must never fail the user's request
+      // Fire and forget â€” audit must never fail the user's request
       auditSvc.writeAudit({
         vendor_id: captureVendorId(),
         actor_id,
@@ -66,9 +79,11 @@ export async function auditLogMiddleware(
         metadata: { path, method, status: res.statusCode },
       }).catch(() => {});
     } catch {
-      // Container resolve failures during shutdown — swallow
+      // Container resolve failures during shutdown â€” swallow
     }
   });
 
   return next();
 }
+
+
