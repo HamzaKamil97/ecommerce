@@ -50,4 +50,12 @@ describe('tags api client', () => {
     expect(out).toEqual(updated);
     expect(out.featured).toBe(true);
   });
+
+  it('updateTag with featured:false (un-feature path) persists false', async () => {
+    const unfeatured = { ...mockTag, featured: false };
+    vi.mocked(client.apiPatch).mockResolvedValue({ tag: unfeatured });
+    const out = await updateTag('t1', { featured: false });
+    expect(client.apiPatch).toHaveBeenCalledWith('/admin/tags/t1', { featured: false });
+    expect(out.featured).toBe(false);
+  });
 });

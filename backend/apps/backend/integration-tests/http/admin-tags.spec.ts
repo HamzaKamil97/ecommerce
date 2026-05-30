@@ -167,6 +167,56 @@ medusaIntegrationTestRunner({
           .catch((e: any) => e.response)
         expect(res.status).toBe(400)
       })
+
+      it("PATCHes featured from true → false (un-feature path)", async () => {
+        // Create with featured:true
+        const create = await api
+          .post(
+            `/admin/tags`,
+            { vendor_id: "v_tags_unfeature", name: "SpecialOffer", featured: true },
+            { headers: adminHeaders }
+          )
+          .catch((e: any) => e.response)
+        expect(create.status).toBe(201)
+        expect(create.data.tag.featured).toBe(true)
+
+        const id = create.data.tag.id
+
+        // PATCH featured:false
+        const patch = await api
+          .patch(
+            `/admin/tags/${id}`,
+            { featured: false },
+            { headers: adminHeaders }
+          )
+          .catch((e: any) => e.response)
+        expect(patch.status).toBe(200)
+        expect(patch.data.tag.featured).toBe(false)
+
+        // Confirm persisted in list
+        const list = await api.get(`/admin/tags?vendor_id=v_tags_unfeature`, { headers: adminHeaders })
+        expect(list.data.tags).toHaveLength(1)
+        expect(list.data.tags[0].featured).toBe(false)
+      })
+
+      it("returns 400 when required POST body fields are missing", async () => {
+        // Missing name
+        const noName = await api
+          .post(`/admin/tags`, { vendor_id: "v_x" }, { headers: adminHeaders })
+          .catch((e: any) => e.response)
+        expect(noName.status).toBe(400)
+      })
+
+      it("returns 409 when name produces an empty slug (all special chars)", async () => {
+        const res = await api
+          .post(
+            `/admin/tags`,
+            { vendor_id: "v_tags_empty_slug", name: "---" },
+            { headers: adminHeaders }
+          )
+          .catch((e: any) => e.response)
+        expect(res.status).toBe(409)
+      })
     })
   },
 })

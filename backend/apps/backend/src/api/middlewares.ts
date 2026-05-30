@@ -118,12 +118,12 @@ export default defineMiddlewares({
     {
       matcher: '/admin/tags',
       method: ['POST'],
-      middlewares: [requirePermission('catalog.add_edit_product')],
+      middlewares: [requirePermission('catalog.manage_tags')],
     },
     {
       matcher: '/admin/tags/*',
       method: ['PATCH', 'DELETE'],
-      middlewares: [requirePermission('catalog.add_edit_product')],
+      middlewares: [requirePermission('catalog.manage_tags')],
     },
   ],
 })
