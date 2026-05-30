@@ -67,6 +67,24 @@ moduleIntegrationTestRunner({
         const updated = await service.markLinePicked(full.lines[0].id, true);
         expect(updated.picked).toBe(true);
       });
+
+      it('stores and looks up by medusa_order_id', async () => {
+        const o = await service.createOrder({
+          vendor_id: 'v_link', total_minor: 1000,
+          commission_rate_bps_snapshot: 700, commission_minor: 70,
+          medusa_order_id: 'order_LINK123', display_id: '42',
+          lines: [{ variant_id: 'v1', title: 'X', qty: 1, unit_price_minor: 1000, line_total_minor: 1000 }],
+        });
+        expect(o.medusa_order_id).toBe('order_LINK123');
+
+        const found = await service.getByMedusaOrderId('order_LINK123');
+        expect(found).toBeTruthy();
+        expect(found.id).toBe(o.id);
+        expect(found.display_id).toBe('42');
+
+        const missing = await service.getByMedusaOrderId('order_NOPE');
+        expect(missing).toBeNull();
+      });
     });
   },
 });

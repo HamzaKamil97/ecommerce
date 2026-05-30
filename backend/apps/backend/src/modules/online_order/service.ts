@@ -23,6 +23,8 @@ export class OnlineOrderService extends OnlineOrderServiceBase {
       delivery_lat: input.delivery_lat ?? null,
       delivery_lng: input.delivery_lng ?? null,
       voice_note_url: input.voice_note_url ?? null,
+      medusa_order_id: input.medusa_order_id ?? null,
+      display_id: input.display_id ?? null,
       placed_at: new Date(),
     });
     const row = Array.isArray(order) ? order[0] : order;
@@ -68,6 +70,11 @@ export class OnlineOrderService extends OnlineOrderServiceBase {
   async markLinePicked(line_id: string, picked: boolean, oos: boolean = false) {
     const updated = await (this as any).updateOnlineOrderLines({ id: line_id, picked, oos });
     return Array.isArray(updated) ? updated[0] : updated;
+  }
+
+  async getByMedusaOrderId(medusaOrderId: string) {
+    const [rows] = await (this as any).listAndCountOnlineOrders({ medusa_order_id: medusaOrderId });
+    return rows.length ? rows[0] : null;
   }
 }
 

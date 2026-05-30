@@ -8,6 +8,8 @@ export const OnlineOrder = model.define('online_order', {
   customer_id: model.text().nullable(),
   customer_name: model.text().nullable(),
   customer_phone: model.text().nullable(),
+  medusa_order_id: model.text().nullable(),
+  display_id: model.text().nullable(),
   total_minor: model.bigNumber(),
   currency_code: model.text().default('iqd'),
   status: model.enum([
