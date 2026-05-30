@@ -86,6 +86,11 @@ export default defineMiddlewares({
       middlewares: [requirePermission('catalog.view_products')],
     },
     {
+      matcher: '/admin/catalog/manager-products',
+      method: ['POST'],
+      middlewares: [requirePermission('catalog.add_edit_product')],
+    },
+    {
       matcher: '/admin/audit-log*',
       method: ['GET'],
       middlewares: [requirePermission('reports.view')],

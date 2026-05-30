@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createProductsWorkflow } from "@medusajs/core-flows"
 
 /**
  * GET /admin/catalog/manager-products?vendor_id=<id>
@@ -116,4 +117,115 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
 
   res.json({ products })
+}
+
+// ---------------------------------------------------------------------------
+// POST /admin/catalog/manager-products
+// ---------------------------------------------------------------------------
+// Creates a product in the manager's merch bucket.
+//
+// Decision: uses createProductsWorkflow (not productModule.createProducts) so
+// that prices are written to product_variant_price_set and the GET endpoint
+// returns the correct price_minor via its raw SQL price join.
+// productModule.createProducts() alone does NOT populate product_variant_price_set,
+// meaning the GET would always return price_minor: 0 for newly created products.
+// ---------------------------------------------------------------------------
+type CreateBody = {
+  vendor_id: string
+  title: string
+  price_minor: number
+  currency_code: string
+  merch_category_id?: string | null
+  sku?: string | null
+  barcode?: string | null
+  initial_on_hand?: number | null
+  cost_price_minor?: number | null
+  brand?: string | null
+  supplier_name?: string | null
+  description?: string | null
+  tags?: string[]
+  low_stock_threshold?: number | null
+  internal_notes?: string | null
+  schema_fields?: Record<string, unknown>
+  thumb_emoji?: string | null
+}
+
+export async function POST(req: MedusaRequest, res: MedusaResponse) {
+  const b = (req.body ?? {}) as Partial<CreateBody>
+
+  // Validate required fields
+  const required = ["vendor_id", "title", "price_minor", "currency_code"] as const
+  for (const k of required) {
+    if (b[k] == null) return res.status(400).json({ error: `${k} required` })
+  }
+  const body = b as CreateBody
+
+  // Set audit context so auditLogMiddleware can record vendor_id
+  ;(req as any).audit_context = { vendor_id: body.vendor_id }
+
+  const tags = Array.isArray(body.tags) ? body.tags : []
+
+  // Use createProductsWorkflow so prices land in product_variant_price_set
+  // and are visible via the GET endpoint's raw SQL price join.
+  const { result } = await createProductsWorkflow(req.scope).run({
+    input: {
+      products: [
+        {
+          title: body.title,
+          description: body.description ?? undefined,
+          status: "published" as const,
+          metadata: {
+            created_by_vendor_id: body.vendor_id,
+            merch_category_id: body.merch_category_id ?? null,
+            cost_price_minor: body.cost_price_minor ?? null,
+            brand: body.brand ?? null,
+            supplier_name: body.supplier_name ?? null,
+            tags,
+            low_stock_threshold: body.low_stock_threshold ?? null,
+            internal_notes: body.internal_notes ?? null,
+            schema_fields: body.schema_fields ?? {},
+            thumb_emoji: body.thumb_emoji ?? null,
+          },
+          options: [{ title: "Default", values: ["Default"] }],
+          variants: [
+            {
+              title: "Default",
+              sku: body.sku ?? undefined,
+              barcode: body.barcode ?? undefined,
+              manage_inventory: false,
+              prices: [
+                {
+                  amount: Number(body.price_minor),
+                  currency_code: body.currency_code,
+                },
+              ],
+              options: { Default: "Default" },
+            },
+          ],
+        },
+      ],
+    },
+  })
+
+  const p = Array.isArray(result) ? result[0] : result
+
+  if (body.initial_on_hand && Number(body.initial_on_hand) > 0) {
+    const variantId = p?.variants?.[0]?.id
+    if (!variantId) {
+      return res.status(500).json({
+        error: "product created without variant id; stock not seeded",
+        product_id: p?.id,
+      })
+    }
+    const wms: any = req.scope.resolve("wmsService")
+    await wms.incrementStock({
+      vendor_id: body.vendor_id,
+      variant_id: variantId,
+      qty: Number(body.initial_on_hand),
+      type: "restock",
+      note: "manager add-product initial on_hand",
+    })
+  }
+
+  res.status(201).json({ product: p })
 }

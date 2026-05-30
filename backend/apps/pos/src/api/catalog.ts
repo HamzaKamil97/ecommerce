@@ -71,5 +71,5 @@ export type CreateProductInput = {
 };
 
 export async function createProduct(input: CreateProductInput) {
-  return apiPost('/admin/products', input);
+  return apiPost('/admin/catalog/manager-products', input);
 }
