@@ -167,45 +167,52 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   // Use createProductsWorkflow so prices land in product_variant_price_set
   // and are visible via the GET endpoint's raw SQL price join.
-  const { result } = await createProductsWorkflow(req.scope).run({
-    input: {
-      products: [
-        {
-          title: body.title,
-          description: body.description ?? undefined,
-          status: "published" as const,
-          metadata: {
-            created_by_vendor_id: body.vendor_id,
-            merch_category_id: body.merch_category_id ?? null,
-            cost_price_minor: body.cost_price_minor ?? null,
-            brand: body.brand ?? null,
-            supplier_name: body.supplier_name ?? null,
-            tags,
-            low_stock_threshold: body.low_stock_threshold ?? null,
-            internal_notes: body.internal_notes ?? null,
-            schema_fields: body.schema_fields ?? {},
-            thumb_emoji: body.thumb_emoji ?? null,
-          },
-          options: [{ title: "Default", values: ["Default"] }],
-          variants: [
-            {
-              title: "Default",
-              sku: body.sku ?? undefined,
-              barcode: body.barcode ?? undefined,
-              manage_inventory: false,
-              prices: [
-                {
-                  amount: Number(body.price_minor),
-                  currency_code: body.currency_code,
-                },
-              ],
-              options: { Default: "Default" },
+  // Wrap in try/catch: invalid input or workflow errors → 400.
+  let result: any
+  try {
+    const wfResult = await createProductsWorkflow(req.scope).run({
+      input: {
+        products: [
+          {
+            title: body.title,
+            description: body.description ?? undefined,
+            status: "published" as const,
+            metadata: {
+              created_by_vendor_id: body.vendor_id,
+              merch_category_id: body.merch_category_id ?? null,
+              cost_price_minor: body.cost_price_minor ?? null,
+              brand: body.brand ?? null,
+              supplier_name: body.supplier_name ?? null,
+              tags,
+              low_stock_threshold: body.low_stock_threshold ?? null,
+              internal_notes: body.internal_notes ?? null,
+              schema_fields: body.schema_fields ?? {},
+              thumb_emoji: body.thumb_emoji ?? null,
             },
-          ],
-        },
-      ],
-    },
-  })
+            options: [{ title: "Default", values: ["Default"] }],
+            variants: [
+              {
+                title: "Default",
+                sku: body.sku ?? undefined,
+                barcode: body.barcode ?? undefined,
+                manage_inventory: false,
+                prices: [
+                  {
+                    amount: Number(body.price_minor),
+                    currency_code: body.currency_code,
+                  },
+                ],
+                options: { Default: "Default" },
+              },
+            ],
+          },
+        ],
+      },
+    })
+    result = wfResult.result
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message })
+  }
 
   const p = Array.isArray(result) ? result[0] : result
 
@@ -218,13 +225,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
     const wms: any = req.scope.resolve("wmsService")
-    await wms.incrementStock({
-      vendor_id: body.vendor_id,
-      variant_id: variantId,
-      qty: Number(body.initial_on_hand),
-      type: "restock",
-      note: "manager add-product initial on_hand",
-    })
+    try {
+      await wms.incrementStock({
+        vendor_id: body.vendor_id,
+        variant_id: variantId,
+        qty: Number(body.initial_on_hand),
+        type: "restock",
+        note: "manager add-product initial on_hand",
+      })
+    } catch (e: any) {
+      return res.status(500).json({
+        error: "product created but stock seeding failed",
+        product_id: p?.id,
+        detail: e.message,
+      })
+    }
   }
 
   res.status(201).json({ product: p })

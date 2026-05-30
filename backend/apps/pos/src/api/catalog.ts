@@ -68,6 +68,7 @@ export type CreateProductInput = {
   low_stock_threshold?: number | null;
   internal_notes?: string | null;
   schema_fields?: Record<string, any>;
+  thumb_emoji?: string | null;
 };
 
 export async function createProduct(input: CreateProductInput) {

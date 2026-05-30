@@ -97,6 +97,7 @@ medusaIntegrationTestRunner({
           merch_category_id: "mc_dairy",
           sku: "PM1",
           price_minor: 1500,
+          currency_code: "iqd",
           stock_qty: 12,
         })
       })
