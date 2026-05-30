@@ -4,12 +4,12 @@
 **Plan(s):** Pass 1 → [2026-05-30-phase-h3-2d-pass1-repoint-clients.md](2026-05-30-phase-h3-2d-pass1-repoint-clients.md)
 **As of:** 2026-05-30
 
-## Status — Pass 1 of 4 COMPLETE
+## Status — Pass 2 of 4 COMPLETE
 
 | Pass | Scope | Status |
 |---|---|---|
 | **1** | Re-point clients to existing endpoints (3 screens) | ✅ **DONE** |
-| 2 | Build missing endpoints (manager products list, product-create reconcile, tags CRUD, staff reset-pin) | ⏳ next |
+| **2** | Build missing endpoints (manager products list, product-create reconcile, tags CRUD, staff reset-pin) | ✅ **DONE** |
 | 3 | Approvals model decision (A: pos_refund_request table · B: audit-log view → design gate) | ⏳ |
 | 4 | Session + audit hygiene (persist cashier→localStorage / manager→sessionStorage; strip PIN from audit after_json) | ⏳ |
 
@@ -54,6 +54,36 @@ Rename 404'd live: `MerchCategory with id "" not found`. Root cause (proved with
 - Pre-existing CORS error on `GET /pos/alerts?vendor_id=v_test` from :9200 (alerts feature, unrelated to H-3.2d).
 
 Test data left in `v_test`: 2 merch categories (Bakery, Dairy & Eggs) — harmless, useful for Pass 2 catalog testing.
+
+## Pass 2 — DONE 2026-05-30 (subagent-driven: impl → spec review → quality review → fix → live verify, per task)
+
+Plan: [2026-05-30-phase-h3-2d-pass2-build-endpoints.md](2026-05-30-phase-h3-2d-pass2-build-endpoints.md). User decisions: new manager endpoint (not extend); store-don't-enforce schema; new `pos_tag` table.
+
+| Task | Commits | Endpoint | Live verified |
+|---|---|---|---|
+| P2-1 | `c3121ba` + `fd0dde8` | `GET /admin/catalog/manager-products` (vendor card-list) + re-point `listProducts` | Catalog grid loads grouped by dept; 200 not 403 (cap change) |
+| P2-2 | `7a7adf0` + `5667b24` | `POST /admin/catalog/manager-products` (merch-bucket create, `createProductsWorkflow`+WMS seed) + re-point `createProduct` | Added "Sourdough Loaf" via form → 201 → shows under Bakery w/ SKU/2,500 IQD/stock 20 |
+| P2-3 | `b88e457` + `9aae70f` | `pos_tag` module + migration + `/admin/tags` CRUD + finish `tags.ts` | Seeded 2 tags via API; promote/demote (`featured:true/false`) live → 200, correct re-render |
+| P2-4 | `b5876c2` + `d528bf6` | `POST /admin/pos-terminal/cashiers/:id/reset-pin` + re-point `resetPin` | Reset QA Manager PIN as manager → 200 (gate `staff.reset_pin`); restored to 4242 |
+
+**New backend infra:** `pos_tag` module (model/service/index/migration, registered in medusa-config); new capability `catalog.view_products` (owner/manager/cashier). Routes gated: manager-products GET→`catalog.view_products`, POST→`catalog.add_edit_product`; tags→`catalog.manage_tags`; reset-pin→`staff.reset_pin`.
+
+**Key adaptations (verified correct):** product create/seed uses `createProductsWorkflow` (NOT `productModule.createProducts`) — only the workflow writes `product_variant_price_set`, so the GET's raw-SQL price read returns a real price. `/admin/catalog/manager-products` is a distinct path because `/admin/products` is a Medusa CORE route.
+
+**Verification:** pos vitest **221 green** (208 + 13 new api-client tests), pos tsc 0. Backend: all 4 new HTTP suites green individually (manager-products 2, create 2, tags 8, reset-pin 3) + regression spot-check (permission-middleware 1/1, admin-staff-capabilities 3/3, capabilities 5/5). Two-stage review per task; final integration review = READY.
+
+**Bugs found + fixed during Pass 2 reviews/live:**
+- P2-2: workflow create wasn't try/caught → would leak 500 on bad input; wrapped (400 vs 500-partial-stock).
+- P2-4: reset-pin gated on `staff.manage` (OWNER-ONLY) → manager would 403 on their own screen. Fixed to `staff.reset_pin`. + 404 guard on unknown cashier.
+- P2-1: N+1 sequential `wms.getStock` → `Promise.allSettled` fan-out; read route gated on a write cap → added `catalog.view_products`.
+- P2-3: empty-slug guard; un-feature test coverage.
+
+**Findings carried forward (not blocking Pass 2):**
+- **Tag manager has NO manual "add tag" UI** — creates only via the out-of-scope AI-suggestions flow (fail-soft empty). A manager can't create a tag from this screen today. Adding an input = new UI → design gate. **Decide in a future UI pass.**
+- `tags.ts listTags` keeps a dead `r.rows ?? []` fallback (cosmetic); `AddProductScreen` doesn't pass `thumb_emoji` (products show 📦 placeholder — emoji picker is future UI).
+- Raw PIN still reaches audit `after_json` (createCashier + reset-pin) — **Pass 4's explicit scope** strips it globally + adds a test. Code comment left at the reset-pin site.
+- **Operational:** every pos client re-point leaves a stale `.js` shadow that breaks Vite HMR (404 on `<file>.js` + HMR reload fail) → **restart the pos Vite dev server after each re-point** before live verify. Hit on catalog/tags/staff. Also: `medusa develop` briefly drops :9000 connections while hot-reloading route/module/config changes (transient ERR_CONNECTION_REFUSED, self-recovers).
+- Manager screens overlap header/footer controls at narrow (<~1000px) widths (responsive nit; fine at desktop — `elementFromPoint` confirms CTAs are clickable). Playwright is over-conservative clicking sticky-footer CTAs (use JS dispatch in automation; real users unaffected).
 
 ## Carry-forwards into Pass 2
 
