@@ -2,6 +2,7 @@ import { apiGet, apiPost } from './client';
 
 export type Product = {
   id: string;
+  variant_id?: string | null;
   title: string;
   sku?: string | null;
   barcode?: string | null;

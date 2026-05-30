@@ -78,18 +78,28 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
   }
 
+  // Fan out wms.getStock for all first-variant IDs in parallel (mirrors the
+  // bulk-price-fetch style above — avoids N+1 sequential awaits).
+  const firstVariantIds = rows
+    .map((p: any) => (p.variants ?? [])[0]?.id)
+    .filter(Boolean) as string[]
+
+  const stockSettled = await Promise.allSettled(
+    firstVariantIds.map((vid) => wms.getStock(vendor_id, vid))
+  )
+
+  const stockByVariantId: Record<string, number> = {}
+  firstVariantIds.forEach((vid, i) => {
+    const result = stockSettled[i]
+    stockByVariantId[vid] =
+      result.status === "fulfilled" ? (result.value?.on_hand ?? 0) : 0
+  })
+
   const products: any[] = []
   for (const p of rows) {
     const v = (p.variants ?? [])[0]
     const priceData = v ? (pricesByVariantId[v.id] ?? null) : null
-    let stock_qty = 0
-    if (v) {
-      try {
-        stock_qty = (await wms.getStock(vendor_id, v.id)).on_hand
-      } catch {
-        /* no stock record yet — treat as 0 */
-      }
-    }
+    const stock_qty = v ? (stockByVariantId[v.id] ?? 0) : 0
     products.push({
       id: p.id,
       variant_id: v?.id ?? null,

@@ -13,6 +13,7 @@ export const CAPABILITIES = {
   'pos.return_process': 'Process a return',
   'pos.end_of_day': 'Close the till with end-of-day reconciliation',
   // Catalog
+  'catalog.view_products': 'View the product catalog list',
   'catalog.add_edit_product': 'Add or edit products',
   'catalog.csv_import': 'Bulk import products from CSV',
   'catalog.bulk_edit': 'Bulk edit existing products',
@@ -52,6 +53,7 @@ export const ROLE_DEFAULTS: Record<Role, Partial<Record<CapabilityKey, true | 'p
   manager: {
     'pos.ring_sales': true, 'pos.open_cash_drawer': true, 'pos.refund_or_void': true,
     'pos.return_process': true, 'pos.end_of_day': true,
+    'catalog.view_products': true,
     'catalog.add_edit_product': true, 'catalog.csv_import': true, 'catalog.bulk_edit': true,
     'catalog.manage_departments': true, 'catalog.manage_tags': true,
     'catalog.adjust_stock': true, 'catalog.stock_count': true, 'catalog.report_damage': true,
@@ -64,6 +66,7 @@ export const ROLE_DEFAULTS: Record<Role, Partial<Record<CapabilityKey, true | 'p
     'pos.ring_sales': true, 'pos.open_cash_drawer': true,
     'pos.refund_or_void': 'pin', 'pos.return_process': 'pin',
     'pos.end_of_day': true,
+    'catalog.view_products': true,
     'catalog.report_damage': 'pin',
     'orders.accept_reject_online': true,
     'shop.notifications_prefs': true,
