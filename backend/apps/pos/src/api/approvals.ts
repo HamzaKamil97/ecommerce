@@ -29,7 +29,10 @@ import { api, apiGet, apiPost } from './client';
 export type RefundApproval = {
   id: string;
   vendor_id: string;
+  /** Normalised client-side field — always populated by listPendingRefunds(). */
   sale_id: string;
+  /** Raw column name returned by the backend pos_refund_request model. */
+  original_sale_id: string;
   total_minor: number;
   reason: string;
   requested_by: string;
@@ -59,7 +62,12 @@ export function listPendingRefunds(vendorId: string): Promise<RefundApproval[]> 
   return apiGet<{ approvals?: RefundApproval[]; rows?: RefundApproval[] }>(
     `/admin/approvals/refunds?vendor_id=${encodeURIComponent(vendorId)}&status=pending`,
   )
-    .then((r) => r.approvals ?? r.rows ?? [])
+    .then((r) => {
+      const arr = r.approvals ?? r.rows ?? [];
+      // The backend model column is `original_sale_id`; normalise to `sale_id`
+      // so the tray's QueueCard / DetailPanel always has a non-undefined value.
+      return arr.map((a) => ({ ...a, sale_id: a.sale_id ?? a.original_sale_id }));
+    })
     .catch(() => []);
 }
 

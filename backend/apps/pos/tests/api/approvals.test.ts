@@ -16,10 +16,11 @@ vi.mock('../../src/api/client', () => ({
   apiDelete: vi.fn(),
 }));
 
-const mockApproval = {
+/** Backend shape: uses original_sale_id, no sale_id (mimics pos_refund_request column). */
+const mockApprovalRaw = {
   id: 'ap1',
   vendor_id: 'v_test',
-  sale_id: 'HN-1',
+  original_sale_id: 'HN-1',
   total_minor: 12750,
   reason: 'Item is expired',
   requested_by: 'cashier-hala',
@@ -28,22 +29,30 @@ const mockApproval = {
   created_at: '2026-05-30T10:00:00Z',
 };
 
+/** Normalised shape after listPendingRefunds() maps original_sale_id -> sale_id. */
+const mockApproval = { ...mockApprovalRaw, sale_id: 'HN-1' };
+
 beforeEach(() => vi.clearAllMocks());
 
 describe('approvals api client', () => {
   // ─── listPendingRefunds ───────────────────────────────────────────────────
 
   it('listPendingRefunds calls apiGet with the correct path including vendor_id + status=pending', async () => {
-    vi.mocked(client.apiGet).mockResolvedValue({ approvals: [mockApproval] });
+    vi.mocked(client.apiGet).mockResolvedValue({ approvals: [mockApprovalRaw] });
     await listPendingRefunds('v_test');
     expect(client.apiGet).toHaveBeenCalledWith(
       '/admin/approvals/refunds?vendor_id=v_test&status=pending',
     );
   });
 
-  it('listPendingRefunds unwraps {approvals} and returns the array', async () => {
-    vi.mocked(client.apiGet).mockResolvedValue({ approvals: [mockApproval] });
+  it('listPendingRefunds unwraps {approvals} and maps original_sale_id -> sale_id', async () => {
+    // Backend returns original_sale_id with no sale_id
+    vi.mocked(client.apiGet).mockResolvedValue({ approvals: [mockApprovalRaw] });
     const out = await listPendingRefunds('v_test');
+    // Normalised: sale_id must equal original_sale_id
+    const first = out[0]!;
+    expect(first.sale_id).toBe(mockApprovalRaw.original_sale_id);
+    expect(first.original_sale_id).toBe('HN-1');
     expect(out).toEqual([mockApproval]);
   });
 
