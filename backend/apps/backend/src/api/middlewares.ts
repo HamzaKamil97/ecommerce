@@ -101,6 +101,11 @@ export default defineMiddlewares({
       middlewares: [requirePermission('staff.manage')],
     },
     {
+      matcher: '/admin/pos-terminal/cashiers/*/reset-pin',
+      method: ['POST'],
+      middlewares: [requirePermission('staff.manage')],
+    },
+    {
       matcher: '/admin/approvals/refunds/bulk',
       method: ['POST'],
       middlewares: [requirePermission('pos.refund_or_void')],

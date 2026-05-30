@@ -265,6 +265,13 @@ export class PosTerminalService extends PosTerminalServiceBase
     };
   }
 
+  async resetCashierPin(cashierId: string, pin: string): Promise<{ ok: true }> {
+    const salt = randomBytes(16).toString('hex');
+    const pin_hash = hashPin(pin, salt);
+    await (this as any).updateCashiers({ id: cashierId, pin_hash, pin_salt: salt });
+    return { ok: true };
+  }
+
   async listCashiers(vendorId: string) {
     const [rows] = await (this as any).listAndCountCashiers({
       vendor_id: vendorId,

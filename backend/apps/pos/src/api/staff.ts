@@ -3,9 +3,6 @@
 // last_active_at — those aren't exposed by the cashier list. We default
 // permission_overrides to {} so PinResetScreen.resolveLabel (which dereferences
 // row.permission_overrides[key]) renders role-default pills without crashing.
-// resetPin still targets /admin/staff/:id/reset-pin — that endpoint is built in
-// Pass 2 (POST /admin/pos-terminal/cashiers/:id/reset-pin); the reset action
-// 404s until then.
 
 import { apiGet, apiPost } from './client';
 
@@ -42,5 +39,5 @@ export async function listStaff(vendorId: string): Promise<StaffRow[]> {
 }
 
 export async function resetPin(id: string, pin: string): Promise<{ ok: boolean }> {
-  return apiPost(`/admin/staff/${encodeURIComponent(id)}/reset-pin`, { pin });
+  return apiPost(`/admin/pos-terminal/cashiers/${encodeURIComponent(id)}/reset-pin`, { pin });
 }
