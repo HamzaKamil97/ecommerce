@@ -76,6 +76,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const merch_category_id = (p.metadata?.merch_category_id as string) ?? null
     for (const v of (p.variants ?? [])) {
       const price = priceByVariant[v.id] ?? null
+      const stockQty: number = stockByVariant[v.id] ?? 0
       items.push({
         variant_id: v.id,
         product_id: p.id,
@@ -88,7 +89,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         thumb_emoji: (p.metadata?.thumb_emoji as string) ?? null,
         merch_category_id,
         category_name: merch_category_id ? (categoryNameById[merch_category_id] ?? null) : null,
-        on_hand: stockByVariant[v.id] ?? 0,
+        on_hand: stockQty,
       })
     }
   }
