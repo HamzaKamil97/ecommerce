@@ -72,7 +72,7 @@ export class OnlineOrderService extends OnlineOrderServiceBase {
     return Array.isArray(updated) ? updated[0] : updated;
   }
 
-  async getByMedusaOrderId(medusaOrderId: string) {
+  async getByMedusaOrderId(medusaOrderId: string): Promise<Record<string, any> | null> {
     const [rows] = await (this as any).listAndCountOnlineOrders({ medusa_order_id: medusaOrderId });
     return rows.length ? rows[0] : null;
   }
