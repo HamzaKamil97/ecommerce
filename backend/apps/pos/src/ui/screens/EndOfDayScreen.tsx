@@ -6,6 +6,7 @@ import {
   openSession,
 } from '../../api/cashSession';
 import { DenominationGrid } from '../components/DenominationGrid';
+import { VENDOR_ID as ENV_VENDOR_ID, TERMINAL_ID } from '../../env';
 import './EndOfDayScreen.css';
 
 export type EndOfDayScreenProps = {
@@ -21,16 +22,7 @@ const DENOM_AMOUNTS: Record<string, number> = {
   '250': 250,
 };
 
-const VENDOR_ID =
-  (typeof import.meta !== 'undefined' &&
-    (import.meta as unknown as { env?: { VITE_VENDOR_ID?: string } }).env
-      ?.VITE_VENDOR_ID) ||
-  'v_test';
-const TERMINAL_ID =
-  (typeof import.meta !== 'undefined' &&
-    (import.meta as unknown as { env?: { VITE_TERMINAL_ID?: string } }).env
-      ?.VITE_TERMINAL_ID) ||
-  'term_dev_1';
+const VENDOR_ID = ENV_VENDOR_ID || 'v_test';
 const CASHIER_ID = 'dev_cashier';
 
 function fmt(n: number): string {

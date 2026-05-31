@@ -21,6 +21,7 @@ export const Tenant = model.define("tenant", {
   domain: model.text().nullable(),
   branding: model.json().nullable(), // { logo_url, primary_color, secondary_color, font }
   approval_status: model.enum(["pending", "approved", "suspended"]).default("pending"),
+  commission_rate_bps: model.number().default(700),
 }).indexes([
   { on: ["slug"], unique: true },
   { on: ["sales_channel_id"] },

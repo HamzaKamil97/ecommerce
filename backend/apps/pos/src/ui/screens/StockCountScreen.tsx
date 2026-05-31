@@ -10,6 +10,7 @@ import {
 import { findByBarcode } from '../../db/catalog-sync';
 import { Badge } from '../components/Badge';
 import { ScanZone } from '../components/ScanZone';
+import { VENDOR_ID as ENV_VENDOR_ID } from '../../env';
 import './StockCountScreen.css';
 
 export type StockCountScreenProps = {
@@ -28,11 +29,7 @@ const REASONS: Array<{ key: CountReason; label: string; danger?: boolean }> = [
   { key: 'expired', label: 'Expired', danger: true },
 ];
 
-const VENDOR_ID =
-  (typeof import.meta !== 'undefined' &&
-    (import.meta as unknown as { env?: { VITE_VENDOR_ID?: string } }).env
-      ?.VITE_VENDOR_ID) ||
-  'v_test';
+const VENDOR_ID = ENV_VENDOR_ID || 'v_test';
 const ACTOR_ID = 'dev_cashier';
 
 type DisplayLine = CountLine & { name?: string; sku?: string | null };

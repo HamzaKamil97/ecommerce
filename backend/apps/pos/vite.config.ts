@@ -8,7 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      devOptions: { enabled: true, type: 'module' },
+      // Dev SW disabled: the workbox precache serves stale bundles during local
+      // dev (e.g. after .env / vendor changes), which breaks live verification.
+      // Production PWA (generateSW on build) is unaffected.
+      devOptions: { enabled: false, type: 'module' },
       manifest: {
         name: 'Hanoot PoS',
         short_name: 'Hanoot PoS',

@@ -22,4 +22,6 @@ export type CreateOnlineOrderInput = {
   delivery_lat?: number | null;
   delivery_lng?: number | null;
   voice_note_url?: string | null;
+  medusa_order_id?: string | null;
+  display_id?: string | null;
 };
