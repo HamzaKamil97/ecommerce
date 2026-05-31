@@ -23,10 +23,11 @@ medusaIntegrationTestRunner({
       expect(acceptR.data.order.status).toBe('accepted');
       expect(acceptR.data.order.accepted_at).toBeTruthy();
 
-      // Verify reservation was created
+      // Verify reservation was created (concrete values: seeded 5, reserved 1)
       const snap = await wms.getStock('v_oo_http', 'v1');
+      expect(snap.on_hand).toBe(5);
       expect(snap.reserved).toBe(1);
-      expect(snap.available).toBe(snap.on_hand - 1);
+      expect(snap.available).toBe(4);
 
       const handR = await api.post(`/pos/online-orders/${o.id}/handoff`, {});
       expect(handR.status).toBe(200);
@@ -120,6 +121,26 @@ medusaIntegrationTestRunner({
       expect(after.status).toBe('pending');
       const snap = await wms.getStock('v_oo_short', 'short1');
       expect(snap.reserved).toBe(0); // no partial reservation left behind
+    });
+
+    it('double accept is idempotent: 2nd call 409s and does not double-reserve', async () => {
+      const svc: any = getContainer().resolve('onlineOrderService');
+      const wms: any = getContainer().resolve('wmsService');
+      const o = await svc.createOrder({
+        vendor_id: 'v_oo_dbl', total_minor: 1000,
+        commission_rate_bps_snapshot: 700, commission_minor: 70,
+        lines: [{ variant_id: 'dbl1', title: 'X', qty: 2, unit_price_minor: 500, line_total_minor: 1000 }],
+      });
+      await wms.incrementStock({ vendor_id: 'v_oo_dbl', variant_id: 'dbl1', qty: 10, type: 'restock' });
+
+      const first = await api.post(`/pos/online-orders/${o.id}/accept`, {});
+      expect(first.status).toBe(200);
+      expect((await wms.getStock('v_oo_dbl', 'dbl1')).reserved).toBe(2);
+
+      const second = await api.post(`/pos/online-orders/${o.id}/accept`, {}).catch((e: any) => e.response);
+      expect(second.status).toBe(409); // already accepted, not pending
+      // Reservation count unchanged — the status guard prevented a duplicate reserve.
+      expect((await wms.getStock('v_oo_dbl', 'dbl1')).reserved).toBe(2);
     });
   },
 });

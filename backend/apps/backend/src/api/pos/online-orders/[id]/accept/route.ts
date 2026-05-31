@@ -15,6 +15,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   // Stock-first: reserve every line; roll back all on any shortfall.
   const made: string[] = [];
+  const releaseAll = async (reason: string) => {
+    for (const rid of made) {
+      await wms.releaseReservation({ reservation_id: rid, reason }).catch(() => {});
+    }
+  };
   try {
     for (const line of full.lines) {
       const r = await wms.createReservation({
@@ -26,12 +31,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       made.push(r.id);
     }
   } catch (e: any) {
-    for (const rid of made) {
-      await wms.releaseReservation({ reservation_id: rid, reason: 'accept-rollback' }).catch(() => {});
-    }
-    return res.status(409).json({ error: e?.message ?? 'insufficient stock' });
+    await releaseAll('accept-rollback');
+    // Only a genuine stock shortfall is a 409 (conflict the cashier can act on).
+    // Infra failures (DB down, etc.) must surface as 500 so clients don't retry-as-conflict.
+    const isShortfall = e?.name === 'WmsInsufficientStockError';
+    return res.status(isShortfall ? 409 : 500).json({ error: e?.message ?? 'reservation failed' });
   }
 
-  const updated = await svc.transition(id, 'accepted');
+  // Reservations are committed; if the status transition fails, release them so we
+  // don't leave a 'pending' order holding stock (and avoid duplicate reservations on retry).
+  let updated: any;
+  try {
+    updated = await svc.transition(id, 'accepted');
+  } catch (e: any) {
+    await releaseAll('accept-transition-failed');
+    return res.status(500).json({ error: e?.message ?? 'failed to accept order' });
+  }
   res.json({ order: updated, reservations: made.length });
 }
