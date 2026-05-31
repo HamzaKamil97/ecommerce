@@ -11,23 +11,32 @@ const LABELS: Record<string, string> = {
   delivered: "Delivered",
   rejected: "Order declined by the shop",
   cancelled: "Cancelled",
+  refunded: "Your order has been refunded",
 }
+
+// Statuses that won't change again — stop polling once we hit one.
+const TERMINAL = new Set(["delivered", "rejected", "cancelled", "refunded"])
 
 export function OrderStatusStrip({ orderId }: { orderId: string }) {
   const [status, setStatus] = useState<string | null>(null)
   useEffect(() => {
     let alive = true
+    let timer: ReturnType<typeof setInterval> | undefined
     const poll = async () => {
       try {
         const r = await fetch(`${BASE}/store/online-order-status/${orderId}`, {
           headers: { "x-publishable-api-key": PK }, credentials: "include",
         })
-        if (r.ok && alive) setStatus((await r.json()).status)
+        if (r.ok && alive) {
+          const s = (await r.json()).status as string
+          setStatus(s)
+          if (TERMINAL.has(s) && timer) clearInterval(timer)
+        }
       } catch { /* ignore transient */ }
     }
     poll()
-    const t = setInterval(poll, 5000)
-    return () => { alive = false; clearInterval(t) }
+    timer = setInterval(poll, 5000)
+    return () => { alive = false; if (timer) clearInterval(timer) }
   }, [orderId])
 
   if (!status) return null
