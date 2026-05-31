@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { OrderStatusStrip } from "./OrderStatusStrip"
 
 export default function OrderSuccessPage() {
   const { countryCode, id } = useParams() as { countryCode: string; id: string }
@@ -18,6 +19,7 @@ export default function OrderSuccessPage() {
       <p className="text-sm text-gray-500 mb-6">
         Order <span className="bg-gray-100 px-2 py-0.5 rounded font-mono font-bold text-gray-900">#{displayId}</span>
       </p>
+      <OrderStatusStrip orderId={id} />
       <p className="text-xs text-gray-500 mb-8">We&apos;ll text you when the order updates.</p>
       <div className="flex-1" />
       <div className="flex flex-col gap-2">
