@@ -10,6 +10,10 @@ medusaIntegrationTestRunner({
         lines: [{ variant_id: 'v1', title: 'X', qty: 1, unit_price_minor: 1000, line_total_minor: 1000 }],
       });
 
+      // Seed stock so accept can reserve
+      const wms: any = getContainer().resolve('wmsService');
+      await wms.incrementStock({ vendor_id: 'v_oo_http', variant_id: 'v1', qty: 5, type: 'restock' });
+
       const listR = await api.get('/pos/online-orders?vendor_id=v_oo_http&status=pending');
       expect(listR.status).toBe(200);
       expect(listR.data.orders.some((x: any) => x.id === o.id)).toBe(true);
@@ -18,6 +22,11 @@ medusaIntegrationTestRunner({
       expect(acceptR.status).toBe(200);
       expect(acceptR.data.order.status).toBe('accepted');
       expect(acceptR.data.order.accepted_at).toBeTruthy();
+
+      // Verify reservation was created
+      const snap = await wms.getStock('v_oo_http', 'v1');
+      expect(snap.reserved).toBe(1);
+      expect(snap.available).toBe(snap.on_hand - 1);
 
       const handR = await api.post(`/pos/online-orders/${o.id}/handoff`, {});
       expect(handR.status).toBe(200);
@@ -46,6 +55,12 @@ medusaIntegrationTestRunner({
           { variant_id: 'v2', title: 'B', qty: 1, unit_price_minor: 1000, line_total_minor: 1000 },
         ],
       });
+
+      // Seed stock so partial's non-OOS lines can be reserved (partial accepts too, needs available stock)
+      const wms: any = getContainer().resolve('wmsService');
+      await wms.incrementStock({ vendor_id: 'v_oo_p', variant_id: 'v1', qty: 5, type: 'restock' });
+      await wms.incrementStock({ vendor_id: 'v_oo_p', variant_id: 'v2', qty: 5, type: 'restock' });
+
       const full = await svc.getWithLines(o.id);
       const oosId = full.lines[0].id;
 
@@ -86,6 +101,25 @@ medusaIntegrationTestRunner({
     it('GET single returns 404 for missing id', async () => {
       const r = await api.get('/pos/online-orders/oo_nope').catch((e: any) => e.response);
       expect(r.status).toBe(404);
+    });
+
+    it('accept with insufficient stock returns 409 and does not transition', async () => {
+      const svc: any = getContainer().resolve('onlineOrderService');
+      const o = await svc.createOrder({
+        vendor_id: 'v_oo_short', total_minor: 1000,
+        commission_rate_bps_snapshot: 700, commission_minor: 70,
+        lines: [{ variant_id: 'short1', title: 'X', qty: 3, unit_price_minor: 1000, line_total_minor: 3000 }],
+      });
+      const wms: any = getContainer().resolve('wmsService');
+      await wms.incrementStock({ vendor_id: 'v_oo_short', variant_id: 'short1', qty: 1, type: 'restock' });
+
+      const r = await api.post(`/pos/online-orders/${o.id}/accept`, {}).catch((e: any) => e.response);
+      expect(r.status).toBe(409);
+
+      const after = await svc.getWithLines(o.id);
+      expect(after.status).toBe('pending');
+      const snap = await wms.getStock('v_oo_short', 'short1');
+      expect(snap.reserved).toBe(0); // no partial reservation left behind
     });
   },
 });
