@@ -39,18 +39,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
   }
 
-  // Mark OOS lines.
-  for (const lid of oos) await svc.markLinePicked(lid, false, true);
-
-  // Transition to accepted — rollback reservations if this fails.
+  // Mark OOS lines + transition to accepted — rollback reservations if EITHER fails
+  // (markLinePicked is inside the guard so a throw there can't leak the holds).
   let updated: any;
   try {
+    for (const lid of oos) await svc.markLinePicked(lid, false, true);
     updated = await svc.transition(id, 'accepted');
   } catch (e: any) {
     for (const rsId of made) {
-      await wms.releaseReservation({ reservation_id: rsId, reason: 'partial-transition-failed' }).catch(() => {});
+      await wms.releaseReservation({ reservation_id: rsId, reason: 'partial-rollback' }).catch(() => {});
     }
-    return res.status(500).json({ error: 'transition failed', details: (e as any)?.message });
+    return res.status(500).json({ error: 'partial accept failed', details: (e as any)?.message });
   }
 
   res.json({ order: updated, oos_line_count: oos.length, reservations: made.length });

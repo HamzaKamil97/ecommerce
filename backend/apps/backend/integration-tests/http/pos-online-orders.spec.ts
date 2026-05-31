@@ -135,6 +135,37 @@ medusaIntegrationTestRunner({
       expect(r.status).toBe(404);
     });
 
+    it('handoff and reject return 404 for missing order', async () => {
+      const h = await api.post('/pos/online-orders/oo_missing/handoff', {}).catch((e: any) => e.response);
+      expect(h.status).toBe(404);
+      const j = await api.post('/pos/online-orders/oo_missing/reject', {}).catch((e: any) => e.response);
+      expect(j.status).toBe(404);
+    });
+
+    it('partial with insufficient stock for a non-OOS line returns 409 and reserves nothing', async () => {
+      const svc: any = getContainer().resolve('onlineOrderService');
+      const wms: any = getContainer().resolve('wmsService');
+      const o = await svc.createOrder({
+        vendor_id: 'v_oo_pshort', total_minor: 2000,
+        commission_rate_bps_snapshot: 700, commission_minor: 140,
+        lines: [
+          { variant_id: 'ps_oos', title: 'OOS', qty: 1, unit_price_minor: 1000, line_total_minor: 1000 },
+          { variant_id: 'ps_short', title: 'Short', qty: 3, unit_price_minor: 1000, line_total_minor: 3000 },
+        ],
+      });
+      // Only 1 of ps_short in stock, but the non-OOS line needs 3 → shortfall.
+      await wms.incrementStock({ vendor_id: 'v_oo_pshort', variant_id: 'ps_short', qty: 1, type: 'restock' });
+      const full = await svc.getWithLines(o.id);
+      const oosId = full.lines.find((l: any) => l.variant_id === 'ps_oos').id;
+
+      const r = await api.post(`/pos/online-orders/${o.id}/partial`, { oos_line_ids: [oosId] }).catch((e: any) => e.response);
+      expect(r.status).toBe(409);
+
+      const after = await svc.getWithLines(o.id);
+      expect(after.status).toBe('pending'); // not transitioned
+      expect((await wms.getStock('v_oo_pshort', 'ps_short')).reserved).toBe(0); // no leaked reservation
+    });
+
     it('accept with insufficient stock returns 409 and does not transition', async () => {
       const svc: any = getContainer().resolve('onlineOrderService');
       const o = await svc.createOrder({
