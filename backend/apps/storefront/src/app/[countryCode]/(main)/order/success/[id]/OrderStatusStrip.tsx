@@ -1,8 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-
-const BASE = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ?? "http://localhost:9000"
-const PK = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ?? ""
+import { getOnlineOrderStatus } from "@lib/data/online-orders"
 
 const LABELS: Record<string, string> = {
   pending: "Waiting for the shop to accept…",
@@ -22,15 +20,14 @@ export function OrderStatusStrip({ orderId }: { orderId: string }) {
   useEffect(() => {
     let alive = true
     let timer: ReturnType<typeof setInterval> | undefined
+    // Poll via a server action: the customer's auth token lives in an httpOnly
+    // cookie the browser can't read, so the authenticated read happens server-side.
     const poll = async () => {
       try {
-        const r = await fetch(`${BASE}/store/online-order-status/${orderId}`, {
-          headers: { "x-publishable-api-key": PK }, credentials: "include",
-        })
-        if (r.ok && alive) {
-          const s = (await r.json()).status as string
-          setStatus(s)
-          if (TERMINAL.has(s) && timer) clearInterval(timer)
+        const res = await getOnlineOrderStatus(orderId)
+        if (res?.status && alive) {
+          setStatus(res.status)
+          if (TERMINAL.has(res.status) && timer) clearInterval(timer)
         }
       } catch { /* ignore transient */ }
     }

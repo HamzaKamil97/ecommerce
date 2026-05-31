@@ -11,6 +11,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      // Mirror tsconfig "paths" so test imports resolve like the app does.
+      '@lib': path.resolve(__dirname, './src/lib'),
+      '@modules': path.resolve(__dirname, './src/modules'),
+      '@pages': path.resolve(__dirname, './src/pages'),
       '@': path.resolve(__dirname, './src'),
     },
   },
