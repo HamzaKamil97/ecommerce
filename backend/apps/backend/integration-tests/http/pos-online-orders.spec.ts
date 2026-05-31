@@ -33,6 +33,11 @@ medusaIntegrationTestRunner({
       expect(handR.status).toBe(200);
       expect(handR.data.order.status).toBe('delivered');
 
+      // handoff consumed the reservation → on_hand decremented, hold released
+      const afterHand = await wms.getStock('v_oo_http', 'v1');
+      expect(afterHand.reserved).toBe(0);
+      expect(afterHand.on_hand).toBe(4); // 5 seeded − 1 consumed
+
       // Audit rows: accept and handoff both attribute to v_oo_http via audit_context
       await new Promise(r => setTimeout(r, 200));
       const auditSvc: any = getContainer().resolve('auditLogService');
@@ -63,7 +68,7 @@ medusaIntegrationTestRunner({
       await wms.incrementStock({ vendor_id: 'v_oo_p', variant_id: 'v2', qty: 5, type: 'restock' });
 
       const full = await svc.getWithLines(o.id);
-      const oosId = full.lines[0].id;
+      const oosId = full.lines[0].id; // lines[0] = v1 (inserted first, ordered ASC by created_at)
 
       const r = await api.post(`/pos/online-orders/${o.id}/partial`, { oos_line_ids: [oosId] });
       expect(r.status).toBe(200);
@@ -73,6 +78,12 @@ medusaIntegrationTestRunner({
       const refreshed = await svc.getWithLines(o.id);
       const lineA = refreshed.lines.find((l: any) => l.id === oosId);
       expect(lineA.oos).toBe(true);
+
+      // Reservations: OOS line (v1) should NOT be reserved; non-OOS line (v2) should be reserved
+      const snap1 = await wms.getStock('v_oo_p', 'v1'); // OOS line
+      const snap2 = await wms.getStock('v_oo_p', 'v2'); // fulfilled line
+      expect(snap1.reserved).toBe(0); // OOS → not reserved
+      expect(snap2.reserved).toBe(1); // non-OOS → reserved
     });
 
     it('reject transitions to rejected and stamps rejected_at', async () => {
@@ -86,6 +97,26 @@ medusaIntegrationTestRunner({
       expect(r.status).toBe(200);
       expect(r.data.order.status).toBe('rejected');
       expect(r.data.order.rejected_at).toBeTruthy();
+    });
+
+    it('reject after accept releases reservations (on_hand untouched)', async () => {
+      const svc: any = getContainer().resolve('onlineOrderService');
+      const wms: any = getContainer().resolve('wmsService');
+      const o = await svc.createOrder({
+        vendor_id: 'v_oo_relrej', total_minor: 1000,
+        commission_rate_bps_snapshot: 700, commission_minor: 70,
+        lines: [{ variant_id: 'rr1', title: 'X', qty: 2, unit_price_minor: 500, line_total_minor: 1000 }],
+      });
+      await wms.incrementStock({ vendor_id: 'v_oo_relrej', variant_id: 'rr1', qty: 10, type: 'restock' });
+      await api.post(`/pos/online-orders/${o.id}/accept`, {});
+      expect((await wms.getStock('v_oo_relrej', 'rr1')).reserved).toBe(2);
+
+      const r = await api.post(`/pos/online-orders/${o.id}/reject`, {});
+      expect(r.status).toBe(200);
+      expect(r.data.order.status).toBe('rejected');
+      const snap = await wms.getStock('v_oo_relrej', 'rr1');
+      expect(snap.reserved).toBe(0);   // released
+      expect(snap.on_hand).toBe(10);   // NOT decremented
     });
 
     it('accept on missing order returns 404', async () => {
