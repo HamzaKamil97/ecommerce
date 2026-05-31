@@ -11,6 +11,7 @@ import { PaymentScreen } from './PaymentScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { CatalogBrowser } from './register/CatalogBrowser';
 import type { CatalogRow } from '../../db/dexie';
+import { VENDOR_ID as ENV_VENDOR_ID } from '../../env';
 import './RegisterScreen.css';
 
 /** Full thousands-separator format (e.g. "13,500"). Used ONLY by the Charge button
@@ -33,7 +34,7 @@ export function RegisterScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
-  const vendor_id = (import.meta as any).env?.VITE_VENDOR_ID ?? 'v_test';
+  const vendor_id = ENV_VENDOR_ID || 'v_test';
 
   useEffect(() => {
     let mounted = true;

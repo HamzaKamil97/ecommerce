@@ -3,14 +3,9 @@ import { useRefundState } from './useRefundState';
 import { fetchSale } from '../../../api/sales';
 import type { RefundReason } from '../../../api/refunds';
 import { useSession } from '../../../state/session';
+import { VENDOR_ID as ENV_VENDOR_ID, TERMINAL_ID } from '../../../env';
 import './RefundShared.css';
 import './RefundScreen.css';
-
-function envVal(key: string, fallback: string): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const env = (import.meta as any)?.env ?? {};
-  return env[key] || fallback;
-}
 
 function formatMinor(n: number): string {
   return n.toLocaleString('en-US');
@@ -40,9 +35,9 @@ type Props = { onClose: () => void };
 export function RefundScreen({ onClose }: Props) {
   const cashier_id = useSession((s) => s.cashier_id) ?? 'dev_cashier';
   const refund = useRefundState({
-    vendor_id: envVal('VITE_VENDOR_ID', 'v_test'),
+    vendor_id: ENV_VENDOR_ID || 'v_test',
     cashier_id,
-    terminal_id: envVal('VITE_TERMINAL_ID', 'term_dev_1'),
+    terminal_id: TERMINAL_ID,
   });
 
   const [receiptId, setReceiptId] = useState('HN-LOC-');
