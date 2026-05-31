@@ -11,6 +11,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (!full) return res.status(404).json({ error: 'order not found' });
   (req as any).audit_context = { vendor_id: full.vendor_id };
 
+  // Idempotency guard (mirrors accept): only a pending order may be partially
+  // accepted, so a double-tap can't create a duplicate set of reservations.
+  if (full.status !== 'pending') {
+    return res.status(409).json({ error: `order is ${full.status}, not pending` });
+  }
+
   // Determine which lines need reservations: all lines NOT in the OOS set.
   const oosSet = new Set(oos);
   const toReserve = (full.lines as any[]).filter((l: any) => !oosSet.has(l.id));

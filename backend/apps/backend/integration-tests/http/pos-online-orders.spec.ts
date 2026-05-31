@@ -86,6 +86,25 @@ medusaIntegrationTestRunner({
       expect(snap2.reserved).toBe(1); // non-OOS → reserved
     });
 
+    it('double partial is idempotent: 2nd call 409s and does not double-reserve', async () => {
+      const svc: any = getContainer().resolve('onlineOrderService');
+      const wms: any = getContainer().resolve('wmsService');
+      const o = await svc.createOrder({
+        vendor_id: 'v_oo_pdbl', total_minor: 1000,
+        commission_rate_bps_snapshot: 700, commission_minor: 70,
+        lines: [{ variant_id: 'pd1', title: 'X', qty: 2, unit_price_minor: 500, line_total_minor: 1000 }],
+      });
+      await wms.incrementStock({ vendor_id: 'v_oo_pdbl', variant_id: 'pd1', qty: 10, type: 'restock' });
+
+      const first = await api.post(`/pos/online-orders/${o.id}/partial`, { oos_line_ids: [] });
+      expect(first.status).toBe(200);
+      expect((await wms.getStock('v_oo_pdbl', 'pd1')).reserved).toBe(2);
+
+      const second = await api.post(`/pos/online-orders/${o.id}/partial`, { oos_line_ids: [] }).catch((e: any) => e.response);
+      expect(second.status).toBe(409); // already accepted, not pending
+      expect((await wms.getStock('v_oo_pdbl', 'pd1')).reserved).toBe(2); // not doubled
+    });
+
     it('reject transitions to rejected and stamps rejected_at', async () => {
       const svc: any = getContainer().resolve('onlineOrderService');
       const o = await svc.createOrder({
