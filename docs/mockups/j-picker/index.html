@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hanoot — Scan &amp; Go (staff) · Mockups</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Arabic:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ivory:#f4ede1; --paper:#faf6ee; --paper-2:#fff;
+  --ink:#1f1c18; --ink-2:#2a2520; --ink-3:#6f6859;
+  --line:#b9af9b; --line-2:#d4ccba; --line-3:#e5dfd0; --line-4:#f0e9d8;
+  --gold:#b88a3a; --gold-2:#c89844; --gold-3:#8a6228;
+  --emerald:#2f6a55; --emerald-2:#387762; --burgundy:#862a3a; --amber:#d4a14e;
+  --bg-success:rgba(47,106,85,.12); --bg-warn:rgba(184,138,58,.12); --bg-danger:rgba(134,42,58,.12);
+  --shadow-sm:0 1px 2px rgba(31,28,24,.06); --shadow-md:0 4px 12px rgba(31,28,24,.08);
+  --shadow-lg:0 8px 24px rgba(31,28,24,.12); --shadow-xl:0 16px 40px rgba(31,28,24,.18);
+  --r-sm:6px; --r-md:8px; --r-lg:10px; --r-xl:12px; --r-2xl:14px; --r-3xl:16px; --pill:999px;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --sans:'Manrope',system-ui,sans-serif; --ar:'Noto Sans Arabic',var(--sans);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);
+  background:radial-gradient(1200px 600px at 12% -5%,rgba(184,138,58,.10),transparent 55%),radial-gradient(900px 500px at 100% 0%,rgba(47,106,85,.08),transparent 50%),#efe6d6;
+  padding:48px 28px 80px;-webkit-font-smoothing:antialiased}
+.head{max-width:1340px;margin:0 auto 38px}
+.kicker{font:700 12px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--gold-3);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:30px;height:2px;background:var(--gold)}
+.head h1{font-weight:800;font-size:40px;letter-spacing:-.02em;margin:14px 0 8px}
+.head h1 em{font-style:normal;color:var(--emerald)}
+.head p{color:var(--ink-3);font-size:15px;max-width:720px;line-height:1.55}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:12.5px;color:var(--ink-3)}
+.legend b{color:var(--ink);font-weight:700}
+.gallery{display:flex;gap:34px;flex-wrap:wrap;max-width:1340px;margin:0 auto;align-items:flex-start}
+.framewrap{width:330px}
+.frame-label{font:700 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:0 0 4px 4px;display:flex;gap:8px;align-items:center}
+.frame-label .n{width:22px;height:22px;border-radius:var(--pill);background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:11px}
+.frame-sub{font:500 12px/1.4 var(--sans);color:var(--ink-3);margin:0 0 12px 4px}
+.phone{width:330px;height:690px;background:var(--paper);border-radius:34px;padding:9px;box-shadow:var(--shadow-xl),0 0 0 1px rgba(31,28,24,.05);position:relative}
+.screen{width:100%;height:100%;background:var(--paper);border-radius:26px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:96px;height:5px;background:rgba(31,28,24,.18);border-radius:99px;z-index:30}
+.top{padding:30px 16px 12px;background:linear-gradient(180deg,var(--paper-2),var(--paper));border-bottom:1px solid var(--line-3);flex-shrink:0}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:9px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold-3));color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;box-shadow:var(--shadow-sm)}
+.brand .t1{font-weight:800;font-size:14px;letter-spacing:-.01em}
+.brand .t2{font:600 10px/1 var(--mono);color:var(--ink-3);letter-spacing:.08em;margin-top:3px;text-transform:uppercase}
+.who{display:flex;align-items:center;gap:7px}
+.av{width:28px;height:28px;border-radius:var(--pill);background:var(--emerald);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.who .nm{font-weight:700;font-size:11.5px;text-align:right;line-height:1.2}
+.who .rl{font:600 9px/1 var(--mono);color:var(--gold-3);text-transform:uppercase;letter-spacing:.06em}
+.body{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.scroll{flex:1;overflow:auto;padding:14px}
+.scroll::-webkit-scrollbar{display:none}
+.btn{border:none;font-family:var(--sans);font-weight:700;border-radius:var(--r-lg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-3));color:#fff}
+.btn.em{background:var(--emerald);color:#fff}
+.btn.dark{background:var(--ink);color:var(--paper)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line-2);color:var(--ink-2)}
+.btn.danger-ghost{background:transparent;border:1.5px solid var(--burgundy);color:var(--burgundy)}
+/* running total bar */
+.totalbar{flex-shrink:0;background:linear-gradient(135deg,var(--emerald),var(--emerald-2));color:#fff;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+.totalbar .lab{font:700 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.totalbar .amt{font:800 24px/1 var(--mono);letter-spacing:-.02em;margin-top:5px}
+.totalbar .ar{font-family:var(--ar);font-size:11px;opacity:.8;margin-top:3px}
+.totalbar .ct{text-align:right}
+.totalbar .ct .n{font:800 20px/1 var(--mono)}
+.totalbar .ct .s{font:600 10px/1 var(--mono);opacity:.85;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+/* scan viewport */
+.viewport{margin:14px;height:150px;border-radius:var(--r-2xl);background:repeating-linear-gradient(135deg,#241f1b,#241f1b 12px,#2c2620 12px,#2c2620 24px);position:relative;overflow:hidden;display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.viewport .reticle{width:70%;height:78px;border:2px solid rgba(255,255,255,.5);border-radius:10px;position:relative}
+.viewport .reticle::before{content:"";position:absolute;left:6px;right:6px;top:50%;height:2px;background:var(--gold-2);box-shadow:0 0 12px var(--gold-2)}
+.viewport .hint{position:absolute;bottom:9px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font:600 11px/1 var(--sans)}
+.viewport .corner{position:absolute;width:18px;height:18px;border:3px solid var(--gold-2)}
+/* search */
+.searchbar{display:flex;align-items:center;gap:9px;margin:0 14px 12px;padding:11px 13px;border:1.5px solid var(--line-2);border-radius:var(--pill);background:var(--paper-2);flex-shrink:0}
+.searchbar .ic{font-size:16px;color:var(--ink-3)}
+.searchbar .ph{font-weight:600;font-size:13px;color:var(--ink-3)}
+.searchbar.active{border-color:var(--gold-2);box-shadow:var(--shadow-sm)}
+.cap{font:700 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:2px 2px 9px}
+/* cart row */
+.crow{display:flex;align-items:center;gap:11px;background:var(--paper-2);border:1px solid var(--line-3);border-radius:var(--r-xl);padding:9px 11px;margin-bottom:8px}
+.crow.fresh{border-color:var(--emerald);box-shadow:0 0 0 3px var(--bg-success)}
+.crow.weigh{border-style:dashed;border-color:var(--gold)}
+.thumb{width:38px;height:38px;border-radius:9px;background:var(--ivory);display:grid;place-items:center;font-size:19px;flex-shrink:0;border:1px solid var(--line-3)}
+.cinfo{flex:1;min-width:0}
+.cname{font-weight:700;font-size:13.5px;line-height:1.2;letter-spacing:-.01em}
+.csub{font:600 11px/1 var(--sans);color:var(--ink-3);margin-top:3px;display:flex;gap:7px;align-items:center}
+.csub .price{font-family:var(--mono);color:var(--ink-2)}
+.stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line-2);border-radius:var(--pill);overflow:hidden;flex-shrink:0}
+.stepper button{width:26px;height:26px;border:none;background:var(--paper-2);font:700 15px/1 var(--mono);color:var(--ink-2)}
+.stepper .q{width:24px;text-align:center;font:700 12px/1 var(--mono)}
+.tag{font:700 9px/1 var(--mono);padding:3px 6px;border-radius:5px;letter-spacing:.04em}
+.tag.weigh{color:var(--gold-3);background:var(--bg-warn)}
+.tag.added{color:var(--emerald);background:var(--bg-success)}
+/* toast */
+.toast{position:absolute;left:14px;right:14px;bottom:90px;z-index:25;border-radius:var(--r-xl);padding:11px 13px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow-lg);animation:pop .3s ease}
+@keyframes pop{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.toast.ok{background:#143a2e;color:#eafff6}
+.toast.bad{background:#3a1620;color:#ffe9ee}
+.toast .ti{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.toast.ok .ti{background:rgba(47,106,85,.45)}
+.toast.bad .ti{background:rgba(134,42,58,.5)}
+.toast .tt{font-weight:700;font-size:13px;line-height:1.25}
+.toast .tt span{display:block;font:600 11px/1.3 var(--sans);opacity:.8;margin-top:2px}
+/* footer */
+.foot{flex-shrink:0;padding:12px 14px 16px;background:linear-gradient(180deg,transparent,var(--paper) 22%);border-top:1px solid var(--line-3)}
+.cta{width:100%;padding:15px;font-size:15px;border-radius:var(--r-xl);box-shadow:var(--shadow-md)}
+.cta[disabled]{opacity:.45;filter:grayscale(.3)}
+/* search results overlay */
+.sresult{display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid var(--line-3)}
+.sresult .add{margin-left:auto;width:30px;height:30px;border-radius:9px;background:var(--emerald);color:#fff;display:grid;place-items:center;font:700 18px/1 var(--mono);flex-shrink:0}
+.sresult .oosbadge{margin-left:auto;font:700 10px/1 var(--mono);color:var(--burgundy);background:var(--bg-danger);padding:5px 8px;border-radius:6px}
+.sresult.dim{opacity:.55}
+/* code / QR handoff */
+.handoff{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px}
+.handoff h2{font-weight:800;font-size:20px;letter-spacing:-.02em;margin-bottom:4px}
+.handoff p{font-size:12.5px;color:var(--ink-3);line-height:1.5;max-width:230px;margin-bottom:18px}
+.qr{width:150px;height:150px;border-radius:var(--r-xl);background:#fff;border:1px solid var(--line-2);padding:12px;box-shadow:var(--shadow-md);
+  background-image:
+    linear-gradient(90deg,#1f1c18 0 0),
+    repeating-linear-gradient(90deg,#1f1c18 0 8px,#fff 8px 16px),
+    repeating-linear-gradient(0deg,#1f1c18 0 8px,#fff 8px 16px);
+  background-blend-mode:multiply;position:relative}
+.qr::after{content:"";position:absolute;inset:12px;background:
+  radial-gradient(circle at 22% 22%,#1f1c18 0 16px,#fff 16px 22px,#1f1c18 22px 28px,transparent 29px),
+  radial-gradient(circle at 78% 22%,#1f1c18 0 16px,#fff 16px 22px,#1f1c18 22px 28px,transparent 29px),
+  radial-gradient(circle at 22% 78%,#1f1c18 0 16px,#fff 16px 22px,#1f1c18 22px 28px,transparent 29px)}
+.code{font:800 30px/1 var(--mono);letter-spacing:.16em;color:var(--ink);margin:18px 0 6px;background:var(--ivory);padding:12px 18px;border-radius:var(--r-lg);border:1px dashed var(--line)}
+.lockrow{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--mono);color:var(--emerald);text-transform:uppercase;letter-spacing:.06em}
+.expnote{font-size:11px;color:var(--ink-3);margin-top:14px;line-height:1.5}
+/* cashier */
+.kv{width:100%;background:var(--paper-2);border:1px solid var(--line-3);border-radius:var(--r-xl);overflow:hidden;margin-top:4px}
+.kv .r{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;font-size:12.5px}
+.kv .r + .r{border-top:1px solid var(--line-3)}
+.kv .r .k{color:var(--ink-3);font-weight:600}
+.kv .r .v{font-weight:700;font-family:var(--mono);font-size:12.5px}
+.notice{background:var(--bg-warn);border:1px solid rgba(184,138,58,.3);border-radius:var(--r-lg);padding:10px 12px;font-size:11.5px;color:var(--gold-3);font-weight:600;line-height:1.45;display:flex;gap:8px}
+.codeentry{display:flex;gap:9px;margin:2px 0 12px}
+.codeentry .box{flex:1;border:1.5px solid var(--line-2);border-radius:var(--r-lg);padding:13px;text-align:center;font:800 22px/1 var(--mono);letter-spacing:.14em;color:var(--ink);background:var(--paper-2)}
+.note{max-width:1340px;margin:42px auto 0;padding:18px 22px;background:rgba(255,255,255,.55);border:1px solid var(--line-3);border-left:3px solid var(--gold);border-radius:var(--r-lg);font-size:13px;color:var(--ink-2);line-height:1.6}
+.note b{color:var(--gold-3)}
+.login{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(420px 240px at 50% 14%,rgba(184,138,58,.14),transparent 60%),var(--paper)}
+.login .logo{width:58px;height:58px;border-radius:16px;font-size:28px;margin-bottom:16px}
+.login h2{font-weight:800;font-size:20px;letter-spacing:-.01em}
+.login .sub{font:600 11px/1 var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;margin-top:6px;margin-bottom:24px}
+.dots{display:flex;gap:13px;margin-bottom:26px}
+.dots i{width:15px;height:15px;border-radius:99px;border:2px solid var(--line)}
+.dots i.f{background:var(--gold);border-color:var(--gold)}
+.keys{display:grid;grid-template-columns:repeat(3,64px);gap:13px}
+.keys button{height:56px;border-radius:var(--r-xl);border:1px solid var(--line-3);background:var(--paper-2);font:700 22px/1 var(--mono);color:var(--ink-2);box-shadow:var(--shadow-sm)}
+.keys button.blank{visibility:hidden}
+.staffhint{margin-top:18px;font:600 11px/1.4 var(--mono);color:var(--gold-3);background:var(--bg-warn);padding:8px 12px;border-radius:var(--pill)}
+</style>
+</head>
+<body>
+<div class="head">
+  <div class="kicker">Hanoot Platform · Phase J · staff-first</div>
+  <h1>Scan &amp; <em>Go</em> — build the cart on a phone, pay at the cashier</h1>
+  <p>A phone-first app where a staff member scans barcodes (or searches by name) to build a customer's cart, live-validated against stock, then sends it to the cashier by a short code / QR. The cashier pulls the cart, takes cash, and stock decrements — reusing the existing POS + WMS loop. Rolls out to staff first; customer self-scan is a later phase.</p>
+  <div class="legend">
+    <span><b>Cart = server state.</b> The code is just a pointer — locks on send, can't be edited after.</span>
+    <span><b>Stock:</b> validate on scan · soft-hold on send · <b>decrement at the cashier</b> (cash collected there).</span>
+    <span><b>Money authority = cashier.</b></span>
+  </div>
+</div>
+
+<div class="gallery">
+
+  <!-- 1 LOGIN -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">1</span> Staff login</div>
+    <div class="frame-sub">Staff PIN (reuses the cashier login). Visitor self-scan = later.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="login">
+        <div class="logo">H</div>
+        <h2>Scan &amp; Go</h2>
+        <div class="sub">Hamza's Kitchen · Staff</div>
+        <div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i></i></div>
+        <div class="keys">
+          <button>1</button><button>2</button><button>3</button>
+          <button>4</button><button>5</button><button>6</button>
+          <button>7</button><button>8</button><button>9</button>
+          <button class="blank"></button><button>0</button><button>⌫</button>
+        </div>
+        <div class="staffhint">Staff-only for now</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 2 SCAN / BUILD -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">2</span> Scan &amp; build</div>
+    <div class="frame-sub">Point &amp; scan → item validates &amp; drops into the cart. Live total on top.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="totalbar">
+        <div><div class="lab">Cart total</div><div class="amt">15,000 IQD</div><div class="ar">المجموع ١٥٬٠٠٠ د.ع</div></div>
+        <div class="ct"><div class="n">2</div><div class="s">items</div></div>
+      </div>
+      <div class="viewport">
+        <span class="corner" style="top:24px;left:38px;border-right:0;border-bottom:0"></span>
+        <span class="corner" style="top:24px;right:38px;border-left:0;border-bottom:0"></span>
+        <span class="corner" style="bottom:30px;left:38px;border-right:0;border-top:0"></span>
+        <span class="corner" style="bottom:30px;right:38px;border-left:0;border-top:0"></span>
+        <div class="reticle"></div>
+        <div class="hint">Point at a barcode</div>
+      </div>
+      <div class="body"><div class="scroll" style="padding-top:0">
+        <div class="cap">In the cart</div>
+        <div class="crow fresh"><div class="thumb">🍕</div><div class="cinfo"><div class="cname">Margherita Pizza</div><div class="csub"><span class="tag added">✓ added</span><span class="price">12,000 IQD</span></div></div>
+          <div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+        <div class="crow"><div class="thumb">🥤</div><div class="cinfo"><div class="cname">Fresh Mint Lemonade</div><div class="csub"><span class="price">3,000 IQD</span></div></div>
+          <div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+      </div></div>
+      <div class="toast ok"><div class="ti">✓</div><div class="tt">Margherita Pizza added<span>In stock · 12,000 IQD</span></div></div>
+      <div class="foot"><button class="cta btn gold">Send to cashier · 2 items →</button></div>
+    </div></div>
+  </div>
+
+  <!-- 3 OUT OF STOCK (live validation) -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">3</span> Live stock check</div>
+    <div class="frame-sub">Out-of-stock / unknown item is rejected — never enters the cart.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="totalbar">
+        <div><div class="lab">Cart total</div><div class="amt">15,000 IQD</div><div class="ar">المجموع ١٥٬٠٠٠ د.ع</div></div>
+        <div class="ct"><div class="n">2</div><div class="s">items</div></div>
+      </div>
+      <div class="viewport">
+        <span class="corner" style="top:24px;left:38px;border-right:0;border-bottom:0;border-color:var(--burgundy)"></span>
+        <span class="corner" style="top:24px;right:38px;border-left:0;border-bottom:0;border-color:var(--burgundy)"></span>
+        <span class="corner" style="bottom:30px;left:38px;border-right:0;border-top:0;border-color:var(--burgundy)"></span>
+        <span class="corner" style="bottom:30px;right:38px;border-left:0;border-top:0;border-color:var(--burgundy)"></span>
+        <div class="reticle" style="border-color:var(--burgundy)"><style>.bd::before{background:var(--burgundy)!important;box-shadow:0 0 12px var(--burgundy)!important}</style></div>
+        <div class="hint">Scanned: Whole Milk 1L</div>
+      </div>
+      <div class="body"><div class="scroll" style="padding-top:0">
+        <div class="cap">In the cart — unchanged</div>
+        <div class="crow"><div class="thumb">🍕</div><div class="cinfo"><div class="cname">Margherita Pizza</div><div class="csub"><span class="price">12,000 IQD</span></div></div><div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+        <div class="crow"><div class="thumb">🥤</div><div class="cinfo"><div class="cname">Fresh Mint Lemonade</div><div class="csub"><span class="price">3,000 IQD</span></div></div><div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+      </div></div>
+      <div class="toast bad"><div class="ti">✕</div><div class="tt">Whole Milk 1L — out of stock<span>Not added · غير متوفر</span></div></div>
+      <div class="foot"><button class="cta btn gold">Send to cashier · 2 items →</button></div>
+    </div></div>
+  </div>
+
+  <!-- 4 NAME SEARCH (no-barcode) -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">4</span> Search by name</div>
+    <div class="frame-sub">No-barcode items (produce). Weight-priced → "weigh at counter".</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="top"><div class="searchbar active" style="margin:0"><span class="ic">🔎</span><span class="ph" style="color:var(--ink)">tomato</span><span style="margin-left:auto;color:var(--ink-3)">✕</span></div></div>
+      <div class="body"><div class="scroll">
+        <div class="cap">3 matches · live stock</div>
+        <div class="sresult"><div class="thumb">🍅</div><div class="cinfo"><div class="cname">Tomatoes (loose)</div><div class="csub"><span class="tag weigh">weigh at counter</span></div></div><div class="add">+</div></div>
+        <div class="sresult"><div class="thumb">🥫</div><div class="cinfo"><div class="cname">Tomato Paste 400g</div><div class="csub"><span class="price">1,750 IQD</span> · 24 in stock</div></div><div class="add">+</div></div>
+        <div class="sresult dim"><div class="thumb">🍝</div><div class="cinfo"><div class="cname">Penne Arrabiata</div><div class="csub">tomato sauce pasta</div></div><div class="oosbadge">out of stock</div></div>
+      </div></div>
+      <div class="foot"><button class="cta btn ghost">Back to scanning</button></div>
+    </div></div>
+  </div>
+
+  <!-- 5 CART REVIEW -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">5</span> Review cart</div>
+    <div class="frame-sub">Adjust qty · weigh-at-counter flagged · send to cashier.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="top"><div class="top-row">
+        <div class="brand"><button class="btn ghost" style="padding:6px 9px;font-size:13px">←</button><div><div class="t1">The cart</div><div class="t2">4 items · staff: Ali</div></div></div>
+        <span class="tag added" style="font-size:10px">building</span>
+      </div></div>
+      <div class="body"><div class="scroll">
+        <div class="crow"><div class="thumb">🍕</div><div class="cinfo"><div class="cname">Margherita Pizza</div><div class="csub"><span class="price">12,000</span></div></div><div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+        <div class="crow"><div class="thumb">🥤</div><div class="cinfo"><div class="cname">Fresh Mint Lemonade</div><div class="csub"><span class="price">3,000</span></div></div><div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+        <div class="crow"><div class="thumb">🥫</div><div class="cinfo"><div class="cname">Tomato Paste 400g</div><div class="csub"><span class="price">3,500</span> · ×2</div></div><div class="stepper"><button>−</button><span class="q">2</span><button>+</button></div></div>
+        <div class="crow weigh"><div class="thumb">🍅</div><div class="cinfo"><div class="cname">Tomatoes (loose)</div><div class="csub"><span class="tag weigh">weigh at counter</span></div></div><div class="stepper"><button>−</button><span class="q">1</span><button>+</button></div></div>
+      </div></div>
+      <div class="foot">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-weight:600;font-size:12.5px;color:var(--ink-3)">Subtotal <span style="font-size:11px">(+ weighed items)</span></span>
+          <span style="font:800 17px/1 var(--mono)">18,500 IQD</span>
+        </div>
+        <button class="cta btn gold">Send to cashier →</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 6 CODE / QR -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">6</span> Cart locked · code</div>
+    <div class="frame-sub">Sent → cart locks (no more edits). Show QR / short code at the till.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="top"><div class="top-row"><div class="brand"><div class="logo">H</div><div><div class="t1">Take to cashier</div><div class="t2">Hamza's Kitchen</div></div></div></div></div>
+      <div class="body"><div class="handoff">
+        <div class="lockrow">🔒 Cart locked</div>
+        <h2 style="margin-top:8px">Show this at the till</h2>
+        <p>The cashier scans the code, weighs any loose items, and takes the cash.</p>
+        <div class="qr"></div>
+        <div class="code">K7·4Q2</div>
+        <div class="kv" style="max-width:240px">
+          <div class="r"><span class="k">Items</span><span class="v">4 (1 to weigh)</span></div>
+          <div class="r"><span class="k">Subtotal</span><span class="v">18,500 IQD</span></div>
+        </div>
+        <div class="expnote">Expires in <b>14:32</b> · single use. Editing the cart makes a new code.</div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- 7 CASHIER (POS) -->
+  <div class="framewrap">
+    <div class="frame-label"><span class="n">7</span> Cashier collects (POS)</div>
+    <div class="frame-sub">Cashier scans/types the code → weighs → takes cash → stock decrements.</div>
+    <div class="phone"><div class="screen"><div class="notch"></div>
+      <div class="top"><div class="top-row">
+        <div class="brand"><div class="logo" style="background:linear-gradient(135deg,var(--emerald),var(--emerald-2))">H</div><div><div class="t1">Scan &amp; Go cart</div><div class="t2">Cashier · POS-01</div></div></div>
+        <span class="tag added" style="font-size:10px">K7·4Q2</span>
+      </div></div>
+      <div class="body"><div class="scroll">
+        <div class="codeentry"><div class="box">K7·4Q2</div><button class="btn dark" style="padding:0 16px">Load</button></div>
+        <div class="crow"><div class="thumb">🍕</div><div class="cinfo"><div class="cname">Margherita Pizza</div><div class="csub">×1</div></div><div class="v" style="font:700 12px/1 var(--mono)">12,000</div></div>
+        <div class="crow"><div class="thumb">🥤</div><div class="cinfo"><div class="cname">Mint Lemonade</div><div class="csub">×1</div></div><div class="v" style="font:700 12px/1 var(--mono)">3,000</div></div>
+        <div class="crow"><div class="thumb">🥫</div><div class="cinfo"><div class="cname">Tomato Paste</div><div class="csub">×2</div></div><div class="v" style="font:700 12px/1 var(--mono)">3,500</div></div>
+        <div class="crow weigh"><div class="thumb">🍅</div><div class="cinfo"><div class="cname">Tomatoes (loose)</div><div class="csub"><span class="tag weigh">weigh → enter price</span></div></div><div class="stepper"><button>−</button><span class="q" style="width:42px">2,000</span><button>+</button></div></div>
+        <div class="notice" style="margin-top:6px"><span>ⓘ</span><span>Loading re-checks stock live. Taking cash decrements WMS &amp; closes the cart.</span></div>
+      </div></div>
+      <div class="foot">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-weight:700;font-size:12.5px;color:var(--ink-3)">Cash due</span><span style="font:800 18px/1 var(--mono)">20,500 IQD</span></div>
+        <button class="cta btn em">Collect cash &amp; finish</button>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="note">
+  <b>Mockup notes —</b> Static visual mockup for approval (not wired). Staff-first Scan &amp; Go: PIN login (staff) → scan to build a cart with a live total → live stock check (out-of-stock items are rejected, never added) → search-by-name for no-barcode items (weight-priced → "weigh at counter") → review/adjust → <b>send to cashier</b> (cart <b>locks</b> server-side, shows a QR + short code) → <b>cashier (POS)</b> loads by code, weighs loose items, takes cash → WMS decrements. Reuses the Hanoot POS tokens (ivory/gold/emerald, Manrope + JetBrains Mono) and the D-1/D-2 cashier + WMS loop. Deferred: <b>customer/visitor self-scan</b>, in-app self-payment, offline cache, loyalty capture.
+</div>
+
+</body>
+</html>
