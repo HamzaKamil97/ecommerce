@@ -39,6 +39,13 @@ export class ScanCartService extends Base {
     return rows[0];
   }
 
+  // Guard against IDOR: the line must belong to the given cart.
+  private async requireLineInCart(cartId: string, lineId: string) {
+    const [lrows] = await (this as any).listAndCountScanCartLines({ id: lineId, cart_id: cartId });
+    if (!lrows.length) throw new Error(`line ${lineId} not in cart ${cartId}`);
+    return lrows[0];
+  }
+
   async addLine(cartId: string, l: AddLineInput) {
     await this.requireOpen(cartId);
     const created = await (this as any).createScanCartLines({
@@ -59,12 +66,14 @@ export class ScanCartService extends Base {
     patch: { qty?: number; unit_price_minor?: number; priced?: boolean }
   ) {
     await this.requireOpen(cartId);
+    await this.requireLineInCart(cartId, lineId);
     const updated = await (this as any).updateScanCartLines({ id: lineId, ...patch });
     return Array.isArray(updated) ? updated[0] : updated;
   }
 
   async removeLine(cartId: string, lineId: string) {
     await this.requireOpen(cartId);
+    await this.requireLineInCart(cartId, lineId);
     await (this as any).deleteScanCartLines(lineId);
     return { ok: true as const };
   }
@@ -76,6 +85,7 @@ export class ScanCartService extends Base {
     if (rows[0].status !== 'PENDING_CASHIER') {
       throw new Error(`cart ${cartId} is ${rows[0].status}, cannot price`);
     }
+    await this.requireLineInCart(cartId, lineId);
     const updated = await (this as any).updateScanCartLines({ id: lineId, unit_price_minor, priced: true });
     return Array.isArray(updated) ? updated[0] : updated;
   }
@@ -83,15 +93,24 @@ export class ScanCartService extends Base {
   async send(cartId: string) {
     await this.requireOpen(cartId);
     const now = new Date();
-    const short_code = this.genCode();
-    const updated = await (this as any).updateScanCarts({
-      id: cartId,
-      status: 'PENDING_CASHIER',
-      short_code,
-      locked_at: now,
-      expires_at: new Date(now.getTime() + TTL_MS),
-    });
-    return Array.isArray(updated) ? updated[0] : updated;
+    const expires_at = new Date(now.getTime() + TTL_MS);
+    // Retry on the rare short_code unique-collision so the caller never sees a raw DB error.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const updated = await (this as any).updateScanCarts({
+          id: cartId,
+          status: 'PENDING_CASHIER',
+          short_code: this.genCode(),
+          locked_at: now,
+          expires_at,
+        });
+        return Array.isArray(updated) ? updated[0] : updated;
+      } catch (e: any) {
+        if (e?.code === '23505' && attempt < 2) continue; // unique violation — try a new code
+        throw e;
+      }
+    }
+    throw new Error('could not generate a unique cart code');
   }
 
   async getWithLines(id: string) {

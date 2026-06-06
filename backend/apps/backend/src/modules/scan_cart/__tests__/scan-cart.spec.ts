@@ -17,7 +17,7 @@ moduleIntegrationTestRunner({
         await service.addLine(c.id, { variant_id: 'va', title: 'A', qty: 2, unit_price_minor: 1000 });
         const locked = await service.send(c.id);
         expect(locked.status).toBe('PENDING_CASHIER');
-        expect(locked.short_code).toMatch(/^[A-Z0-9]{5,6}$/);
+        expect(locked.short_code).toMatch(/^[A-Z0-9]{6}$/);
         const found = await service.getByCode(locked.short_code);
         expect(found.id).toBe(c.id);
         expect(found.lines.length).toBe(1);
@@ -29,6 +29,20 @@ moduleIntegrationTestRunner({
         await service.send(c.id);
         await expect(service.addLine(c.id, { variant_id: 'vc', title: 'C', qty: 1, unit_price_minor: 500 }))
           .rejects.toThrow(/not open/i);
+      });
+
+      it('priceLine works on a PENDING_CASHIER cart, rejects on OPEN, and guards line ownership', async () => {
+        const c = await service.createCart({ vendor_id: 'v1', staff_id: 's1' });
+        const line = await service.addLine(c.id, { variant_id: 'vw', title: 'Loose', qty: 1, unit_price_minor: 0, weigh_at_counter: true });
+        expect(line.priced).toBe(false);
+        // OPEN cart: pricing is not allowed yet
+        await expect(service.priceLine(c.id, line.id, 2000)).rejects.toThrow(/cannot price/i);
+        await service.send(c.id);
+        const priced = await service.priceLine(c.id, line.id, 2000);
+        expect(priced.priced).toBe(true);
+        expect(Number(priced.unit_price_minor)).toBe(2000);
+        // ownership guard: a foreign line id is rejected
+        await expect(service.priceLine(c.id, 'scl_foreign', 1000)).rejects.toThrow(/not in cart/i);
       });
     });
   },
