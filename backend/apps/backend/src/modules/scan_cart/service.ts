@@ -85,7 +85,11 @@ export class ScanCartService extends Base {
     if (rows[0].status !== 'PENDING_CASHIER') {
       throw new Error(`cart ${cartId} is ${rows[0].status}, cannot price`);
     }
-    await this.requireLineInCart(cartId, lineId);
+    const line = await this.requireLineInCart(cartId, lineId);
+    // Only weigh-at-counter lines may be (re)priced — a fixed-price line's price is authoritative.
+    if (!line.weigh_at_counter) {
+      throw new Error(`line ${lineId} is fixed-price, cannot reprice`);
+    }
     const updated = await (this as any).updateScanCartLines({ id: lineId, unit_price_minor, priced: true });
     return Array.isArray(updated) ? updated[0] : updated;
   }
