@@ -18,6 +18,7 @@ import { EndOfDayScreen } from './ui/screens/EndOfDayScreen';
 import { StockCountScreen } from './ui/screens/StockCountScreen';
 import { RefundFlowPhone } from './ui/screens/refund/RefundFlowPhone';
 import { RefundScreen } from './ui/screens/refund/RefundScreen';
+import { ScanCartScreen } from './ui/screens/ScanCartScreen';
 import { useResponsive } from './hooks/useResponsive';
 import { useSession } from './state/session';
 
@@ -35,6 +36,7 @@ function ResponsiveRefund() {
 
 export const router = createBrowserRouter([
   { path: '/', element: <RequireCashier><RegisterScreen /></RequireCashier> },
+  { path: '/scan-cart', element: <RequireCashier><ScanCartScreen /></RequireCashier> },
   { path: '/orders', element: <RequireCashier><OrderInboxScreen /></RequireCashier> },
   { path: '/orders/:id', element: <RequireCashier><OrderDetailScreen /></RequireCashier> },
   { path: '/refund', element: <RequireCashier><ResponsiveRefund /></RequireCashier> },

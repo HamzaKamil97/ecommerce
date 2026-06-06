@@ -17,13 +17,13 @@ const VENDOR_CORS = (process.env.VENDOR_CORS ?? "http://localhost:9100")
   .map((s) => s.trim())
   .filter(Boolean)
 
-// Custom /pos/* CORS — The POS PWA lives at localhost:9200 and calls /pos/*
-// routes from the browser. Without these headers the browser blocks the
-// response (404s from /pos/alerts etc. arrive without ACAO header).
+// Custom /pos/* CORS — The POS PWA (localhost:9200) and the Scan & Go PWA
+// (localhost:9400) call /pos/* routes from the browser. Without these headers
+// the browser blocks the response (404s from /pos/alerts etc. arrive without ACAO header).
 //
 // Allowed origins are derived from POS_CORS env var (comma-separated) and
-// fall back to localhost:9200 for dev.
-const POS_CORS = (process.env.POS_CORS ?? "http://localhost:9200")
+// fall back to the POS + Scan & Go dev ports.
+const POS_CORS = (process.env.POS_CORS ?? "http://localhost:9200,http://localhost:9400")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean)
