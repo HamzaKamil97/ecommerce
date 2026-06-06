@@ -39,7 +39,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
-    exclude: ['**/*.test.js', '**/*.test.jsx', '**/node_modules/**', '**/dist/**'],
+    include: [
+      'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
+      'src/**/__tests__/**/*.spec.ts',
+      'src/**/__tests__/**/*.spec.tsx',
+    ],
+    exclude: ['**/*.test.js', '**/*.test.jsx', '**/*.spec.js', '**/node_modules/**', '**/dist/**'],
   },
 });
