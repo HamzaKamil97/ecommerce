@@ -39,5 +39,6 @@ module.exports = defineConfig({
     { resolve: "./src/modules/cash_session" },
     { resolve: "./src/modules/inventory_count", dependencies: ['wmsService'] },
     { resolve: "./src/modules/online_order" },
+    { resolve: "./src/modules/scan_cart", dependencies: ['wmsService', 'posTerminalService'] },
   ],
 })
