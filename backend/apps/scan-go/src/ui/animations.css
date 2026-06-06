@@ -61,6 +61,12 @@
   animation: shimmer 1.4s linear infinite;
 }
 
+/* Toast pop animation */
+@keyframes sg-pop {
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 /* Tap bounce — apply with .tap-bounce class on a button */
 .tap-bounce { transition: transform 0.1s ease; }
 .tap-bounce:active { transform: scale(0.96); }
